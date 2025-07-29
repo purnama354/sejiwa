@@ -1,7 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"net/http"
+
+	"sejiwa-api/internal/config"
+	"sejiwa-api/internal/database"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,6 +27,19 @@ import (
 // @BasePath /api/v1
 
 func main() {
+
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("Error loading configuration: %v", err)
+	}
+
+	// Connect to the database
+	db, err := database.Connect(cfg.DatabaseURL)
+	if err != nil {
+		log.Fatalf("Error connecting to the database: %v", err)
+	}
+	log.Println("Database connection established")
+
 	router := gin.Default()
 
 	// Define a simple health check endpoint
@@ -29,14 +47,36 @@ func main() {
 	{
 		// Health check endpoint
 		api.GET("/health", func(c *gin.Context) {
+			// Check database connection
+			sqlDB, err := db.DB()
+			if err != nil {
+				c.JSON(http.StatusServiceUnavailable, gin.H{
+					"status":          "DOWN",
+					"database_status": "unreachable",
+				})
+				return
+			}
+
+			err = sqlDB.Ping()
+			if err != nil {
+				c.JSON(http.StatusServiceUnavailable, gin.H{
+					"status":          "DOWN",
+					"database_status": "unhealthy",
+				})
+				return
+			}
+
 			c.JSON(http.StatusOK, gin.H{
-				"status": "UP",
+				"status":          "UP",
+				"database_status": "healthy",
 			})
 		})
 	}
 
-	// Start the server on port 8080
-	if err := router.Run(":8080"); err != nil {
-		panic(err)
+	// Start the server using the configured port
+	serverAddr := fmt.Sprintf(":%s", cfg.AppPort)
+	log.Printf("Server starting on %s", serverAddr)
+	if err := router.Run(serverAddr); err != nil {
+		log.Fatalf("failed to start server: %v", err)
 	}
 }

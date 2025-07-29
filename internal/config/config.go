@@ -12,7 +12,7 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	_ = godotenv.Load() // Load .env file if it exists
+	_ = godotenv.Load("../../.env") // Load .env file if it exists
 
 	var cfg Config
 	err := envconfig.Process("", &cfg)
