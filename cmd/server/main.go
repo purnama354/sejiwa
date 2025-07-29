@@ -56,6 +56,9 @@ func main() {
 
 	log.Println("Database migration completed successfully.")
 
+	// Initialize the user repository
+	// userRepo := repository.NewUserRepository(db)
+
 	router := gin.Default()
 
 	// Define a simple health check endpoint
