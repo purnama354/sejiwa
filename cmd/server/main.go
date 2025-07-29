@@ -7,6 +7,7 @@ import (
 
 	"sejiwa-api/internal/config"
 	"sejiwa-api/internal/database"
+	"sejiwa-api/internal/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +29,8 @@ import (
 
 func main() {
 
+	log.Println("Starting database migration...")
+
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Error loading configuration: %v", err)
@@ -39,6 +42,19 @@ func main() {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}
 	log.Println("Database connection established")
+
+	log.Println("Running auto-migration...")
+	err = db.AutoMigrate(
+		&models.User{},
+		// Add other models here
+
+	)
+
+	if err != nil {
+		log.Fatalf("failed to migrate database: %v", err)
+	}
+
+	log.Println("Database migration completed successfully.")
 
 	router := gin.Default()
 
