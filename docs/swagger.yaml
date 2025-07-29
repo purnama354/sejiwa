@@ -1,0 +1,1809 @@
+openapi: 3.0.3
+info:
+  title: Sejiwa - Anonymous Talk Space API
+  description: |
+    Sejiwa API provides endpoints for an anonymous mental health discussion platform.
+    The API supports user authentication, thread management, moderation, and secure anonymous communication.
+  version: 1.0.0
+  contact:
+    name: Sejiwa Development Team
+    email: dev@sejiwa.app
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.sejiwa.app/v1
+    description: Production server
+  - url: https://staging-api.sejiwa.app/v1
+    description: Staging server
+  - url: http://localhost:8080/v1
+    description: Development server
+
+security:
+  - BearerAuth: []
+
+paths:
+  # Authentication Endpoints
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new anonymous user
+      description: Create a new user account with anonymous username and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: Username already exists
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "USERNAME_ALREADY_EXISTS"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/RateLimitError"
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login with username and password
+      description: Authenticate user and return JWT token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "AUTH_INVALID_CREDENTIALS"
+        "423":
+          description: Account locked due to too many failed attempts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "ACCOUNT_LOCKED"
+                      locked_until:
+                        type: string
+                        format: date-time
+        "429":
+          $ref: "#/components/responses/RateLimitError"
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Invalidate user session and JWT token
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh JWT token
+      description: Get a new JWT token using refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "REFRESH_TOKEN_INVALID"
+
+  # User Profile Endpoints
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Get current user profile
+      description: Retrieve current authenticated user's profile information (available to all authenticated users)
+      responses:
+        "200":
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    patch:
+      tags:
+        - Users
+      summary: Update user profile
+      description: Update current user's profile information (limited fields, available to all authenticated users)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        "200":
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: Username already exists
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "USERNAME_ALREADY_EXISTS"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  # Categories Endpoints
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: Get all categories
+      description: Retrieve list of all available discussion categories
+      security: []
+      parameters:
+        - name: active_only
+          in: query
+          description: Filter only active categories
+          schema:
+            type: boolean
+            default: true
+      responses:
+        "200":
+          description: Categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Category"
+                  meta:
+                    $ref: "#/components/schemas/MetaResponse"
+
+  # Threads Endpoints
+  /threads:
+    get:
+      tags:
+        - Threads
+      summary: Get threads list
+      description: Retrieve paginated list of discussion threads (excludes hidden/deleted threads)
+      security: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: category_id
+          in: query
+          description: Filter by category ID
+          schema:
+            type: string
+            format: uuid
+        - name: sort
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum: [latest, popular, oldest, most_replies]
+            default: latest
+        - name: search
+          in: query
+          description: Search keyword in title and content
+          schema:
+            type: string
+            maxLength: 100
+      responses:
+        "200":
+          description: Threads retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ThreadSummary"
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+    post:
+      tags:
+        - Threads
+      summary: Create new thread
+      description: Create a new discussion thread
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateThreadRequest"
+      responses:
+        "201":
+          description: Thread created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThreadDetail"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "CATEGORY_NOT_FOUND"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/RateLimitError"
+
+  /threads/{thread_id}:
+    get:
+      tags:
+        - Threads
+      summary: Get thread details
+      description: Retrieve detailed information about a specific thread including replies (excludes hidden/deleted content)
+      security: []
+      parameters:
+        - name: thread_id
+          in: path
+          required: true
+          description: Thread ID
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          description: Page number for replies pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of replies per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        "200":
+          description: Thread details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThreadDetailWithReplies"
+        "404":
+          description: Thread not found or hidden
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "THREAD_NOT_FOUND"
+
+    patch:
+      tags:
+        - Threads
+      summary: Update thread
+      description: Update thread details (only by thread author within edit time limit)
+      parameters:
+        - name: thread_id
+          in: path
+          required: true
+          description: Thread ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateThreadRequest"
+      responses:
+        "200":
+          description: Thread updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThreadDetail"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - not thread author or edit time exceeded
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "THREAD_EDIT_FORBIDDEN"
+        "404":
+          description: Thread not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "THREAD_NOT_FOUND"
+        "410":
+          description: Thread is locked
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "THREAD_LOCKED"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+    delete:
+      tags:
+        - Threads
+      summary: Delete thread (soft delete)
+      description: Soft delete thread (only by thread author or moderator) - marks as hidden rather than physical deletion
+      parameters:
+        - name: thread_id
+          in: path
+          required: true
+          description: Thread ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Thread deleted successfully (soft delete)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      deleted_at:
+                        type: string
+                        format: date-time
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - not thread author or moderator
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "THREAD_DELETE_FORBIDDEN"
+        "404":
+          description: Thread not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "THREAD_NOT_FOUND"
+
+  # Replies Endpoints
+  /threads/{thread_id}/replies:
+    post:
+      tags:
+        - Replies
+      summary: Create reply
+      description: Add a reply to a thread
+      parameters:
+        - name: thread_id
+          in: path
+          required: true
+          description: Thread ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReplyRequest"
+      responses:
+        "201":
+          description: Reply created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reply"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Thread not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "THREAD_NOT_FOUND"
+        "410":
+          description: Thread is locked
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "THREAD_LOCKED"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/RateLimitError"
+
+  /replies/{reply_id}:
+    patch:
+      tags:
+        - Replies
+      summary: Update reply
+      description: Update reply content (only by reply author within edit time limit)
+      parameters:
+        - name: reply_id
+          in: path
+          required: true
+          description: Reply ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReplyRequest"
+      responses:
+        "200":
+          description: Reply updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reply"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - not reply author or edit time exceeded
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "REPLY_EDIT_FORBIDDEN"
+        "404":
+          description: Reply not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "REPLY_NOT_FOUND"
+        "410":
+          description: Thread is locked
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "THREAD_LOCKED"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+    delete:
+      tags:
+        - Replies
+      summary: Delete reply (soft delete)
+      description: Soft delete reply (only by reply author or moderator) - marks as hidden rather than physical deletion
+      parameters:
+        - name: reply_id
+          in: path
+          required: true
+          description: Reply ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Reply deleted successfully (soft delete)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      deleted_at:
+                        type: string
+                        format: date-time
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - not reply author or moderator
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "REPLY_DELETE_FORBIDDEN"
+        "404":
+          description: Reply not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "REPLY_NOT_FOUND"
+
+  # Reporting & Moderation Endpoints
+  /reports:
+    post:
+      tags:
+        - Reports
+      summary: Report content
+      description: Report inappropriate content for moderation review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReportRequest"
+      responses:
+        "201":
+          description: Report submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Reported content not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "CONTENT_NOT_FOUND"
+        "409":
+          description: Content already reported by this user
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "ALREADY_REPORTED"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/RateLimitError"
+
+  # Moderation Endpoints (Admin/Moderator only)
+  /moderation/reports:
+    get:
+      tags:
+        - Moderation
+      summary: Get reports for moderation
+      description: Retrieve list of reports for moderator review (moderator/admin only)
+      parameters:
+        - name: status
+          in: query
+          description: Filter by report status
+          schema:
+            type: string
+            enum: [pending, reviewed, resolved]
+            default: pending
+        - name: priority
+          in: query
+          description: Filter by report priority (based on reason)
+          schema:
+            type: string
+            enum: [low, medium, high, critical]
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Reports retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ModerationReport"
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "INSUFFICIENT_PERMISSIONS"
+
+  /moderation/reports/{report_id}/actions:
+    post:
+      tags:
+        - Moderation
+      summary: Take moderation action
+      description: Take action on a reported content (moderator/admin only)
+      parameters:
+        - name: report_id
+          in: path
+          required: true
+          description: Report ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModerationActionRequest"
+      responses:
+        "200":
+          description: Moderation action taken successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModerationAction"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "INSUFFICIENT_PERMISSIONS"
+        "404":
+          description: Report not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "REPORT_NOT_FOUND"
+
+  /moderation/audit:
+    get:
+      tags:
+        - Moderation
+      summary: Get moderation audit trail
+      description: Retrieve audit trail of all moderation actions (admin only)
+      parameters:
+        - name: moderator_id
+          in: query
+          description: Filter by moderator ID
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: query
+          description: Filter by action type
+          schema:
+            type: string
+            enum:
+              [
+                dismiss,
+                warn_user,
+                hide_content,
+                delete_content,
+                ban_user_temp,
+                ban_user_permanent,
+              ]
+        - name: from_date
+          in: query
+          description: Filter actions from this date
+          schema:
+            type: string
+            format: date
+        - name: to_date
+          in: query
+          description: Filter actions until this date
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Audit trail retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ModerationAuditEntry"
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - admin only
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "ADMIN_ONLY"
+
+  # Search Endpoints
+  /search:
+    get:
+      tags:
+        - Search
+      summary: Search threads and replies
+      description: Search for threads and replies by keyword (excludes hidden/deleted content)
+      security: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 100
+        - name: type
+          in: query
+          description: Content type to search
+          schema:
+            type: string
+            enum: [threads, replies, all]
+            default: all
+        - name: category_id
+          in: query
+          description: Filter by category ID
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        "200":
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResults"
+        "400":
+          description: Invalid search query
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "INVALID_SEARCH_QUERY"
+
+  # Health Check
+  /health:
+    get:
+      tags:
+        - System
+      summary: Health check
+      description: Check API health status
+      security: []
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: API is unhealthy
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/HealthResponse"
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        example: "unhealthy"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Authentication Schemas
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+          pattern: "^[a-zA-Z0-9_-]+$"
+          description: Anonymous username (alphanumeric, underscore, hyphen only)
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: User password (min 8 characters)
+      example:
+        username: "anonymous_soul123"
+        password: "securePassword123!"
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      example:
+        username: "anonymous_soul123"
+        password: "securePassword123!"
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+          description: Refresh token
+
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: JWT access token
+        refresh_token:
+          type: string
+          description: Refresh token
+        token_type:
+          type: string
+          enum: [Bearer]
+        expires_in:
+          type: integer
+          description: Token expiration time in seconds
+        user:
+          $ref: "#/components/schemas/UserProfile"
+
+    # User Schemas
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [active, banned, suspended]
+        role:
+          type: string
+          enum: [user, moderator, admin]
+        thread_count:
+          type: integer
+          description: Number of threads created by user
+        reply_count:
+          type: integer
+          description: Number of replies created by user
+        last_active_at:
+          type: string
+          format: date-time
+          description: Last activity timestamp
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+          pattern: "^[a-zA-Z0-9_-]+$"
+
+    # Category Schemas
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        slug:
+          type: string
+        color:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        is_active:
+          type: boolean
+        thread_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    # Content Base Schema (with type discriminator)
+    ContentBase:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [thread, reply]
+        id:
+          type: string
+          format: uuid
+        content:
+          type: string
+        author:
+          $ref: "#/components/schemas/AnonymousAuthor"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        is_edited:
+          type: boolean
+        is_hidden:
+          type: boolean
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+      discriminator:
+        propertyName: type
+
+    # Thread Schemas
+    ThreadSummary:
+      allOf:
+        - $ref: "#/components/schemas/ContentBase"
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [thread]
+            title:
+              type: string
+            content_preview:
+              type: string
+              description: First 200 characters of content
+            category:
+              $ref: "#/components/schemas/Category"
+            reply_count:
+              type: integer
+            view_count:
+              type: integer
+            is_pinned:
+              type: boolean
+            is_locked:
+              type: boolean
+            last_reply_at:
+              type: string
+              format: date-time
+              nullable: true
+
+    ThreadDetail:
+      allOf:
+        - $ref: "#/components/schemas/ThreadSummary"
+        - type: object
+          properties:
+            content:
+              type: string
+              description: Full thread content (overrides content_preview)
+
+    ThreadDetailWithReplies:
+      allOf:
+        - $ref: "#/components/schemas/ThreadDetail"
+        - type: object
+          properties:
+            replies:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Reply"
+                meta:
+                  $ref: "#/components/schemas/PaginationMeta"
+
+    CreateThreadRequest:
+      type: object
+      required:
+        - title
+        - content
+        - category_id
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 200
+        content:
+          type: string
+          minLength: 10
+          maxLength: 10000
+        category_id:
+          type: string
+          format: uuid
+
+    UpdateThreadRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 200
+        content:
+          type: string
+          minLength: 10
+          maxLength: 10000
+        category_id:
+          type: string
+          format: uuid
+
+    # Reply Schemas
+    Reply:
+      allOf:
+        - $ref: "#/components/schemas/ContentBase"
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [reply]
+            thread_id:
+              type: string
+              format: uuid
+
+    CreateReplyRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 5000
+
+    UpdateReplyRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 5000
+
+    # Author Schema (Anonymous)
+    AnonymousAuthor:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        role:
+          type: string
+          enum: [user, moderator, admin]
+
+    # Report Schemas
+    CreateReportRequest:
+      type: object
+      required:
+        - content_type
+        - content_id
+        - reason
+      properties:
+        content_type:
+          type: string
+          enum: [thread, reply]
+        content_id:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          enum:
+            [
+              spam,
+              harassment,
+              hate_speech,
+              inappropriate_content,
+              self_harm,
+              misinformation,
+              other,
+            ]
+        description:
+          type: string
+          maxLength: 500
+          description: Optional additional details
+
+    Report:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        content_type:
+          type: string
+          enum: [thread, reply]
+        content_id:
+          type: string
+          format: uuid
+        reason:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [pending, reviewed, resolved]
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+          description: Auto-assigned based on reason and user history
+        reporter:
+          $ref: "#/components/schemas/AnonymousAuthor"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    # Enhanced Moderation Schemas
+    ModerationReport:
+      allOf:
+        - $ref: "#/components/schemas/Report"
+        - type: object
+          properties:
+            content:
+              oneOf:
+                - $ref: "#/components/schemas/ThreadDetail"
+                - $ref: "#/components/schemas/Reply"
+              discriminator:
+                propertyName: type
+              description: The reported content (thread or reply)
+            content_preview:
+              type: string
+              description: Preview of content for quick moderation review
+            reported_user:
+              $ref: "#/components/schemas/AnonymousAuthor"
+            reported_user_history:
+              type: object
+              properties:
+                previous_reports_count:
+                  type: integer
+                previous_violations_count:
+                  type: integer
+                account_age_days:
+                  type: integer
+                recent_activity_level:
+                  type: string
+                  enum: [low, medium, high]
+
+    ModerationActionRequest:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum:
+            [
+              dismiss,
+              warn_user,
+              hide_content,
+              delete_content,
+              ban_user_temp,
+              ban_user_permanent,
+            ]
+        reason:
+          type: string
+          maxLength: 500
+        ban_duration_days:
+          type: integer
+          minimum: 1
+          maximum: 365
+          description: Required for temporary bans
+        internal_notes:
+          type: string
+          maxLength: 1000
+          description: Internal moderator notes (not visible to users)
+
+    ModerationAction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        report_id:
+          type: string
+          format: uuid
+        content_type:
+          type: string
+          enum: [thread, reply]
+        content_id:
+          type: string
+          format: uuid
+        reported_user_id:
+          type: string
+          format: uuid
+        action:
+          type: string
+          enum:
+            [
+              dismiss,
+              warn_user,
+              hide_content,
+              delete_content,
+              ban_user_temp,
+              ban_user_permanent,
+            ]
+        reason:
+          type: string
+        internal_notes:
+          type: string
+        moderator:
+          $ref: "#/components/schemas/AnonymousAuthor"
+        created_at:
+          type: string
+          format: date-time
+        ban_expires_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Present only for temporary bans
+
+    ModerationAuditEntry:
+      allOf:
+        - $ref: "#/components/schemas/ModerationAction"
+        - type: object
+          properties:
+            report_details:
+              type: object
+              properties:
+                original_reason:
+                  type: string
+                reporter_id:
+                  type: string
+                  format: uuid
+                reported_at:
+                  type: string
+                  format: date-time
+
+    # Search Schemas
+    SearchResults:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            threads:
+              type: array
+              items:
+                allOf:
+                  - $ref: "#/components/schemas/ThreadSummary"
+                  - type: object
+                    properties:
+                      highlight:
+                        type: object
+                        properties:
+                          title:
+                            type: string
+                            description: Title with search term highlighted
+                          content:
+                            type: string
+                            description: Content snippet with search term highlighted
+            replies:
+              type: array
+              items:
+                allOf:
+                  - $ref: "#/components/schemas/Reply"
+                  - type: object
+                    properties:
+                      thread_title:
+                        type: string
+                        description: Title of the thread this reply belongs to
+                      highlight:
+                        type: object
+                        properties:
+                          content:
+                            type: string
+                            description: Content snippet with search term highlighted
+        meta:
+          allOf:
+            - $ref: "#/components/schemas/PaginationMeta"
+            - type: object
+              properties:
+                query:
+                  type: string
+                total_threads:
+                  type: integer
+                total_replies:
+                  type: integer
+                search_time_ms:
+                  type: number
+                  description: Search execution time in milliseconds
+
+    # Common Response Schemas
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        success:
+          type: boolean
+          default: true
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        success:
+          type: boolean
+          default: false
+        code:
+          type: string
+          description: Machine-readable error code for programmatic handling
+        timestamp:
+          type: string
+          format: date-time
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          default: "Validation failed"
+        message:
+          type: string
+        success:
+          type: boolean
+          default: false
+        code:
+          type: string
+          default: "VALIDATION_ERROR"
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+              code:
+                type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    MetaResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+
+    PaginationMeta:
+      allOf:
+        - $ref: "#/components/schemas/MetaResponse"
+        - type: object
+          properties:
+            page:
+              type: integer
+            limit:
+              type: integer
+            total_pages:
+              type: integer
+            has_next:
+              type: boolean
+            has_prev:
+              type: boolean
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        uptime_seconds:
+          type: integer
+        database:
+          type: object
+          properties:
+            status:
+              type: string
+              enum: [connected, disconnected]
+            response_time_ms:
+              type: number
+            connection_pool:
+              type: object
+              properties:
+                active_connections:
+                  type: integer
+                idle_connections:
+                  type: integer
+                max_connections:
+                  type: integer
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorResponse"
+              - type: object
+                properties:
+                  code:
+                    type: string
+                    example: "BAD_REQUEST"
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorResponse"
+              - type: object
+                properties:
+                  code:
+                    type: string
+                    example: "UNAUTHORIZED"
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorResponse"
+              - type: object
+                properties:
+                  code:
+                    type: string
+                    example: "FORBIDDEN"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorResponse"
+              - type: object
+                properties:
+                  code:
+                    type: string
+                    example: "NOT_FOUND"
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationErrorResponse"
+
+    RateLimitError:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorResponse"
+              - type: object
+                properties:
+                  code:
+                    type: string
+                    example: "RATE_LIMIT_EXCEEDED"
+                  retry_after:
+                    type: integer
+                    description: Seconds to wait before retrying
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Users
+    description: User profile management
+  - name: Categories
+    description: Discussion categories
+  - name: Threads
+    description: Discussion threads management
+  - name: Replies
+    description: Thread replies management
+  - name: Reports
+    description: Content reporting system
+  - name: Moderation
+    description: Content moderation (Admin/Moderator only)
+  - name: Search
+    description: Search functionality
+  - name: System
+    description: System health and status
