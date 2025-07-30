@@ -6,11 +6,14 @@ import (
 )
 
 type Config struct {
-	AppPort     string `envconfig:"APP_PORT" default:"8080"`
-	DatabaseURL string `envconfig:"DATABASE_URL" required:"true"`
-	JWTSecret   string `envconfig:"JWT_SECRET"   required:"true"`
+	AppPort              string `envconfig:"APP_PORT" default:"8080"`
+	DatabaseURL          string `envconfig:"DATABASE_URL" required:"true"`
+	JWTSecret            string `envconfig:"JWT_SECRET"   required:"true"`
+	InitialAdminUsername string `envconfig:"INITIAL_ADMIN_USERNAME" default:"admin"`
+	InitialAdminPassword string `envconfig:"INITIAL_ADMIN_PASSWORD" required:"true"`
 }
 
+// LoadConfig loads configuration from environment variables.
 func LoadConfig() (*Config, error) {
 	_ = godotenv.Load("../../.env") // Load .env file if it exists
 

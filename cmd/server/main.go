@@ -6,6 +6,7 @@ import (
 
 	"sejiwa-api/internal/config"
 	"sejiwa-api/internal/database"
+	"sejiwa-api/internal/database/seeds"
 	"sejiwa-api/internal/handlers"
 	"sejiwa-api/internal/models"
 	"sejiwa-api/internal/repository"
@@ -64,6 +65,9 @@ func main() {
 	}
 
 	log.Println("Database migration completed successfully.")
+
+	// Seed the database with initial data
+	seeds.SeedAdmin(db, cfg.InitialAdminUsername, cfg.InitialAdminPassword)
 
 	// Initialize the user repository
 	userRepo := repository.NewUserRepository(db)
