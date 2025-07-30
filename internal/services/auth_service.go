@@ -18,9 +18,14 @@ var (
 	ErrTokenGeneration    = errors.New("TOKEN_GENERATION_FAILED")
 )
 
+const (
+	AccessTokenDuration  = time.Hour * 24      // 24 hours
+	RefreshTokenDuration = time.Hour * 24 * 30 // 30 days
+)
+
 // AuthService defines the interface for authentication operations.
 type AuthService interface {
-	Register(req dto.RegisterRequest) (*models.User, error)
+	Register(req dto.RegisterRequest) (*dto.AuthResponse, error)
 	Login(req dto.LoginRequest) (*dto.AuthResponse, error)
 }
 
@@ -29,6 +34,7 @@ type authService struct {
 	jwtSecret string
 }
 
+// NewAuthService creates a new instance of AuthService.
 func NewAuthService(userRepo repository.UserRepository, jwtSecret string) AuthService {
 	return &authService{
 		userRepo:  userRepo,
@@ -36,14 +42,15 @@ func NewAuthService(userRepo repository.UserRepository, jwtSecret string) AuthSe
 	}
 }
 
-func (s *authService) Register(req dto.RegisterRequest) (*models.User, error) {
+// Register handles the business logic for user registration.
+func (s *authService) Register(req dto.RegisterRequest) (*dto.AuthResponse, error) {
 	// Check if username already exists
 	_, err := s.userRepo.FindByUsername(req.Username)
 	if err == nil {
 		return nil, ErrUserExists
 	}
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err // Handle other potential database errors
+		return nil, err
 	}
 
 	// Hash the password
@@ -52,7 +59,7 @@ func (s *authService) Register(req dto.RegisterRequest) (*models.User, error) {
 		return nil, err
 	}
 
-	// Create a new user model
+	// Create new user model
 	newUser := &models.User{
 		Username: req.Username,
 		Password: hashedPassword,
@@ -64,7 +71,8 @@ func (s *authService) Register(req dto.RegisterRequest) (*models.User, error) {
 		return nil, err
 	}
 
-	return newUser, nil
+	// Generate tokens and return complete auth response
+	return s.generateAuthResponse(newUser)
 }
 
 // Login handles the business logic for user authentication.
@@ -83,21 +91,52 @@ func (s *authService) Login(req dto.LoginRequest) (*dto.AuthResponse, error) {
 		return nil, ErrInvalidCredentials
 	}
 
-	// Generate JWT token
-	token, err := s.generateJWT(user)
+	// Generate tokens and return complete auth response
+	return s.generateAuthResponse(user)
+}
+
+// generateAuthResponse creates a complete AuthResponse with tokens and user profile
+func (s *authService) generateAuthResponse(user *models.User) (*dto.AuthResponse, error) {
+	// Generate access token
+	accessToken, err := s.generateJWT(user, AccessTokenDuration)
 	if err != nil {
 		return nil, ErrTokenGeneration
 	}
 
-	return &dto.AuthResponse{Token: token}, nil
+	// Generate refresh token
+	refreshToken, err := s.generateJWT(user, RefreshTokenDuration)
+	if err != nil {
+		return nil, ErrTokenGeneration
+	}
+
+	// Create user profile
+	userProfile := dto.UserProfile{
+		ID:           user.ID.String(),
+		Username:     user.Username,
+		CreatedAt:    user.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:    user.UpdatedAt.Format(time.RFC3339),
+		Status:       "active", // Default status
+		Role:         string(user.Role),
+		ThreadCount:  0, // Will be populated when we implement threads
+		ReplyCount:   0, // Will be populated when we implement replies
+		LastActiveAt: time.Now().Format(time.RFC3339),
+	}
+
+	return &dto.AuthResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		TokenType:    "Bearer",
+		ExpiresIn:    int(AccessTokenDuration.Seconds()),
+		User:         userProfile,
+	}, nil
 }
 
-// generateJWT creates a new JWT token for a given user.
-func (s *authService) generateJWT(user *models.User) (string, error) {
+// generateJWT creates a new JWT token for a given user with specified duration
+func (s *authService) generateJWT(user *models.User, duration time.Duration) (string, error) {
 	claims := jwt.MapClaims{
-		"sub":  user.ID,
+		"sub":  user.ID.String(),
 		"role": user.Role,
-		"exp":  time.Now().Add(time.Hour * 72).Unix(), // Token expires in 3 days
+		"exp":  time.Now().Add(duration).Unix(),
 		"iat":  time.Now().Unix(),
 	}
 

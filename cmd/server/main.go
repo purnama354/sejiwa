@@ -3,17 +3,19 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 
 	"sejiwa-api/internal/config"
 	"sejiwa-api/internal/database"
 	"sejiwa-api/internal/handlers"
-	"sejiwa-api/internal/middleware"
 	"sejiwa-api/internal/models"
 	"sejiwa-api/internal/repository"
+	"sejiwa-api/internal/routes"
 	"sejiwa-api/internal/services"
+	"sejiwa-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 // @title Sejiwa API
@@ -32,12 +34,15 @@ import (
 // @BasePath /api/v1
 
 func main() {
-
-	log.Println("Starting database migration...")
-
+	// Load application configuration
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatalf("Error loading configuration: %v", err)
+		log.Fatalf("failed to load configuration: %v", err)
+	}
+
+	// Register custom validators
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		utils.RegisterCustomValidators(v)
 	}
 
 	// Connect to the database
@@ -71,59 +76,8 @@ func main() {
 
 	router := gin.Default()
 
-	// Define a simple health check endpoint
-	api := router.Group("/api/v1")
-	{
-		// Health check endpoint
-		api.GET("/health", func(c *gin.Context) {
-			// Check database connection
-			sqlDB, err := db.DB()
-			if err != nil {
-				c.JSON(http.StatusServiceUnavailable, gin.H{
-					"status":          "DOWN",
-					"database_status": "unreachable",
-				})
-				return
-			}
-
-			err = sqlDB.Ping()
-			if err != nil {
-				c.JSON(http.StatusServiceUnavailable, gin.H{
-					"status":          "DOWN",
-					"database_status": "unhealthy",
-				})
-				return
-			}
-
-			c.JSON(http.StatusOK, gin.H{
-				"status":          "UP",
-				"database_status": "healthy",
-			})
-		})
-
-		// Authentication routes
-		authRoutes := api.Group("/auth")
-		{
-			authRoutes.POST("/register", authHandler.Register)
-			authRoutes.POST("/login", authHandler.Login)
-		}
-
-		authRequired := api.Group("/")
-		authRequired.Use(middleware.AuthMiddleware(cfg.JWTSecret))
-		{
-			authRequired.GET("/me", func(c *gin.Context) {
-				userID, _ := c.Get(middleware.ContextUserIDKey)
-				userRole, _ := c.Get(middleware.ContextUserRoleKey)
-
-				c.JSON(http.StatusOK, gin.H{
-					"message": "This is a protected route",
-					"user_id": userID,
-					"role":    userRole,
-				})
-			})
-		}
-
-	}
+	// Register all routes in a separate package
+	routes.RegisterRoutes(router, db, cfg, authHandler)
 
 	// Start the server using the configured port
 	serverAddr := fmt.Sprintf(":%s", cfg.AppPort)
