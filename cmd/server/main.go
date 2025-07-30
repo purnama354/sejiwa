@@ -8,6 +8,7 @@ import (
 	"sejiwa-api/internal/config"
 	"sejiwa-api/internal/database"
 	"sejiwa-api/internal/handlers"
+	"sejiwa-api/internal/middleware"
 	"sejiwa-api/internal/models"
 	"sejiwa-api/internal/repository"
 	"sejiwa-api/internal/services"
@@ -106,6 +107,22 @@ func main() {
 			authRoutes.POST("/register", authHandler.Register)
 			authRoutes.POST("/login", authHandler.Login)
 		}
+
+		authRequired := api.Group("/")
+		authRequired.Use(middleware.AuthMiddleware(cfg.JWTSecret))
+		{
+			authRequired.GET("/me", func(c *gin.Context) {
+				userID, _ := c.Get(middleware.ContextUserIDKey)
+				userRole, _ := c.Get(middleware.ContextUserRoleKey)
+
+				c.JSON(http.StatusOK, gin.H{
+					"message": "This is a protected route",
+					"user_id": userID,
+					"role":    userRole,
+				})
+			})
+		}
+
 	}
 
 	// Start the server using the configured port
