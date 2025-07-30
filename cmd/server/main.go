@@ -7,7 +7,10 @@ import (
 
 	"sejiwa-api/internal/config"
 	"sejiwa-api/internal/database"
+	"sejiwa-api/internal/handlers"
 	"sejiwa-api/internal/models"
+	"sejiwa-api/internal/repository"
+	"sejiwa-api/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -57,7 +60,13 @@ func main() {
 	log.Println("Database migration completed successfully.")
 
 	// Initialize the user repository
-	// userRepo := repository.NewUserRepository(db)
+	userRepo := repository.NewUserRepository(db)
+
+	// Initialize the authentication service
+	authService := services.NewAuthService(userRepo, cfg.JWTSecret)
+
+	// Initialize the authentication handler
+	authHandler := handlers.NewAuthHandler(authService)
 
 	router := gin.Default()
 
@@ -90,6 +99,13 @@ func main() {
 				"database_status": "healthy",
 			})
 		})
+
+		// Authentication routes
+		authRoutes := api.Group("/auth")
+		{
+			authRoutes.POST("/register", authHandler.Register)
+			authRoutes.POST("/login", authHandler.Login)
+		}
 	}
 
 	// Start the server using the configured port
