@@ -12,6 +12,7 @@ type UserRepository interface {
 	Create(user *models.User) error
 	FindByUsername(username string) (*models.User, error)
 	FindByID(id uuid.UUID) (*models.User, error)
+	FindByEmail(email string) (*models.User, error)
 }
 
 type userRepository struct {
@@ -41,6 +42,16 @@ func (r *userRepository) FindByUsername(username string) (*models.User, error) {
 func (r *userRepository) FindByID(id uuid.UUID) (*models.User, error) {
 	var user models.User
 	err := r.db.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// FindByEmail retrieves a user by their email address.
+func (r *userRepository) FindByEmail(email string) (*models.User, error) {
+	var user models.User
+	err := r.db.Where("email = ?", email).First(&user).Error
 	if err != nil {
 		return nil, err
 	}

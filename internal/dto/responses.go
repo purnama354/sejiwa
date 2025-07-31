@@ -31,3 +31,10 @@ func NewErrorResponse(error, code string, details []ValidationError) ErrorRespon
 		Timestamp: time.Now().Format(time.RFC3339),
 	}
 }
+
+// SuccessResponse defines the standard success response structure
+type SuccessResponse struct {
+	Message   string `json:"message"`
+	Success   bool   `json:"success"`
+	Timestamp string `json:"timestamp"`
+}

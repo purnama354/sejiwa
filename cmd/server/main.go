@@ -75,13 +75,19 @@ func main() {
 	// Initialize the authentication service
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret)
 
+	// Initialize the admin service
+	adminService := services.NewAdminService(userRepo)
+
 	// Initialize the authentication handler
 	authHandler := handlers.NewAuthHandler(authService)
+
+	// Initialize the admin handler
+	adminHandler := handlers.NewAdminHandler(adminService)
 
 	router := gin.Default()
 
 	// Register all routes in a separate package
-	routes.RegisterRoutes(router, db, cfg, authHandler)
+	routes.RegisterRoutes(router, db, cfg, authHandler, adminHandler)
 
 	// Start the server using the configured port
 	serverAddr := fmt.Sprintf(":%s", cfg.AppPort)

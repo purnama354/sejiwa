@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHandler *handlers.AuthHandler) {
+func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHandler *handlers.AuthHandler, adminHandler *handlers.AdminHandler) {
 	api := router.Group("/api/v1")
 	{
 		// Health check endpoint
@@ -45,6 +45,18 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHan
 		{
 			authRoutes.POST("/register", authHandler.Register)
 			authRoutes.POST("/login", authHandler.Login)
+		}
+
+		// Admin-only routes
+		adminRoutes := api.Group("/admin")
+		adminRoutes.Use(middleware.AuthMiddleware(cfg.JWTSecret))
+		adminRoutes.Use(middleware.AdminOnlyMiddleware())
+		{
+			adminAuthRoutes := adminRoutes.Group("/auth")
+			{
+				adminAuthRoutes.POST("/create-admin", adminHandler.CreateAdmin)
+				adminAuthRoutes.POST("/create-moderator", adminHandler.CreateModerator)
+			}
 		}
 
 		authRequired := api.Group("/")

@@ -12,7 +12,6 @@ import (
 )
 
 const (
-
 	ContextUserIDKey = "userID"
 
 	ContextUserRoleKey = "userRole"
