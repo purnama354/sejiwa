@@ -51,4 +51,4 @@ docs/swagger.yaml
 tmp/
 
 # Copilot instructions (AI assistant prompt files)
-.github/copilot-instructions.md
+.github/copilot-instructions.md.env
