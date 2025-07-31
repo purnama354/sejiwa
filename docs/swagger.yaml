@@ -30,7 +30,7 @@ paths:
       tags:
         - Authentication
       summary: Register a new anonymous user
-      description: Create a new user account with anonymous username and password
+      description: Create a new user account with anonymous username and password (user role only)
       security: []
       requestBody:
         required: true
@@ -69,7 +69,7 @@ paths:
       tags:
         - Authentication
       summary: Login with username and password
-      description: Authenticate user and return JWT token
+      description: Authenticate user and return JWT token (all roles)
       security: []
       requestBody:
         required: true
@@ -165,6 +165,355 @@ paths:
                         type: string
                         example: "REFRESH_TOKEN_INVALID"
 
+  # Admin Authentication & Management Endpoints
+  /admin/auth/create-admin:
+    post:
+      tags:
+        - Admin Management
+      summary: Create new admin account
+      description: Create a new admin account (admin only). Initial admin is seeded from backend.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminRequest"
+      responses:
+        "201":
+          description: Admin account created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      admin:
+                        $ref: "#/components/schemas/ModeratorProfile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - admin only
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "ADMIN_ONLY"
+        "409":
+          description: Username already exists
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "USERNAME_ALREADY_EXISTS"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /admin/auth/create-moderator:
+    post:
+      tags:
+        - Admin Management
+      summary: Create new moderator account
+      description: Create a new moderator account (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateModeratorRequest"
+      responses:
+        "201":
+          description: Moderator account created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      moderator:
+                        $ref: "#/components/schemas/ModeratorProfile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - admin only
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "ADMIN_ONLY"
+        "409":
+          description: Username already exists
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "USERNAME_ALREADY_EXISTS"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  # Moderator Management Endpoints
+  /admin/moderators:
+    get:
+      tags:
+        - Admin Management
+      summary: Get all moderators
+      description: Retrieve list of all admins and moderators (admin only)
+      parameters:
+        - name: role
+          in: query
+          description: Filter by role
+          schema:
+            type: string
+            enum: [admin, moderator]
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: [active, inactive, suspended]
+            default: active
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Moderator list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ModeratorProfile"
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - admin only
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "ADMIN_ONLY"
+
+  /admin/moderators/{moderator_id}:
+    get:
+      tags:
+        - Admin Management
+      summary: Get moderator details
+      description: Retrieve detailed information about a specific moderator (admin only)
+      parameters:
+        - name: moderator_id
+          in: path
+          required: true
+          description: Moderator ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Moderator details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModeratorDetailProfile"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - admin only
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "ADMIN_ONLY"
+        "404":
+          description: Moderator not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "MODERATOR_NOT_FOUND"
+
+    patch:
+      tags:
+        - Admin Management
+      summary: Update moderator
+      description: Update moderator information (admin only)
+      parameters:
+        - name: moderator_id
+          in: path
+          required: true
+          description: Moderator ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateModeratorRequest"
+      responses:
+        "200":
+          description: Moderator updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModeratorDetailProfile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - admin only or cannot modify own role
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "ADMIN_ONLY"
+        "404":
+          description: Moderator not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "MODERATOR_NOT_FOUND"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+    delete:
+      tags:
+        - Admin Management
+      summary: Deactivate moderator
+      description: Deactivate/suspend moderator (admin only, cannot deactivate self)
+      parameters:
+        - name: moderator_id
+          in: path
+          required: true
+          description: Moderator ID
+          schema:
+            type: string
+            format: uuid
+        - name: reason
+          in: query
+          required: true
+          description: Reason for deactivation
+          schema:
+            type: string
+            enum: [resigned, terminated, suspended, other]
+        - name: notes
+          in: query
+          description: Optional notes about deactivation
+          schema:
+            type: string
+            maxLength: 500
+      responses:
+        "200":
+          description: Moderator deactivated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      deactivated_at:
+                        type: string
+                        format: date-time
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - admin only or cannot deactivate self
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "CANNOT_DEACTIVATE_SELF"
+        "404":
+          description: Moderator not found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ErrorResponse"
+                  - type: object
+                    properties:
+                      code:
+                        type: string
+                        example: "MODERATOR_NOT_FOUND"
+
   # User Profile Endpoints
   /users/me:
     get:
@@ -178,7 +527,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserProfile"
+                oneOf:
+                  - $ref: "#/components/schemas/UserProfile"
+                  - $ref: "#/components/schemas/ModeratorProfile"
+                discriminator:
+                  propertyName: role
+                  mapping:
+                    user: "#/components/schemas/UserProfile"
+                    admin: "#/components/schemas/ModeratorProfile"
+                    moderator: "#/components/schemas/ModeratorProfile"
         "401":
           $ref: "#/components/responses/Unauthorized"
 
@@ -199,7 +556,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserProfile"
+                oneOf:
+                  - $ref: "#/components/schemas/UserProfile"
+                  - $ref: "#/components/schemas/ModeratorProfile"
+                discriminator:
+                  propertyName: role
+                  mapping:
+                    user: "#/components/schemas/UserProfile"
+                    admin: "#/components/schemas/ModeratorProfile"
+                    moderator: "#/components/schemas/ModeratorProfile"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -1123,7 +1488,111 @@ components:
           type: integer
           description: Token expiration time in seconds
         user:
-          $ref: "#/components/schemas/UserProfile"
+          oneOf:
+            - $ref: "#/components/schemas/UserProfile"
+            - $ref: "#/components/schemas/ModeratorProfile"
+          discriminator:
+            propertyName: role
+            mapping:
+              user: "#/components/schemas/UserProfile"
+              admin: "#/components/schemas/ModeratorProfile"
+              moderator: "#/components/schemas/ModeratorProfile"
+
+    # Admin/Moderator Management Schemas
+    CreateAdminRequest:
+      type: object
+      required:
+        - username
+        - password
+        - email
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+          pattern: "^[a-zA-Z0-9_-]+$"
+          description: Admin username
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: Admin password (min 8 characters)
+        email:
+          type: string
+          format: email
+          description: Admin email address (for notifications)
+        full_name:
+          type: string
+          maxLength: 100
+          description: Admin full name (optional)
+      example:
+        username: "admin_john"
+        password: "superSecurePassword123!"
+        email: "john.admin@sejiwa.app"
+        full_name: "John Admin"
+
+    CreateModeratorRequest:
+      type: object
+      required:
+        - username
+        - password
+        - email
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+          pattern: "^[a-zA-Z0-9_-]+$"
+          description: Moderator username
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: Moderator password (min 8 characters)
+        email:
+          type: string
+          format: email
+          description: Moderator email address (for notifications)
+        full_name:
+          type: string
+          maxLength: 100
+          description: Moderator full name (optional)
+        permissions:
+          type: array
+          items:
+            type: string
+            enum: [manage_reports, ban_users, delete_content, manage_categories]
+          description: Specific moderator permissions (optional, defaults to basic moderation)
+      example:
+        username: "mod_jane"
+        password: "secureModPassword123!"
+        email: "jane.mod@sejiwa.app"
+        full_name: "Jane Moderator"
+        permissions: ["manage_reports", "ban_users"]
+
+    UpdateModeratorRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+          pattern: "^[a-zA-Z0-9_-]+$"
+        email:
+          type: string
+          format: email
+        full_name:
+          type: string
+          maxLength: 100
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        permissions:
+          type: array
+          items:
+            type: string
+            enum: [manage_reports, ban_users, delete_content, manage_categories]
+          description: Only applicable for moderators
 
     # User Schemas
     UserProfile:
@@ -1145,7 +1614,8 @@ components:
           enum: [active, banned, suspended]
         role:
           type: string
-          enum: [user, moderator, admin]
+          enum: [user]
+          default: user
         thread_count:
           type: integer
           description: Number of threads created by user
@@ -1156,6 +1626,90 @@ components:
           type: string
           format: date-time
           description: Last activity timestamp
+
+    ModeratorProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        full_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        role:
+          type: string
+          enum: [admin, moderator]
+        permissions:
+          type: array
+          items:
+            type: string
+            enum:
+              [
+                manage_reports,
+                ban_users,
+                delete_content,
+                manage_categories,
+                manage_moderators,
+              ]
+          description: Moderator permissions
+        thread_count:
+          type: integer
+          description: Number of threads created by moderator
+        reply_count:
+          type: integer
+          description: Number of replies created by moderator
+        last_active_at:
+          type: string
+          format: date-time
+          description: Last activity timestamp
+        created_by:
+          type: string
+          format: uuid
+          description: ID of admin who created this moderator
+
+    ModeratorDetailProfile:
+      allOf:
+        - $ref: "#/components/schemas/ModeratorProfile"
+        - type: object
+          properties:
+            moderation_stats:
+              type: object
+              properties:
+                reports_handled:
+                  type: integer
+                users_banned:
+                  type: integer
+                content_removed:
+                  type: integer
+                warnings_issued:
+                  type: integer
+              description: Only for moderators/admins
+            login_history:
+              type: array
+              items:
+                type: object
+                properties:
+                  login_at:
+                    type: string
+                    format: date-time
+                  ip_address:
+                    type: string
+                  user_agent:
+                    type: string
+              description: Recent login history (admin only)
 
     UpdateUserRequest:
       type: object
@@ -1791,6 +2345,8 @@ components:
 tags:
   - name: Authentication
     description: User authentication and session management
+  - name: Admin Management
+    description: Admin-only endpoints for managing moderator accounts
   - name: Users
     description: User profile management
   - name: Categories
