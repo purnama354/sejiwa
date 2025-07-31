@@ -53,3 +53,4 @@ tmp/
 # Copilot instructions (AI assistant prompt files)
 .github/copilot-instructions.md.env
 .github
+.github/copilot-instructions.md
