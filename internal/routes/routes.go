@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"time"
 
 	"sejiwa-api/internal/config"
 	"sejiwa-api/internal/handlers"
@@ -11,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHandler *handlers.AuthHandler, adminHandler *handlers.AdminHandler) {
+func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHandler *handlers.AuthHandler, adminHandler *handlers.AdminHandler, userHandler *handlers.UserHandler) {
 	api := router.Group("/api/v1")
 	{
 		// Health check endpoint
@@ -40,7 +41,7 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHan
 			})
 		})
 
-		// Authentication routes
+		// Authentication routes (public)
 		authRoutes := api.Group("/auth")
 		{
 			authRoutes.POST("/register", authHandler.Register)
@@ -57,19 +58,60 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHan
 				adminAuthRoutes.POST("/create-admin", adminHandler.CreateAdmin)
 				adminAuthRoutes.POST("/create-moderator", adminHandler.CreateModerator)
 			}
-		}
 
-		authRequired := api.Group("/")
-		authRequired.Use(middleware.AuthMiddleware(cfg.JWTSecret))
-		{
-			authRequired.GET("/me", func(c *gin.Context) {
+			// Test endpoint for admin access
+			adminRoutes.GET("/test", func(c *gin.Context) {
 				userID, _ := c.Get(middleware.ContextUserIDKey)
 				userRole, _ := c.Get(middleware.ContextUserRoleKey)
 
 				c.JSON(http.StatusOK, gin.H{
-					"message": "This is a protected route",
-					"user_id": userID,
-					"role":    userRole,
+					"message":   "Admin access confirmed",
+					"user_id":   userID,
+					"role":      userRole,
+					"endpoint":  "admin-only",
+					"timestamp": time.Now().Format(time.RFC3339),
+				})
+			})
+		}
+
+		// Moderator or Admin routes
+		moderatorRoutes := api.Group("/moderation")
+		moderatorRoutes.Use(middleware.AuthMiddleware(cfg.JWTSecret))
+		moderatorRoutes.Use(middleware.ModeratorOrAdminMiddleware())
+		{
+			// Test endpoint for moderator/admin access
+			moderatorRoutes.GET("/test", func(c *gin.Context) {
+				userID, _ := c.Get(middleware.ContextUserIDKey)
+				userRole, _ := c.Get(middleware.ContextUserRoleKey)
+
+				c.JSON(http.StatusOK, gin.H{
+					"message":   "Moderator/Admin access confirmed",
+					"user_id":   userID,
+					"role":      userRole,
+					"endpoint":  "moderator-or-admin",
+					"timestamp": time.Now().Format(time.RFC3339),
+				})
+			})
+		}
+
+		// Authenticated user routes (all roles)
+		userRoutes := api.Group("/users")
+		userRoutes.Use(middleware.AuthMiddleware(cfg.JWTSecret))
+		{
+			userRoutes.GET("/me", userHandler.GetProfile)
+			userRoutes.GET("/me/role", userHandler.GetRoleInfo)
+
+			// Test endpoint for any authenticated user
+			userRoutes.GET("/test", func(c *gin.Context) {
+				userID, _ := c.Get(middleware.ContextUserIDKey)
+				userRole, _ := c.Get(middleware.ContextUserRoleKey)
+
+				c.JSON(http.StatusOK, gin.H{
+					"message":   "Authenticated user access confirmed",
+					"user_id":   userID,
+					"role":      userRole,
+					"endpoint":  "authenticated-user",
+					"timestamp": time.Now().Format(time.RFC3339),
 				})
 			})
 		}

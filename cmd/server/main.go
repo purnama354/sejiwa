@@ -8,7 +8,6 @@ import (
 	"sejiwa-api/internal/database"
 	"sejiwa-api/internal/database/seeds"
 	"sejiwa-api/internal/handlers"
-	"sejiwa-api/internal/models"
 	"sejiwa-api/internal/repository"
 	"sejiwa-api/internal/routes"
 	"sejiwa-api/internal/services"
@@ -46,48 +45,33 @@ func main() {
 		utils.RegisterCustomValidators(v)
 	}
 
-	// Connect to the database
-	db, err := database.Connect(cfg.DatabaseURL)
+	// Connect to the database and run migrations
+	db, err := database.InitAndMigrate(cfg.DatabaseURL)
 	if err != nil {
-		log.Fatalf("Error connecting to the database: %v", err)
+		log.Fatalf("Database initialization failed: %v", err)
 	}
-	log.Println("Database connection established")
-
-	log.Println("Running auto-migration...")
-	err = db.AutoMigrate(
-		&models.User{},
-		// Add other models here
-
-	)
-
-	if err != nil {
-		log.Fatalf("failed to migrate database: %v", err)
-	}
-
-	log.Println("Database migration completed successfully.")
+	log.Println("Database connection established and migrations completed")
 
 	// Seed the database with initial data
 	seeds.SeedAdmin(db, cfg.InitialAdminUsername, cfg.InitialAdminPassword)
 
-	// Initialize the user repository
+	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 
-	// Initialize the authentication service
+	// Initialize services
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret)
-
-	// Initialize the admin service
 	adminService := services.NewAdminService(userRepo)
+	userService := services.NewUserService(userRepo)
 
-	// Initialize the authentication handler
+	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
-
-	// Initialize the admin handler
 	adminHandler := handlers.NewAdminHandler(adminService)
+	userHandler := handlers.NewUserHandler(userService)
 
 	router := gin.Default()
 
-	// Register all routes in a separate package
-	routes.RegisterRoutes(router, db, cfg, authHandler, adminHandler)
+	// Register routes
+	routes.RegisterRoutes(router, db, cfg, authHandler, adminHandler, userHandler)
 
 	// Start the server using the configured port
 	serverAddr := fmt.Sprintf(":%s", cfg.AppPort)
