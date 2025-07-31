@@ -10,7 +10,7 @@ import (
 // AdminOnlyMiddleware ensures only admin users can access the endpoint
 func AdminOnlyMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userRole, exists := c.Get(ContextUserRoleKey)
+		userRoleInterface, exists := c.Get(ContextUserRoleKey)
 		if !exists {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error":   "No role found in token",
@@ -20,7 +20,8 @@ func AdminOnlyMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if role, ok := userRole.(models.UserRole); !ok || role != models.RoleAdmin {
+		userRole, ok := userRoleInterface.(models.UserRole)
+		if !ok || userRole != models.RoleAdmin {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 				"error":   "Admin access required",
 				"code":    "ADMIN_ONLY",
@@ -36,7 +37,7 @@ func AdminOnlyMiddleware() gin.HandlerFunc {
 // ModeratorOrAdminMiddleware ensures only moderators or admins can access the endpoint
 func ModeratorOrAdminMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userRole, exists := c.Get(ContextUserRoleKey)
+		userRoleInterface, exists := c.Get(ContextUserRoleKey)
 		if !exists {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error":   "No role found in token",
@@ -46,7 +47,8 @@ func ModeratorOrAdminMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if role, ok := userRole.(models.UserRole); !ok || (role != models.RoleAdmin && role != models.RoleModerator) {
+		userRole, ok := userRoleInterface.(models.UserRole)
+		if !ok || (userRole != models.RoleAdmin && userRole != models.RoleModerator) {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 				"error":   "Moderator or admin access required",
 				"code":    "INSUFFICIENT_PERMISSIONS",

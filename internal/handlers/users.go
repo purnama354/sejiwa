@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sejiwa-api/internal/dto"
 	"sejiwa-api/internal/middleware"
+	"sejiwa-api/internal/models"
 	"sejiwa-api/internal/services"
 	"time"
 
@@ -59,12 +60,28 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 
 func (h *UserHandler) GetRoleInfo(c *gin.Context) {
 	userID, _ := c.Get(middleware.ContextUserIDKey)
-	userRole, _ := c.Get(middleware.ContextUserRoleKey)
+	userRoleInterface, _ := c.Get(middleware.ContextUserRoleKey)
+
+	// Convert the role to string for comparison
+	var userRole string
+	if role, ok := userRoleInterface.(models.UserRole); ok {
+		userRole = string(role)
+	} else if roleStr, ok := userRoleInterface.(string); ok {
+		userRole = roleStr
+	} else {
+		errorResponse := dto.NewErrorResponse(
+			"Invalid role type in context",
+			"CONTEXT_ERROR",
+			nil,
+		)
+		c.JSON(http.StatusInternalServerError, errorResponse)
+		return
+	}
 
 	// Define permissions based on role
 	var permissions []string
 	switch userRole {
-	case "admin":
+	case string(models.RoleAdmin):
 		permissions = []string{
 			"manage_users",
 			"manage_moderators",
@@ -74,7 +91,7 @@ func (h *UserHandler) GetRoleInfo(c *gin.Context) {
 			"manage_categories",
 			"view_audit_logs",
 		}
-	case "moderator":
+	case string(models.RoleModerator):
 		permissions = []string{
 			"manage_reports",
 			"ban_users",
@@ -82,21 +99,23 @@ func (h *UserHandler) GetRoleInfo(c *gin.Context) {
 			"hide_content",
 			"warn_users",
 		}
-	case "user":
+	case string(models.RoleUser):
 		permissions = []string{
 			"create_threads",
 			"reply_to_threads",
 			"report_content",
 		}
+	default:
+		permissions = []string{}
 	}
 
 	roleInfo := gin.H{
 		"user_id":      userID,
 		"role":         userRole,
 		"permissions":  permissions,
-		"is_admin":     userRole == "admin",
-		"is_moderator": userRole == "moderator" || userRole == "admin",
-		"can_moderate": userRole == "moderator" || userRole == "admin",
+		"is_admin":     userRole == string(models.RoleAdmin),
+		"is_moderator": userRole == string(models.RoleModerator) || userRole == string(models.RoleAdmin),
+		"can_moderate": userRole == string(models.RoleModerator) || userRole == string(models.RoleAdmin),
 		"timestamp":    time.Now().Format(time.RFC3339),
 	}
 
