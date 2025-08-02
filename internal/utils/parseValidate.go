@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"sejiwa-api/internal/dto"
 	"strings"
+
+	"github.com/purnama354/sejiwa-api/internal/dto"
 
 	"github.com/go-playground/validator/v10"
 )

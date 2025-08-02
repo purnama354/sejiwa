@@ -3,8 +3,9 @@ package middleware
 import (
 	"fmt"
 	"net/http"
-	"sejiwa-api/internal/models"
 	"strings"
+
+	"github.com/purnama354/sejiwa-api/internal/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"

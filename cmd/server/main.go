@@ -4,34 +4,19 @@ import (
 	"fmt"
 	"log"
 
-	"sejiwa-api/internal/config"
-	"sejiwa-api/internal/database"
-	"sejiwa-api/internal/database/seeds"
-	"sejiwa-api/internal/handlers"
-	"sejiwa-api/internal/repository"
-	"sejiwa-api/internal/routes"
-	"sejiwa-api/internal/services"
-	"sejiwa-api/internal/utils"
+	"github.com/purnama354/sejiwa-api/internal/config"
+	"github.com/purnama354/sejiwa-api/internal/database"
+	"github.com/purnama354/sejiwa-api/internal/database/seeds"
+	"github.com/purnama354/sejiwa-api/internal/handlers"
+	"github.com/purnama354/sejiwa-api/internal/repository"
+	"github.com/purnama354/sejiwa-api/internal/routes"
+	"github.com/purnama354/sejiwa-api/internal/services"
+	"github.com/purnama354/sejiwa-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 )
-
-// @title Sejiwa API
-// @version 1.0
-// @description This is the API for Sejiwa, an anonymous mental health discussion platform.
-// @termsOfService http://swagger.io/terms/
-
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
-
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @host localhost:8080
-// @BasePath /api/v1
 
 func main() {
 	// Load application configuration

@@ -2,7 +2,8 @@ package middleware
 
 import (
 	"net/http"
-	"sejiwa-api/internal/models"
+
+	"github.com/purnama354/sejiwa-api/internal/models"
 
 	"github.com/gin-gonic/gin"
 )

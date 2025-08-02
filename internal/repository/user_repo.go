@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"sejiwa-api/internal/models"
+	"github.com/purnama354/sejiwa-api/internal/models"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

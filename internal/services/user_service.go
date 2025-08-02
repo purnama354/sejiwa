@@ -1,9 +1,10 @@
 package services
 
 import (
-	"sejiwa-api/internal/dto"
-	"sejiwa-api/internal/repository"
 	"time"
+
+	"github.com/purnama354/sejiwa-api/internal/dto"
+	"github.com/purnama354/sejiwa-api/internal/repository"
 
 	"github.com/google/uuid"
 )

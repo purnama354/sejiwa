@@ -2,11 +2,12 @@ package services
 
 import (
 	"errors"
-	"sejiwa-api/internal/dto"
-	"sejiwa-api/internal/models"
-	"sejiwa-api/internal/repository"
-	"sejiwa-api/internal/utils"
 	"time"
+
+	"github.com/purnama354/sejiwa-api/internal/dto"
+	"github.com/purnama354/sejiwa-api/internal/models"
+	"github.com/purnama354/sejiwa-api/internal/repository"
+	"github.com/purnama354/sejiwa-api/internal/utils"
 
 	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm"

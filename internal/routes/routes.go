@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"sejiwa-api/internal/config"
-	"sejiwa-api/internal/handlers"
-	"sejiwa-api/internal/middleware"
+	"github.com/purnama354/sejiwa-api/internal/config"
+	"github.com/purnama354/sejiwa-api/internal/handlers"
+	"github.com/purnama354/sejiwa-api/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

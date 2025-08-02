@@ -1,4 +1,4 @@
-module sejiwa-api
+module github.com/purnama354/github.com/purnama354/sejiwa-api
 
 go 1.24.1
 

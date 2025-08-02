@@ -2,7 +2,8 @@ package database
 
 import (
 	"log"
-	"sejiwa-api/internal/models"
+
+	"github.com/purnama354/sejiwa-api/internal/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

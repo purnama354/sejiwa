@@ -3,11 +3,12 @@ package handlers
 import (
 	"errors"
 	"net/http"
-	"sejiwa-api/internal/dto"
-	"sejiwa-api/internal/middleware"
-	"sejiwa-api/internal/services"
-	"sejiwa-api/internal/utils"
 	"time"
+
+	"github.com/purnama354/sejiwa-api/internal/dto"
+	"github.com/purnama354/sejiwa-api/internal/middleware"
+	"github.com/purnama354/sejiwa-api/internal/services"
+	"github.com/purnama354/sejiwa-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
