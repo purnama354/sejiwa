@@ -29,6 +29,7 @@ func InitAndMigrate(dsn string) (*gorm.DB, error) {
 	log.Println("Running auto-migration...")
 	err = db.AutoMigrate(
 		&models.User{},
+		&models.Category{},
 		// Add other models here
 	)
 	if err != nil {

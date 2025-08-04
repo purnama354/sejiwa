@@ -2,6 +2,17 @@ package dto
 
 import "time"
 
+type CreateCategoryRequest struct {
+	Name        string `json:"name" binding:"required,min=3,max=50"`
+	Description string `json:"description,omitempty" binding:"max=255"`
+}
+
+type UpdateCategoryRequest struct {
+	Name        *string `json:"name,omitempty" binding:"omitempty,min=3,max=50"`
+	Description *string `json:"description,omitempty" binding:"omitempty,max=255"`
+	IsLocked    *bool   `json:"is_locked,omitempty"`
+}
+
 // AuthResponse defines the structure for successful authentication responses.
 type AuthResponse struct {
 	AccessToken  string      `json:"access_token"`
@@ -21,6 +32,24 @@ type ErrorResponse struct {
 	Timestamp string            `json:"timestamp"`
 }
 
+// SuccessResponse defines the standard success response structure
+type SuccessResponse struct {
+	Message   string `json:"message"`
+	Success   bool   `json:"success"`
+	Timestamp string `json:"timestamp"`
+}
+
+type CategoryResponse struct {
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Slug        string    `json:"slug"`
+	Description string    `json:"description"`
+	ThreadCount int       `json:"thread_count"`
+	IsLocked    bool      `json:"is_locked"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
 // NewErrorResponse creates a new error response
 func NewErrorResponse(error, code string, details []ValidationError) ErrorResponse {
 	return ErrorResponse{
@@ -32,9 +61,10 @@ func NewErrorResponse(error, code string, details []ValidationError) ErrorRespon
 	}
 }
 
-// SuccessResponse defines the standard success response structure
-type SuccessResponse struct {
-	Message   string `json:"message"`
-	Success   bool   `json:"success"`
-	Timestamp string `json:"timestamp"`
+func NewSuccessResponse(message string) SuccessResponse {
+	return SuccessResponse{
+		Message:   message,
+		Success:   true,
+		Timestamp: time.Now().Format(time.RFC3339),
+	}
 }

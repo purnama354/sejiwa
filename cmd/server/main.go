@@ -39,24 +39,28 @@ func main() {
 
 	// Seed the database with initial data
 	seeds.SeedAdmin(db, cfg.InitialAdminUsername, cfg.InitialAdminPassword)
+	seeds.SeedCategories(db)
 
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
+	categoryRepo := repository.NewCategoryRepository(db) // Add this line
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret)
 	adminService := services.NewAdminService(userRepo)
 	userService := services.NewUserService(userRepo)
+	categoryService := services.NewCategoryService(categoryRepo) // Add this line
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	adminHandler := handlers.NewAdminHandler(adminService)
 	userHandler := handlers.NewUserHandler(userService)
+	categoryHandler := handlers.NewCategoryHandler(categoryService) // Add this line
 
 	router := gin.Default()
 
 	// Register routes
-	routes.RegisterRoutes(router, db, cfg, authHandler, adminHandler, userHandler)
+	routes.RegisterRoutes(router, db, cfg, authHandler, adminHandler, userHandler, categoryHandler)
 
 	// Start the server using the configured port
 	serverAddr := fmt.Sprintf(":%s", cfg.AppPort)

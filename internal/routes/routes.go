@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHandler *handlers.AuthHandler, adminHandler *handlers.AdminHandler, userHandler *handlers.UserHandler) {
+func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHandler *handlers.AuthHandler, adminHandler *handlers.AdminHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler) {
 	api := router.Group("/api/v1")
 	{
 		// Health check endpoint
@@ -46,6 +46,18 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHan
 		{
 			authRoutes.POST("/register", authHandler.Register)
 			authRoutes.POST("/login", authHandler.Login)
+		}
+
+		// Category routes
+		categoryRoutes := api.Group("/categories")
+		{
+			categoryRoutes.GET("", categoryHandler.GetAll)
+			categoryRoutes.GET("/:id", categoryHandler.GetByID)
+
+			// Admin-only category routes
+			categoryRoutes.POST("", middleware.AuthMiddleware(cfg.JWTSecret), middleware.AdminOnlyMiddleware(), categoryHandler.Create)
+			categoryRoutes.PUT("/:id", middleware.AuthMiddleware(cfg.JWTSecret), middleware.AdminOnlyMiddleware(), categoryHandler.Update)
+			categoryRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), middleware.AdminOnlyMiddleware(), categoryHandler.Delete)
 		}
 
 		// Admin-only routes
