@@ -53,6 +53,7 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHan
 		{
 			categoryRoutes.GET("", categoryHandler.GetAll)
 			categoryRoutes.GET("/:id", categoryHandler.GetByID)
+			categoryRoutes.GET("/:id/threads", threadHandler.GetByCategory)
 
 			// Admin-only category routes
 			categoryRoutes.POST("", middleware.AuthMiddleware(cfg.JWTSecret), middleware.AdminOnlyMiddleware(), categoryHandler.Create)
@@ -74,9 +75,6 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHan
 			threadRoutes.PUT("/:id", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Update)
 			threadRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Delete)
 		}
-
-		// Category-specific thread routes
-		categoryRoutes.GET("/:categoryId/threads", threadHandler.GetByCategory)
 
 		// Admin-only routes
 		adminRoutes := api.Group("/admin")
