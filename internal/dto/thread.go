@@ -2,13 +2,6 @@ package dto
 
 import "time"
 
-// CreateThreadRequest defines the structure for creating a new thread
-type CreateThreadRequest struct {
-	Title      string `json:"title" binding:"required,min=5,max=255"`
-	Content    string `json:"content" binding:"required,min=10,max=10000"`
-	CategoryID string `json:"category_id" binding:"required,uuid"`
-}
-
 // UpdateThreadRequest defines the structure for updating a thread
 type UpdateThreadRequest struct {
 	Title   *string `json:"title,omitempty" binding:"omitempty,min=5,max=255"`

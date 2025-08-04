@@ -2,11 +2,6 @@ package dto
 
 import "time"
 
-type CreateCategoryRequest struct {
-	Name        string `json:"name" binding:"required,min=3,max=50"`
-	Description string `json:"description,omitempty" binding:"max=255"`
-}
-
 type UpdateCategoryRequest struct {
 	Name        *string `json:"name,omitempty" binding:"omitempty,min=3,max=50"`
 	Description *string `json:"description,omitempty" binding:"omitempty,max=255"`

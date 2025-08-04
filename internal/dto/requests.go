@@ -25,6 +25,19 @@ type CreateAdminRequest struct {
 	FullName string `json:"full_name,omitempty" binding:"max=100"`
 }
 
+// CreateCategoryRequest defines the structure for creating new categories
+type CreateCategoryRequest struct {
+	Name        string `json:"name" binding:"required,min=3,max=50"`
+	Description string `json:"description,omitempty" binding:"max=255"`
+}
+
+// CreateThreadRequest defines the structure for creating a new thread
+type CreateThreadRequest struct {
+	Title      string `json:"title" binding:"required,min=5,max=255"`
+	Content    string `json:"content" binding:"required,min=10,max=10000"`
+	CategoryID string `json:"category_id" binding:"required,uuid"`
+}
+
 // CreateModeratorRequest defines the structure for creating new moderator accounts
 type CreateModeratorRequest struct {
 	Username    string   `json:"username" binding:"required,min=3,max=30,alphanum_underscore_hyphen"`

@@ -43,24 +43,27 @@ func main() {
 
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
-	categoryRepo := repository.NewCategoryRepository(db) // Add this line
+	categoryRepo := repository.NewCategoryRepository(db)
+	threadRepo := repository.NewThreadRepository(db)
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret)
 	adminService := services.NewAdminService(userRepo)
 	userService := services.NewUserService(userRepo)
-	categoryService := services.NewCategoryService(categoryRepo) // Add this line
+	categoryService := services.NewCategoryService(categoryRepo)
+	threadService := services.NewThreadService(threadRepo, categoryRepo, userRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	adminHandler := handlers.NewAdminHandler(adminService)
 	userHandler := handlers.NewUserHandler(userService)
-	categoryHandler := handlers.NewCategoryHandler(categoryService) // Add this line
+	categoryHandler := handlers.NewCategoryHandler(categoryService)
+	threadHandler := handlers.NewThreadHandler(threadService) // Add this line
 
 	router := gin.Default()
 
 	// Register routes
-	routes.RegisterRoutes(router, db, cfg, authHandler, adminHandler, userHandler, categoryHandler)
+	routes.RegisterRoutes(router, db, cfg, authHandler, adminHandler, userHandler, categoryHandler, threadHandler) // Update this line
 
 	// Start the server using the configured port
 	serverAddr := fmt.Sprintf(":%s", cfg.AppPort)

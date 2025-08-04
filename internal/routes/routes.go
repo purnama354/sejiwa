@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHandler *handlers.AuthHandler, adminHandler *handlers.AdminHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler) {
+func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHandler *handlers.AuthHandler, adminHandler *handlers.AdminHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, threadHandler *handlers.ThreadHandler) {
 	api := router.Group("/api/v1")
 	{
 		// Health check endpoint
@@ -60,6 +60,24 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHan
 			categoryRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), middleware.AdminOnlyMiddleware(), categoryHandler.Delete)
 		}
 
+		// Thread routes
+		threadRoutes := api.Group("/threads")
+		{
+			// Public routes
+			threadRoutes.GET("", threadHandler.GetAll)
+			threadRoutes.GET("/search", threadHandler.Search)
+			threadRoutes.GET("/pinned", threadHandler.GetPinned)
+			threadRoutes.GET("/:id", threadHandler.GetByID)
+
+			// Authenticated routes
+			threadRoutes.POST("", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Create)
+			threadRoutes.PUT("/:id", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Update)
+			threadRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Delete)
+		}
+
+		// Category-specific thread routes
+		categoryRoutes.GET("/:categoryId/threads", threadHandler.GetByCategory)
+
 		// Admin-only routes
 		adminRoutes := api.Group("/admin")
 		adminRoutes.Use(middleware.AuthMiddleware(cfg.JWTSecret))
@@ -104,6 +122,9 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHan
 					"timestamp": time.Now().Format(time.RFC3339),
 				})
 			})
+
+			// Thread moderation
+			moderatorRoutes.POST("/threads/:id", threadHandler.ModerateThread)
 		}
 
 		// Authenticated user routes (all roles)
