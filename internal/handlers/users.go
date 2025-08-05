@@ -9,6 +9,7 @@ import (
 	"github.com/purnama354/sejiwa-api/internal/middleware"
 	"github.com/purnama354/sejiwa-api/internal/models"
 	"github.com/purnama354/sejiwa-api/internal/services"
+	"github.com/purnama354/sejiwa-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -121,4 +122,44 @@ func (h *UserHandler) GetRoleInfo(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, roleInfo)
+}
+
+func (h *UserHandler) UpdateProfile(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		errorResponse := dto.NewErrorResponse(
+			"User ID not found in context",
+			"CONTEXT_ERROR",
+			nil,
+		)
+		c.JSON(http.StatusUnauthorized, errorResponse)
+		return
+	}
+
+	var req dto.UpdateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validationErrors := utils.ParseValidationErrors(err)
+		errorResponse := dto.NewErrorResponse(
+			"Validation failed",
+			"VALIDATION_ERROR",
+			validationErrors,
+		)
+		c.JSON(http.StatusUnprocessableEntity, errorResponse)
+		return
+	}
+
+	profile, err := h.userService.UpdateUserProfile(userID.(uuid.UUID), req)
+	if err != nil {
+		switch {
+		case errors.Is(err, services.ErrUserNotFound):
+			c.JSON(http.StatusNotFound, dto.NewErrorResponse("User not found", "USER_NOT_FOUND", nil))
+		case errors.Is(err, services.ErrUserExists):
+			c.JSON(http.StatusConflict, dto.NewErrorResponse("Username already exists", "USERNAME_ALREADY_EXISTS", nil))
+		default:
+			c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to update profile", "INTERNAL_SERVER_ERROR", nil))
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, profile)
 }

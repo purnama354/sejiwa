@@ -58,3 +58,8 @@ type CreateModeratorRequest struct {
 	FullName    string   `json:"full_name,omitempty" binding:"max=100"`
 	Permissions []string `json:"permissions,omitempty"`
 }
+
+// UpdateUserRequest defines the structure for updating user profile
+type UpdateUserRequest struct {
+	Username *string `json:"username,omitempty" binding:"omitempty,min=3,max=30,alphanum_underscore_hyphen"`
+}

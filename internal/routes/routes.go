@@ -154,6 +154,7 @@ func RegisterRoutes(
 		userRoutes.Use(middleware.AuthMiddleware(cfg.JWTSecret))
 		{
 			userRoutes.GET("/me", userHandler.GetProfile)
+			userRoutes.PATCH("/me", userHandler.UpdateProfile)
 			userRoutes.GET("/me/role", userHandler.GetRoleInfo)
 
 			// Test endpoint for any authenticated user
