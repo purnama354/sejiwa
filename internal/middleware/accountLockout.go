@@ -26,16 +26,13 @@ const (
 // AccountLockoutMiddleware checks if the account is locked before allowing login
 func AccountLockoutMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Only check username from form or header, do NOT bind JSON here!
 		username := c.PostForm("username")
 		if username == "" {
-			// Try JSON body
-			var body struct {
-				Username string `json:"username"`
-			}
-			_ = c.ShouldBindJSON(&body)
-			username = body.Username
+			username = c.GetHeader("X-Username")
 		}
 		if username == "" {
+			// Optionally, skip lockout check if username is not present
 			c.Next()
 			return
 		}

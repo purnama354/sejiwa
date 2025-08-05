@@ -82,8 +82,8 @@ func RegisterRoutes(
 			threadRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Delete)
 
 			// Thread reply routes
-			threadRoutes.GET("/:threadId/replies", replyHandler.GetByThread)
-			threadRoutes.POST("/:threadId/replies", middleware.AuthMiddleware(cfg.JWTSecret), replyHandler.Create)
+			threadRoutes.GET("/:id/replies", replyHandler.GetByThread)
+			threadRoutes.POST("/:id/replies", middleware.AuthMiddleware(cfg.JWTSecret), replyHandler.Create)
 		}
 
 		// Reply routes

@@ -74,13 +74,14 @@ func main() {
 		Limit:  5,
 	}
 	authLimiter := middleware.NewRateLimiter(authRate)
+	accountLockout := middleware.AccountLockoutMiddleware()
 
-	// Register routes
+	// Register routes with rate limiting and account lockout for auth endpoints
 	routes.RegisterRoutes(
 		router, db, cfg,
 		authHandler, adminHandler, userHandler, categoryHandler, threadHandler, replyHandler,
 		authLimiter,
-		middleware.AccountLockoutMiddleware(),
+		accountLockout,
 	)
 
 	// Start the server using the configured port
