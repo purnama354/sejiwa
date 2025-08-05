@@ -3,15 +3,18 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/purnama354/sejiwa-api/internal/config"
 	"github.com/purnama354/sejiwa-api/internal/database"
 	"github.com/purnama354/sejiwa-api/internal/database/seeds"
 	"github.com/purnama354/sejiwa-api/internal/handlers"
+	"github.com/purnama354/sejiwa-api/internal/middleware"
 	"github.com/purnama354/sejiwa-api/internal/repository"
 	"github.com/purnama354/sejiwa-api/internal/routes"
 	"github.com/purnama354/sejiwa-api/internal/services"
 	"github.com/purnama354/sejiwa-api/internal/utils"
+	"github.com/ulule/limiter/v3"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -45,6 +48,7 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	categoryRepo := repository.NewCategoryRepository(db)
 	threadRepo := repository.NewThreadRepository(db)
+	replyRepo := repository.NewReplyRepository(db)
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret)
@@ -52,18 +56,32 @@ func main() {
 	userService := services.NewUserService(userRepo)
 	categoryService := services.NewCategoryService(categoryRepo)
 	threadService := services.NewThreadService(threadRepo, categoryRepo, userRepo)
+	replyService := services.NewReplyService(replyRepo, threadRepo, userRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	adminHandler := handlers.NewAdminHandler(adminService)
 	userHandler := handlers.NewUserHandler(userService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
-	threadHandler := handlers.NewThreadHandler(threadService) // Add this line
+	threadHandler := handlers.NewThreadHandler(threadService)
+	replyHandler := handlers.NewReplyHandler(replyService)
 
 	router := gin.Default()
 
+	// Rate limit: 5 requests per minute per IP for auth endpoints
+	authRate := limiter.Rate{
+		Period: 1 * time.Minute,
+		Limit:  5,
+	}
+	authLimiter := middleware.NewRateLimiter(authRate)
+
 	// Register routes
-	routes.RegisterRoutes(router, db, cfg, authHandler, adminHandler, userHandler, categoryHandler, threadHandler) // Update this line
+	routes.RegisterRoutes(
+		router, db, cfg,
+		authHandler, adminHandler, userHandler, categoryHandler, threadHandler, replyHandler,
+		authLimiter,
+		middleware.AccountLockoutMiddleware(),
+	)
 
 	// Start the server using the configured port
 	serverAddr := fmt.Sprintf(":%s", cfg.AppPort)

@@ -45,6 +45,29 @@ type CategoryResponse struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+// ReplyResponse defines the structure for reply responses
+type ReplyResponse struct {
+	ID               string          `json:"id"`
+	Content          string          `json:"content"`
+	AuthorUsername   string          `json:"author_username"`
+	ThreadID         string          `json:"thread_id"`
+	ParentReplyID    *string         `json:"parent_reply_id,omitempty"`
+	ModerationStatus string          `json:"moderation_status"`
+	IsEdited         bool            `json:"is_edited"`
+	CreatedAt        time.Time       `json:"created_at"`
+	UpdatedAt        time.Time       `json:"updated_at"`
+	ChildReplies     []ReplyResponse `json:"child_replies,omitempty"`
+}
+
+// ReplyListResponse for paginated reply lists
+type ReplyListResponse struct {
+	Replies    []ReplyResponse `json:"replies"`
+	Total      int64           `json:"total"`
+	Page       int             `json:"page"`
+	PageSize   int             `json:"page_size"`
+	TotalPages int             `json:"total_pages"`
+}
+
 // NewErrorResponse creates a new error response
 func NewErrorResponse(error, code string, details []ValidationError) ErrorResponse {
 	return ErrorResponse{

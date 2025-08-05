@@ -4,15 +4,20 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+
 	"github.com/purnama354/sejiwa-api/internal/config"
 	"github.com/purnama354/sejiwa-api/internal/handlers"
 	"github.com/purnama354/sejiwa-api/internal/middleware"
-
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHandler *handlers.AuthHandler, adminHandler *handlers.AdminHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, threadHandler *handlers.ThreadHandler) {
+func RegisterRoutes(
+	router *gin.Engine, db *gorm.DB, cfg *config.Config,
+	authHandler *handlers.AuthHandler, adminHandler *handlers.AdminHandler, userHandler *handlers.UserHandler,
+	categoryHandler *handlers.CategoryHandler, threadHandler *handlers.ThreadHandler, replyHandler *handlers.ReplyHandler,
+	authLimiter gin.HandlerFunc, accountLockout gin.HandlerFunc,
+) {
 	api := router.Group("/api/v1")
 	{
 		// Health check endpoint
@@ -41,11 +46,12 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHan
 			})
 		})
 
-		// Authentication routes (public)
+		// Authentication routes (public, with rate limiting and lockout)
 		authRoutes := api.Group("/auth")
 		{
-			authRoutes.POST("/register", authHandler.Register)
-			authRoutes.POST("/login", authHandler.Login)
+			authRoutes.POST("/register", authLimiter, authHandler.Register)
+			authRoutes.POST("/login", authLimiter, accountLockout, authHandler.Login)
+
 		}
 
 		// Category routes
@@ -61,7 +67,7 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHan
 			categoryRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), middleware.AdminOnlyMiddleware(), categoryHandler.Delete)
 		}
 
-		// Thread routes
+		// Thread routes with reply endpoints
 		threadRoutes := api.Group("/threads")
 		{
 			// Public routes
@@ -74,6 +80,21 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHan
 			threadRoutes.POST("", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Create)
 			threadRoutes.PUT("/:id", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Update)
 			threadRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Delete)
+
+			// Thread reply routes
+			threadRoutes.GET("/:threadId/replies", replyHandler.GetByThread)
+			threadRoutes.POST("/:threadId/replies", middleware.AuthMiddleware(cfg.JWTSecret), replyHandler.Create)
+		}
+
+		// Reply routes
+		replyRoutes := api.Group("/replies")
+		{
+			// Public routes
+			replyRoutes.GET("/:id", replyHandler.GetByID)
+
+			// Authenticated routes
+			replyRoutes.PATCH("/:id", middleware.AuthMiddleware(cfg.JWTSecret), replyHandler.Update)
+			replyRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), replyHandler.Delete)
 		}
 
 		// Admin-only routes
@@ -123,6 +144,9 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB, cfg *config.Config, authHan
 
 			// Thread moderation
 			moderatorRoutes.POST("/threads/:id", threadHandler.ModerateThread)
+
+			// Reply moderation
+			moderatorRoutes.POST("/replies/:id", replyHandler.ModerateReply)
 		}
 
 		// Authenticated user routes (all roles)

@@ -16,7 +16,11 @@ require (
 	gorm.io/gorm v1.30.1
 )
 
-require github.com/mattn/go-sqlite3 v1.14.22 // indirect
+require (
+	github.com/mattn/go-sqlite3 v1.14.22 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/ulule/limiter/v3 v3.11.2 // indirect
+)
 
 require (
 	github.com/bytedance/sonic v1.13.3 // indirect
@@ -46,6 +50,7 @@ require (
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.0 // indirect
+	github.com/ulule/limiter v2.2.2+incompatible
 	golang.org/x/arch v0.18.0 // indirect
 	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect

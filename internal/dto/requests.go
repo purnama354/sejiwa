@@ -38,6 +38,18 @@ type CreateThreadRequest struct {
 	CategoryID string `json:"category_id" binding:"required,uuid"`
 }
 
+// CreateReplyRequest defines the structure for creating a new reply
+
+type CreateReplyRequest struct {
+	Content       string  `json:"content" binding:"required,min=5,max=5000"`
+	ParentReplyID *string `json:"parent_reply_id,omitempty" binding:"omitempty,uuid"`
+}
+
+// UpdateReplyRequest defines the structure for updating a reply
+type UpdateReplyRequest struct {
+	Content *string `json:"content,omitempty" binding:"omitempty,min=5,max=5000"`
+}
+
 // CreateModeratorRequest defines the structure for creating new moderator accounts
 type CreateModeratorRequest struct {
 	Username    string   `json:"username" binding:"required,min=3,max=30,alphanum_underscore_hyphen"`
