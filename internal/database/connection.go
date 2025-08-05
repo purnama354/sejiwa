@@ -30,7 +30,7 @@ func InitAndMigrate(dsn string) (*gorm.DB, error) {
 	err = db.AutoMigrate(
 		&models.User{},
 		&models.Category{},
-		// Add other models here
+		&models.Thread{},
 	)
 	if err != nil {
 		return nil, err
