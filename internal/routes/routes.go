@@ -16,6 +16,7 @@ func RegisterRoutes(
 	router *gin.Engine, db *gorm.DB, cfg *config.Config,
 	authHandler *handlers.AuthHandler, adminHandler *handlers.AdminHandler, userHandler *handlers.UserHandler,
 	categoryHandler *handlers.CategoryHandler, threadHandler *handlers.ThreadHandler, replyHandler *handlers.ReplyHandler,
+	reportHandler *handlers.ReportHandler, moderationHandler *handlers.ModerationHandler, // Add this parameter
 	authLimiter gin.HandlerFunc, accountLockout gin.HandlerFunc,
 ) {
 	api := router.Group("/api/v1")
@@ -97,6 +98,14 @@ func RegisterRoutes(
 			replyRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), replyHandler.Delete)
 		}
 
+		// Report routes
+		reportRoutes := api.Group("/reports")
+		reportRoutes.Use(middleware.AuthMiddleware(cfg.JWTSecret))
+		{
+			reportRoutes.POST("", reportHandler.Create)
+			reportRoutes.GET("/me", reportHandler.GetMyReports)
+		}
+
 		// Admin-only routes
 		adminRoutes := api.Group("/admin")
 		adminRoutes.Use(middleware.AuthMiddleware(cfg.JWTSecret))
@@ -142,11 +151,22 @@ func RegisterRoutes(
 				})
 			})
 
-			// Thread moderation
+			// Content moderation endpoints
 			moderatorRoutes.POST("/threads/:id", threadHandler.ModerateThread)
-
-			// Reply moderation
 			moderatorRoutes.POST("/replies/:id", replyHandler.ModerateReply)
+
+			// Report management
+			moderatorRoutes.GET("/reports", moderationHandler.GetReportsForModeration)
+			moderatorRoutes.GET("/reports/:id", reportHandler.GetByID)
+			moderatorRoutes.POST("/reports/:id/actions", moderationHandler.ProcessReport)
+
+			// Moderation actions and statistics
+			moderatorRoutes.GET("/actions", moderationHandler.GetModerationActions)
+			moderatorRoutes.GET("/stats", moderationHandler.GetModerationStats)
+
+			// User management
+			moderatorRoutes.POST("/users/:id/ban", moderationHandler.BanUser)
+			moderatorRoutes.POST("/users/:id/unban", moderationHandler.UnbanUser)
 		}
 
 		// Authenticated user routes (all roles)

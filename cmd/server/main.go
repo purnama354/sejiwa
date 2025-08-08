@@ -49,6 +49,8 @@ func main() {
 	categoryRepo := repository.NewCategoryRepository(db)
 	threadRepo := repository.NewThreadRepository(db)
 	replyRepo := repository.NewReplyRepository(db)
+	reportRepo := repository.NewReportRepository(db)
+	moderationRepo := repository.NewModerationActionRepository(db) // Add this line
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret)
@@ -57,6 +59,8 @@ func main() {
 	categoryService := services.NewCategoryService(categoryRepo)
 	threadService := services.NewThreadService(threadRepo, categoryRepo, userRepo)
 	replyService := services.NewReplyService(replyRepo, threadRepo, userRepo)
+	reportService := services.NewReportService(reportRepo, threadRepo, replyRepo, userRepo)
+	moderationService := services.NewModerationService(reportRepo, userRepo, threadRepo, replyRepo, moderationRepo) // Add this line
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
@@ -65,6 +69,8 @@ func main() {
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	threadHandler := handlers.NewThreadHandler(threadService)
 	replyHandler := handlers.NewReplyHandler(replyService)
+	reportHandler := handlers.NewReportHandler(reportService)
+	moderationHandler := handlers.NewModerationHandler(moderationService, reportService) // Add this line
 
 	router := gin.Default()
 
@@ -80,6 +86,7 @@ func main() {
 	routes.RegisterRoutes(
 		router, db, cfg,
 		authHandler, adminHandler, userHandler, categoryHandler, threadHandler, replyHandler,
+		reportHandler, moderationHandler, // Add this parameter
 		authLimiter,
 		accountLockout,
 	)
