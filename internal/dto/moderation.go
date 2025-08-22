@@ -1,6 +1,10 @@
 package dto
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // ModerationActionRequest defines the structure for moderation actions
 type ModerationActionRequest struct {
@@ -8,6 +12,26 @@ type ModerationActionRequest struct {
 	Reason          string `json:"reason" binding:"required,max=500"`
 	BanDurationDays *int   `json:"ban_duration_days,omitempty" binding:"omitempty,min=1,max=365"`
 	InternalNotes   string `json:"internal_notes,omitempty" binding:"max=1000"`
+}
+
+type CreateModeratorNoteRequest struct {
+	Note string `json:"note" validate:"required,min=1,max=1000"`
+}
+
+type ModeratorNoteResponse struct {
+	ID          uuid.UUID `json:"id"`
+	UserID      uuid.UUID `json:"user_id"`
+	ModeratorID uuid.UUID `json:"moderator_id"`
+	Note        string    `json:"note"`
+	CreatedAt   time.Time `json:"created_at"`
+
+	// Optional moderator info
+	ModeratorUsername *string `json:"moderator_username,omitempty"`
+}
+
+type ModeratorNotesListResponse struct {
+	Notes      []ModeratorNoteResponse `json:"notes"`
+	Pagination PaginationResponse      `json:"pagination"`
 }
 
 // ModerationActionResponse defines the structure for moderation action responses
@@ -63,7 +87,6 @@ type UserBanRequest struct {
 	BanDurationDays *int   `json:"ban_duration_days,omitempty"`
 	InternalNotes   string `json:"internal_notes,omitempty" binding:"max=1000"`
 }
-
 
 // ReportFilters for filtering reports
 type ReportFilters struct {

@@ -59,6 +59,15 @@ type ReplyResponse struct {
 	ChildReplies     []ReplyResponse `json:"child_replies,omitempty"`
 }
 
+// PaginationResponse defines pagination metadata for list responses
+type PaginationResponse struct {
+	Total      int64 `json:"total"`
+	Page       int   `json:"page"`
+	Limit      int   `json:"limit"`
+	PageSize   int   `json:"page_size"`
+	TotalPages int   `json:"total_pages"`
+}
+
 // ReplyListResponse for paginated reply lists
 type ReplyListResponse struct {
 	Replies    []ReplyResponse `json:"replies"`

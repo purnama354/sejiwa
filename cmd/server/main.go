@@ -60,7 +60,12 @@ func main() {
 	threadService := services.NewThreadService(threadRepo, categoryRepo, userRepo)
 	replyService := services.NewReplyService(replyRepo, threadRepo, userRepo)
 	reportService := services.NewReportService(reportRepo, threadRepo, replyRepo, userRepo)
-	moderationService := services.NewModerationService(reportRepo, userRepo, threadRepo, replyRepo, moderationRepo) // Add this line
+	moderationService := services.NewModerationService(reportRepo, userRepo, threadRepo, replyRepo, moderationRepo)
+
+	// Add moderator note repo/service/handler
+	moderatorNoteRepo := repository.NewModeratorNoteRepository(db)
+	moderatorNoteService := services.NewModeratorNoteService(moderatorNoteRepo, userRepo)
+	moderatorNoteHandler := handlers.NewModeratorNoteHandler(moderatorNoteService)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
@@ -70,7 +75,7 @@ func main() {
 	threadHandler := handlers.NewThreadHandler(threadService)
 	replyHandler := handlers.NewReplyHandler(replyService)
 	reportHandler := handlers.NewReportHandler(reportService)
-	moderationHandler := handlers.NewModerationHandler(moderationService, reportService) // Add this line
+	moderationHandler := handlers.NewModerationHandler(moderationService, reportService)
 
 	router := gin.Default()
 
@@ -86,9 +91,7 @@ func main() {
 	routes.RegisterRoutes(
 		router, db, cfg,
 		authHandler, adminHandler, userHandler, categoryHandler, threadHandler, replyHandler,
-		reportHandler, moderationHandler, // Add this parameter
-		authLimiter,
-		accountLockout,
+		reportHandler, moderationHandler, moderatorNoteHandler, authLimiter, accountLockout,
 	)
 
 	// Start the server using the configured port

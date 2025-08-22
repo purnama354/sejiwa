@@ -16,7 +16,7 @@ func RegisterRoutes(
 	router *gin.Engine, db *gorm.DB, cfg *config.Config,
 	authHandler *handlers.AuthHandler, adminHandler *handlers.AdminHandler, userHandler *handlers.UserHandler,
 	categoryHandler *handlers.CategoryHandler, threadHandler *handlers.ThreadHandler, replyHandler *handlers.ReplyHandler,
-	reportHandler *handlers.ReportHandler, moderationHandler *handlers.ModerationHandler, // Add this parameter
+	reportHandler *handlers.ReportHandler, moderationHandler *handlers.ModerationHandler, moderatorNoteHandler *handlers.ModeratorNoteHandler,
 	authLimiter gin.HandlerFunc, accountLockout gin.HandlerFunc,
 ) {
 	api := router.Group("/api/v1")
@@ -154,6 +154,10 @@ func RegisterRoutes(
 			// Content moderation endpoints
 			moderatorRoutes.POST("/threads/:id", threadHandler.ModerateThread)
 			moderatorRoutes.POST("/replies/:id", replyHandler.ModerateReply)
+
+			moderatorRoutes.GET("/users/:id/moderator-notes", moderatorNoteHandler.GetNotesByUserID)
+			moderatorRoutes.POST("/users/:id/moderator-notes", moderatorNoteHandler.CreateNote)
+			moderatorRoutes.DELETE("/moderator-notes/:noteId", moderatorNoteHandler.DeleteNote)
 
 			// Report management
 			moderatorRoutes.GET("/reports", moderationHandler.GetReportsForModeration)

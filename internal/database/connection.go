@@ -33,6 +33,8 @@ func InitAndMigrate(dsn string) (*gorm.DB, error) {
 		&models.Thread{},
 		&models.Reply{},
 		&models.Report{},
+		&models.ModerationAction{},
+		&models.ModeratorNote{},
 	)
 	if err != nil {
 		return nil, err
