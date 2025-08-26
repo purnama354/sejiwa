@@ -41,6 +41,7 @@ const (
 	PriorityCritical ReportPriority = "critical"
 )
 
+// swagger:model
 type Report struct {
 	BaseModel
 	ContentType    ContentType    `gorm:"type:varchar(20);not null;index"`

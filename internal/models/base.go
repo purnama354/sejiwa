@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// swagger:model
 // BaseModel contains common columns for all tables.
 // It uses UUID for the primary key and includes fields for auditing and soft deletes.
 type BaseModel struct {

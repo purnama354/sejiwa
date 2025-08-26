@@ -15,6 +15,7 @@ const (
 	ModerationStatusDeleted  ModerationStatus = "deleted"
 )
 
+// swagger:model
 type Thread struct {
 	BaseModel
 	Title            string           `gorm:"size:255;not null"`

@@ -1,0 +1,328 @@
+definitions:
+    BaseModel:
+        properties:
+            CreatedAt:
+                format: date-time
+                type: string
+            DeletedAt:
+                $ref: '#/definitions/DeletedAt'
+            ID:
+                format: uuid
+                type: string
+            UpdatedAt:
+                format: date-time
+                type: string
+        type: object
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    Category:
+        properties:
+            CreatedAt:
+                format: date-time
+                type: string
+            DeletedAt:
+                $ref: '#/definitions/DeletedAt'
+            Description:
+                type: string
+            ID:
+                format: uuid
+                type: string
+            IsLocked:
+                type: boolean
+            Name:
+                type: string
+            Slug:
+                type: string
+            ThreadCount:
+                format: int64
+                type: integer
+            UpdatedAt:
+                format: date-time
+                type: string
+        type: object
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    ContentType:
+        type: string
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    DeletedAt:
+        $ref: '#/definitions/NullTime'
+    ModerationAction:
+        properties:
+            Action:
+                $ref: '#/definitions/ModerationActionType'
+            BanExpiresAt:
+                format: date-time
+                type: string
+            ContentID:
+                format: uuid
+                type: string
+            ContentType:
+                $ref: '#/definitions/ContentType'
+            CreatedAt:
+                format: date-time
+                type: string
+            DeletedAt:
+                $ref: '#/definitions/DeletedAt'
+            ID:
+                format: uuid
+                type: string
+            InternalNotes:
+                type: string
+            Moderator:
+                $ref: '#/definitions/User'
+            ModeratorID:
+                format: uuid
+                type: string
+            Reason:
+                type: string
+            Report:
+                $ref: '#/definitions/Report'
+            ReportID:
+                format: uuid
+                type: string
+            ReportedUser:
+                $ref: '#/definitions/User'
+            ReportedUserID:
+                format: uuid
+                type: string
+            UpdatedAt:
+                format: date-time
+                type: string
+        type: object
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    ModerationActionType:
+        type: string
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    ModerationStatus:
+        type: string
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    ModeratorNote:
+        properties:
+            CreatedAt:
+                format: date-time
+                type: string
+            DeletedAt:
+                $ref: '#/definitions/DeletedAt'
+            ID:
+                format: uuid
+                type: string
+            UpdatedAt:
+                format: date-time
+                type: string
+            moderator:
+                $ref: '#/definitions/User'
+            moderator_id:
+                format: uuid
+                type: string
+                x-go-name: ModeratorID
+            note:
+                type: string
+                x-go-name: Note
+            user:
+                $ref: '#/definitions/User'
+            user_id:
+                format: uuid
+                type: string
+                x-go-name: UserID
+        type: object
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    NullTime:
+        description: |-
+            NullTime implements the [Scanner] interface so
+            it can be used as a scan destination, similar to [NullString].
+        properties:
+            Time:
+                format: date-time
+                type: string
+            Valid:
+                type: boolean
+        title: NullTime represents a [time.Time] that may be null.
+        type: object
+        x-go-package: database/sql
+    Permissions:
+        description: Permissions for moderators (stored as JSON in database)
+        items:
+            type: string
+        type: array
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    Reply:
+        properties:
+            Author:
+                $ref: '#/definitions/User'
+            AuthorID:
+                format: uuid
+                type: string
+            ChildReplies:
+                items:
+                    $ref: '#/definitions/Reply'
+                type: array
+            Content:
+                type: string
+            CreatedAt:
+                format: date-time
+                type: string
+            DeletedAt:
+                $ref: '#/definitions/DeletedAt'
+            ID:
+                format: uuid
+                type: string
+            IsEdited:
+                type: boolean
+            ModerationStatus:
+                $ref: '#/definitions/ModerationStatus'
+            ParentReply:
+                $ref: '#/definitions/Reply'
+            ParentReplyID:
+                format: uuid
+                type: string
+            Thread:
+                $ref: '#/definitions/Thread'
+            ThreadID:
+                format: uuid
+                type: string
+            UpdatedAt:
+                format: date-time
+                type: string
+        type: object
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    Report:
+        properties:
+            ContentID:
+                format: uuid
+                type: string
+            ContentType:
+                $ref: '#/definitions/ContentType'
+            CreatedAt:
+                format: date-time
+                type: string
+            DeletedAt:
+                $ref: '#/definitions/DeletedAt'
+            Description:
+                type: string
+            ID:
+                format: uuid
+                type: string
+            Priority:
+                $ref: '#/definitions/ReportPriority'
+            Reason:
+                $ref: '#/definitions/ReportReason'
+            ReportedUser:
+                $ref: '#/definitions/User'
+            ReportedUserID:
+                format: uuid
+                type: string
+            Reporter:
+                $ref: '#/definitions/User'
+            ReporterID:
+                format: uuid
+                type: string
+            Status:
+                $ref: '#/definitions/ReportStatus'
+            UpdatedAt:
+                format: date-time
+                type: string
+        type: object
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    ReportPriority:
+        type: string
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    ReportReason:
+        type: string
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    ReportStatus:
+        type: string
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    Thread:
+        properties:
+            Author:
+                $ref: '#/definitions/User'
+            AuthorID:
+                format: uuid
+                type: string
+            Category:
+                $ref: '#/definitions/Category'
+            CategoryID:
+                format: uuid
+                type: string
+            Content:
+                type: string
+            CreatedAt:
+                format: date-time
+                type: string
+            DeletedAt:
+                $ref: '#/definitions/DeletedAt'
+            ID:
+                format: uuid
+                type: string
+            IsEdited:
+                type: boolean
+            IsLocked:
+                type: boolean
+            IsPinned:
+                type: boolean
+            LastReplyAt:
+                format: date-time
+                type: string
+            ModerationStatus:
+                $ref: '#/definitions/ModerationStatus'
+            ReplyCount:
+                format: int64
+                type: integer
+            Title:
+                type: string
+            UpdatedAt:
+                format: date-time
+                type: string
+            ViewCount:
+                format: int64
+                type: integer
+        type: object
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    User:
+        properties:
+            CreatedAt:
+                format: date-time
+                type: string
+            CreatedBy:
+                format: uuid
+                type: string
+            DeletedAt:
+                $ref: '#/definitions/DeletedAt'
+            Email:
+                type: string
+            FullName:
+                type: string
+            ID:
+                format: uuid
+                type: string
+            LastActiveAt:
+                format: date-time
+                type: string
+            Password:
+                type: string
+            Permissions:
+                $ref: '#/definitions/Permissions'
+            ReplyCount:
+                format: int64
+                type: integer
+            Role:
+                $ref: '#/definitions/UserRole'
+            Status:
+                $ref: '#/definitions/UserStatus'
+            ThreadCount:
+                format: int64
+                type: integer
+            UpdatedAt:
+                format: date-time
+                type: string
+            Username:
+                type: string
+        type: object
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    UserRole:
+        type: string
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+    UserStatus:
+        type: string
+        x-go-package: github.com/purnama354/sejiwa-api/internal/models
+paths: {}
+swagger: "2.0"

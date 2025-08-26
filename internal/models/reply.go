@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// swagger:model
 // Reply represents a response to a thread in the discussion platform
 type Reply struct {
 	BaseModel

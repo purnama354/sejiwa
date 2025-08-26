@@ -46,6 +46,7 @@ func (p *Permissions) Scan(value interface{}) error {
 	return json.Unmarshal(bytes, p)
 }
 
+// swagger:model
 type User struct {
 	BaseModel
 	Username     string      `gorm:"size:30;uniqueIndex;not null"`

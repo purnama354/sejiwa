@@ -18,6 +18,7 @@ const (
 	ModerationActionUnban         ModerationActionType = "unban"
 )
 
+// swagger:model
 // ModerationAction represents an action taken by a moderator on content or users
 type ModerationAction struct {
 	BaseModel

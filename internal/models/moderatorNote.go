@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// swagger:model
 type ModeratorNote struct {
 	BaseModel
 	UserID      uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`

@@ -1,5 +1,6 @@
 package models
 
+// swagger:model
 type Category struct {
 	BaseModel
 	Name        string `gorm:"size:50;uniqueIndex;not null"`
