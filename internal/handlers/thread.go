@@ -127,7 +127,7 @@ func (h *ThreadHandler) GetByID(c *gin.Context) {
 }
 
 func (h *ThreadHandler) GetByCategory(c *gin.Context) {
-	categoryID, err := uuid.Parse(c.Param("categoryId"))
+	categoryID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.NewErrorResponse("Invalid category ID format", "INVALID_ID_FORMAT", nil))
 		return

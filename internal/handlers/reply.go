@@ -26,7 +26,7 @@ func NewReplyHandler(replyService services.ReplyService) *ReplyHandler {
 }
 
 func (h *ReplyHandler) Create(c *gin.Context) {
-	threadID, err := uuid.Parse(c.Param("threadId"))
+	threadID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.NewErrorResponse("Invalid thread ID format", "INVALID_ID_FORMAT", nil))
 		return
@@ -93,7 +93,7 @@ func (h *ReplyHandler) Create(c *gin.Context) {
 }
 
 func (h *ReplyHandler) GetByThread(c *gin.Context) {
-	threadID, err := uuid.Parse(c.Param("threadId"))
+	threadID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.NewErrorResponse("Invalid thread ID format", "INVALID_ID_FORMAT", nil))
 		return

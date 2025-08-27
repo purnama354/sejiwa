@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// swagger:enum ContentType
 type ContentType string
 
 const (
@@ -12,6 +13,7 @@ const (
 	ContentTypeUser   ContentType = "user"
 )
 
+// swagger:enum ReportReason
 type ReportReason string
 
 const (
@@ -24,6 +26,7 @@ const (
 	ReasonOther          ReportReason = "other"
 )
 
+// swagger:enum ReportStatus
 type ReportStatus string
 
 const (
@@ -32,6 +35,7 @@ const (
 	ReportStatusResolved ReportStatus = "resolved"
 )
 
+// swagger:enum ReportPriority
 type ReportPriority string
 
 const (

@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// swagger:enum UserRole
 type UserRole string
 
 const (
@@ -17,6 +18,7 @@ const (
 	RoleAdmin     UserRole = "admin"
 )
 
+// swagger:enum UserStatus
 type UserStatus string
 
 const (

@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// swagger:enum ModerationActionType
 type ModerationActionType string
 
 const (
