@@ -3,10 +3,10 @@ import { Navigate, useLocation } from "react-router-dom"
 import { useAuthStore, type AuthState } from "@/store/auth"
 
 function ProtectedRoute({ children }: PropsWithChildren) {
-  const isAuthed = useAuthStore((s: AuthState) => s.isAuthenticated)
+  const accessToken = useAuthStore((s: AuthState) => s.accessToken)
   const location = useLocation()
 
-  if (!isAuthed) {
+  if (!accessToken) {
     return <Navigate to="/login" replace state={{ from: location }} />
   }
 

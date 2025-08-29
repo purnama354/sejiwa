@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { loginSchema, type LoginInput } from "@/services/auth"
 import { useAuthStore, type AuthState } from "@/store/auth"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import {
   Card,
@@ -30,6 +30,7 @@ export default function LoginPage() {
   const location = useLocation() as FromLocation
   const from = location.state?.from?.pathname ?? "/dashboard"
   const login = useAuthStore((s: AuthState) => s.login)
+  const accessToken = useAuthStore((s: AuthState) => s.accessToken)
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm<LoginInput>({
@@ -61,13 +62,27 @@ export default function LoginPage() {
     }
   }
 
+  // If already logged in and visiting /login, redirect
+  useEffect(() => {
+    if (accessToken) {
+      const role = useAuthStore.getState().user?.role as
+        | "user"
+        | "moderator"
+        | "admin"
+        | undefined
+      navigate(defaultRouteForRole(role ?? "user"), { replace: true })
+    }
+  }, [accessToken, navigate])
+
   return (
     <div className="relative min-h-dvh grid place-items-center overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1000px_600px_at_50%-100%,oklch(0.97_0_0),transparent)]" />
-      <Card className="relative w-full max-w-sm border bg-card/70 backdrop-blur">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_700px_at_50%_-20%,oklch(0.98_0.02_160),transparent)]" />
+      <Card className="relative w-full max-w-sm border bg-card/70 shadow-xl backdrop-blur">
         <CardHeader>
-          <CardTitle>Welcome back</CardTitle>
-          <CardDescription>Login to your account</CardDescription>
+          <CardTitle className="text-3xl">Welcome back</CardTitle>
+          <CardDescription className="text-base">
+            Login to your account
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {serverError && (

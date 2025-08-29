@@ -16,6 +16,10 @@ export default function App() {
           <nav className="ml-auto text-sm text-muted-foreground flex items-center gap-3">
             {isAuthed ? (
               <>
+                {user?.role === "admin" && <Link to="/admin">Admin</Link>}
+                {(user?.role === "admin" || user?.role === "moderator") && (
+                  <Link to="/moderation">Moderation</Link>
+                )}
                 <span className="text-foreground">{user?.username}</span>
                 <LogoutButton />
               </>

@@ -1,4 +1,5 @@
 import axios from "axios"
+import storage from "@/lib/storage"
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
@@ -21,3 +22,21 @@ api.interceptors.request.use((config) => {
 })
 
 export default api
+
+// Global 401 handling: clear session and redirect to login
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err?.response?.status === 401) {
+      storage.setAccessToken(null)
+      storage.setRefreshToken(null)
+      storage.setUser(null)
+      setAccessToken(null)
+      // Avoid redirect loops during auth calls
+      if (!location.pathname.startsWith("/login")) {
+        window.location.href = "/login"
+      }
+    }
+    return Promise.reject(err)
+  }
+)

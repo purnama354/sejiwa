@@ -3,6 +3,10 @@ import App from "@/App"
 import LoginPage from "@/pages/auth/login"
 import RegisterPage from "@/pages/auth/register"
 import ProtectedRoute from "@/router/protected-route"
+import RoleRoute from "@/router/role-route"
+import DashboardPage from "@/pages/dashboard"
+import ModerationPage from "@/pages/moderation"
+import AdminPage from "@/pages/admin"
 
 const router = createBrowserRouter([
   {
@@ -16,8 +20,24 @@ const router = createBrowserRouter([
         path: "dashboard",
         element: (
           <ProtectedRoute>
-            <div className="p-6">Welcome to Sejiwa</div>
+            <DashboardPage />
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: "moderation",
+        element: (
+          <RoleRoute allow={["moderator", "admin"]}>
+            <ModerationPage />
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "admin",
+        element: (
+          <RoleRoute allow={["admin"]}>
+            <AdminPage />
+          </RoleRoute>
         ),
       },
     ],
