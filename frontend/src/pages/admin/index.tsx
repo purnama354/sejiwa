@@ -1,29 +1,23 @@
 import { useState } from "react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { createAdmin, createModerator } from "@/services/admin"
-import {
-  listCategories,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-} from "@/services/categories"
-import type {
-  CreateAdminRequest,
-  CreateModeratorRequest,
-  Category,
-} from "@/types/api"
+import type { CreateAdminRequest, CreateModeratorRequest } from "@/types/api"
+import { Shield, UserPlus, Mail, User, Lock } from "lucide-react"
 
 export default function AdminPage() {
   return (
-    <div className="mx-auto max-w-5xl p-6 space-y-8">
+    <div className="space-y-8">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold">Admin Tools</h1>
-        <p className="text-muted-foreground">Manage privileged accounts.</p>
+        <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
+        <p className="text-slate-600 mt-1">
+          Create and manage privileged accounts
+        </p>
       </div>
-      <div className="grid gap-6 md:grid-cols-2">
+
+      <div className="grid gap-6 lg:grid-cols-2">
         <CreateAdminCard />
         <CreateModeratorCard />
-        <CategoriesCard />
       </div>
     </div>
   )
@@ -47,52 +41,103 @@ function CreateAdminCard() {
     return e instanceof Error ? e.message : undefined
   }
   return (
-    <div className="rounded-lg border p-4">
-      <h2 className="font-medium">Create Admin</h2>
-      <div className="mt-3 grid gap-2">
-        <input
-          className="border rounded px-2 py-1"
-          placeholder="Username"
-          value={form.username}
-          onChange={(e) => setForm({ ...form, username: e.target.value })}
-        />
-        <input
-          className="border rounded px-2 py-1"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <input
-          className="border rounded px-2 py-1"
-          placeholder="Full name"
-          value={form.full_name}
-          onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-        />
-        <input
-          className="border rounded px-2 py-1"
-          placeholder="Password"
-          type="password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
-        <button
-          className="mt-2 border rounded px-3 py-1 disabled:opacity-50"
-          disabled={isPending}
-          onClick={async () => {
-            setMessage("")
-            try {
-              await mutateAsync(form)
-              setMessage("Admin created.")
-            } catch (e: unknown) {
-              setMessage(extractMessage(e) || "Failed to create admin")
-            }
-          }}
-        >
-          {isPending ? "Creating…" : "Create"}
-        </button>
-        {message && (
-          <div className="text-sm text-muted-foreground">{message}</div>
-        )}
+    <div className="relative overflow-hidden rounded-2xl bg-white p-8 shadow-xl shadow-blue-500/10 ring-1 ring-slate-200/50 backdrop-blur-sm">
+      {/* Gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50" />
+
+      {/* Content */}
+      <div className="relative">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25">
+            <Shield className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-slate-900">
+              Create Admin
+            </h2>
+            <p className="text-sm text-slate-600">
+              Add a new administrator account
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-white/80 pl-10 pr-4 py-3 text-slate-900 placeholder-slate-500 shadow-sm backdrop-blur-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              placeholder="Username"
+              value={form.username}
+              onChange={(e) => setForm({ ...form, username: e.target.value })}
+            />
+          </div>
+
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-white/80 pl-10 pr-4 py-3 text-slate-900 placeholder-slate-500 shadow-sm backdrop-blur-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              placeholder="Email"
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+          </div>
+
+          <div className="relative">
+            <UserPlus className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-white/80 pl-10 pr-4 py-3 text-slate-900 placeholder-slate-500 shadow-sm backdrop-blur-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              placeholder="Full name"
+              value={form.full_name}
+              onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+            />
+          </div>
+
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-white/80 pl-10 pr-4 py-3 text-slate-900 placeholder-slate-500 shadow-sm backdrop-blur-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              placeholder="Password"
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+            />
+          </div>
+
+          <button
+            className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isPending}
+            onClick={async () => {
+              setMessage("")
+              try {
+                await mutateAsync(form)
+                setMessage("Admin created successfully!")
+                setForm({
+                  username: "",
+                  password: "",
+                  email: "",
+                  full_name: "",
+                })
+              } catch (e: unknown) {
+                setMessage(extractMessage(e) || "Failed to create admin")
+              }
+            }}
+          >
+            {isPending ? "Creating…" : "Create Admin"}
+          </button>
+
+          {message && (
+            <div
+              className={`rounded-xl p-3 text-sm font-medium ${
+                message.includes("successfully")
+                  ? "bg-green-50 text-green-700 border border-green-200"
+                  : "bg-red-50 text-red-700 border border-red-200"
+              }`}
+            >
+              {message}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -119,191 +164,120 @@ function CreateModeratorCard() {
     return e instanceof Error ? e.message : undefined
   }
   return (
-    <div className="rounded-lg border p-4">
-      <h2 className="font-medium">Create Moderator</h2>
-      <div className="mt-3 grid gap-2">
-        <input
-          className="border rounded px-2 py-1"
-          placeholder="Username"
-          value={form.username}
-          onChange={(e) => setForm({ ...form, username: e.target.value })}
-        />
-        <input
-          className="border rounded px-2 py-1"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <input
-          className="border rounded px-2 py-1"
-          placeholder="Full name"
-          value={form.full_name}
-          onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-        />
-        <input
-          className="border rounded px-2 py-1"
-          placeholder="Password"
-          type="password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
-        <div className="text-xs text-muted-foreground">
-          Permissions: {form.permissions?.join(", ")}
+    <div className="relative overflow-hidden rounded-2xl bg-white p-8 shadow-xl shadow-purple-500/10 ring-1 ring-slate-200/50 backdrop-blur-sm">
+      {/* Gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-pink-50/50" />
+
+      {/* Content */}
+      <div className="relative">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg shadow-purple-500/25">
+            <Shield className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-slate-900">
+              Create Moderator
+            </h2>
+            <p className="text-sm text-slate-600">
+              Add a new moderator account
+            </p>
+          </div>
         </div>
-        <button
-          className="mt-2 border rounded px-3 py-1 disabled:opacity-50"
-          disabled={isPending}
-          onClick={async () => {
-            setMessage("")
-            try {
-              await mutateAsync(form)
-              setMessage("Moderator created.")
-            } catch (e: unknown) {
-              setMessage(extractMessage(e) || "Failed to create moderator")
-            }
-          }}
-        >
-          {isPending ? "Creating…" : "Create"}
-        </button>
-        {message && (
-          <div className="text-sm text-muted-foreground">{message}</div>
-        )}
-      </div>
-    </div>
-  )
-}
 
-function CategoriesCard() {
-  const qc = useQueryClient()
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["categories"],
-    queryFn: listCategories,
-  })
-  const [draft, setDraft] = useState<{ name: string; description: string }>({
-    name: "",
-    description: "",
-  })
+        <div className="space-y-4">
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-white/80 pl-10 pr-4 py-3 text-slate-900 placeholder-slate-500 shadow-sm backdrop-blur-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              placeholder="Username"
+              value={form.username}
+              onChange={(e) => setForm({ ...form, username: e.target.value })}
+            />
+          </div>
 
-  const createMut = useMutation({
-    mutationFn: createCategory,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
-  })
-  const updateMut = useMutation({
-    mutationFn: ({
-      id,
-      name,
-      description,
-      is_locked,
-    }: { id: string } & Partial<Category>) =>
-      updateCategory(id, { name, description, is_locked }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
-  })
-  const deleteMut = useMutation({
-    mutationFn: (id: string) => deleteCategory(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
-  })
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-white/80 pl-10 pr-4 py-3 text-slate-900 placeholder-slate-500 shadow-sm backdrop-blur-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              placeholder="Email"
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+          </div>
 
-  return (
-    <div className="rounded-lg border p-4 md:col-span-2">
-      <h2 className="font-medium">Manage Categories</h2>
-      <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
-        <input
-          className="border rounded px-2 py-1"
-          placeholder="Name"
-          value={draft.name}
-          onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-        />
-        <input
-          className="border rounded px-2 py-1"
-          placeholder="Description"
-          value={draft.description}
-          onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-        />
-        <button
-          className="border rounded px-3 py-1 disabled:opacity-50"
-          disabled={createMut.isPending || !draft.name.trim()}
-          onClick={() =>
-            createMut.mutate({
-              name: draft.name.trim(),
-              description: draft.description.trim() || undefined,
-            })
-          }
-        >
-          {createMut.isPending ? "Adding…" : "Add"}
-        </button>
-      </div>
-      <div className="mt-4 divide-y">
-        {isLoading && <div>Loading…</div>}
-        {isError && (
-          <div className="text-red-600">Failed to load categories</div>
-        )}
-        {data?.map((c) => (
-          <CategoryRow
-            key={c.id}
-            cat={c}
-            onSave={(payload) => updateMut.mutate({ id: c.id, ...payload })}
-            onDelete={() => deleteMut.mutate(c.id)}
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
+          <div className="relative">
+            <UserPlus className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-white/80 pl-10 pr-4 py-3 text-slate-900 placeholder-slate-500 shadow-sm backdrop-blur-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              placeholder="Full name"
+              value={form.full_name}
+              onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+            />
+          </div>
 
-function CategoryRow({
-  cat,
-  onSave,
-  onDelete,
-}: {
-  cat: Category
-  onSave: (p: Partial<Category>) => void
-  onDelete: () => void
-}) {
-  const [edit, setEdit] = useState<Partial<Category>>({
-    name: cat.name,
-    description: cat.description,
-    is_locked: cat.is_locked,
-  })
-  const dirty =
-    edit.name !== cat.name ||
-    edit.description !== cat.description ||
-    edit.is_locked !== cat.is_locked
-  return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 py-3">
-      <div className="flex-1 min-w-0">
-        <div className="text-sm text-muted-foreground">{cat.slug}</div>
-        <div className="flex gap-2 mt-1">
-          <input
-            className="border rounded px-2 py-1 flex-1"
-            value={edit.name ?? ""}
-            onChange={(e) => setEdit({ ...edit, name: e.target.value })}
-          />
-          <input
-            className="border rounded px-2 py-1 flex-[2]"
-            value={edit.description ?? ""}
-            onChange={(e) => setEdit({ ...edit, description: e.target.value })}
-          />
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-white/80 pl-10 pr-4 py-3 text-slate-900 placeholder-slate-500 shadow-sm backdrop-blur-sm transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+              placeholder="Password"
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+            />
+          </div>
+
+          <div className="rounded-xl bg-slate-50 p-4 border border-slate-200">
+            <div className="text-sm font-medium text-slate-700 mb-2">
+              Default Permissions:
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {form.permissions?.map((permission) => (
+                <span
+                  key={permission}
+                  className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-800"
+                >
+                  {permission.replace("_", " ")}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <button
+            className="w-full rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 font-semibold text-white shadow-lg shadow-purple-500/25 transition-all hover:from-purple-700 hover:to-pink-700 hover:shadow-xl hover:shadow-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isPending}
+            onClick={async () => {
+              setMessage("")
+              try {
+                await mutateAsync(form)
+                setMessage("Moderator created successfully!")
+                setForm({
+                  username: "",
+                  password: "",
+                  email: "",
+                  full_name: "",
+                  permissions: ["manage_reports", "ban_users"],
+                })
+              } catch (e: unknown) {
+                setMessage(extractMessage(e) || "Failed to create moderator")
+              }
+            }}
+          >
+            {isPending ? "Creating…" : "Create Moderator"}
+          </button>
+
+          {message && (
+            <div
+              className={`rounded-xl p-3 text-sm font-medium ${
+                message.includes("successfully")
+                  ? "bg-green-50 text-green-700 border border-green-200"
+                  : "bg-red-50 text-red-700 border border-red-200"
+              }`}
+            >
+              {message}
+            </div>
+          )}
         </div>
-      </div>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={!!edit.is_locked}
-          onChange={(e) => setEdit({ ...edit, is_locked: e.target.checked })}
-        />{" "}
-        Locked
-      </label>
-      <div className="ml-auto flex items-center gap-2">
-        <button
-          className="border rounded px-3 py-1 disabled:opacity-50"
-          disabled={!dirty}
-          onClick={() => onSave(edit)}
-        >
-          Save
-        </button>
-        <button className="border rounded px-3 py-1" onClick={onDelete}>
-          Delete
-        </button>
       </div>
     </div>
   )
