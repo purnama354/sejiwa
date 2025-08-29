@@ -1,5 +1,9 @@
 import api from "@/lib/api"
-import type { Category, CreateCategoryRequest, UpdateCategoryRequest } from "@/types/api"
+import type {
+  Category,
+  CreateCategoryRequest,
+  UpdateCategoryRequest,
+} from "@/types/api"
 
 export async function listCategories() {
   const res = await api.get<Category[]>(`/categories`)
@@ -17,6 +21,8 @@ export async function updateCategory(id: string, body: UpdateCategoryRequest) {
 }
 
 export async function deleteCategory(id: string) {
-  const res = await api.delete<{ success: boolean; message: string }>(`/categories/${id}`)
+  const res = await api.delete<{ success: boolean; message: string }>(
+    `/categories/${id}`
+  )
   return res.data
 }
