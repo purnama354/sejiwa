@@ -2,9 +2,8 @@ import * as React from "react"
 import { Controller, FormProvider, useFormContext } from "react-hook-form"
 import { cn } from "@/lib/utils"
 
-export function Form(props: React.ComponentProps<typeof FormProvider>) {
-  return <FormProvider {...props} />
-}
+// Preserve react-hook-form generics by re-exporting FormProvider
+export const Form = FormProvider
 
 import type { ControllerProps, FieldValues, Path } from "react-hook-form"
 export function FormField<TFieldValues extends FieldValues>(
