@@ -79,6 +79,9 @@ func main() {
 
 	router := gin.Default()
 
+	// Enable CORS for frontend dev origin
+	router.Use(middleware.CORSMiddleware())
+
 	// Rate limit: 5 requests per minute per IP for auth endpoints
 	authRate := limiter.Rate{
 		Period: 1 * time.Minute,

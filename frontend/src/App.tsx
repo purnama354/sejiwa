@@ -1,35 +1,41 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Outlet, Link } from "react-router-dom"
+import { useAuthStore, type AuthState } from "@/store/auth"
+import LogoutButton from "@/components/logout-button"
+import "./App.css"
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
+  const isAuthed = useAuthStore((s: AuthState) => s.isAuthenticated)
+  const user = useAuthStore((s: AuthState) => s.user)
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="min-h-dvh flex flex-col">
+      <header className="border-b bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/40">
+        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center gap-4">
+          <Link to="/" className="font-semibold">
+            Sejiwa
+          </Link>
+          <nav className="ml-auto text-sm text-muted-foreground flex items-center gap-3">
+            {isAuthed ? (
+              <>
+                <span className="text-foreground">{user?.username}</span>
+                <LogoutButton />
+              </>
+            ) : (
+              <>
+                <Link to="/login">Login</Link>
+                <Link to="/register">Register</Link>
+              </>
+            )}
+          </nav>
+        </div>
+      </header>
+      <main className="flex-1">
+        <Outlet />
+      </main>
+      <footer className="border-t text-xs text-muted-foreground">
+        <div className="mx-auto max-w-6xl px-4 py-4">
+          © {new Date().getFullYear()} Sejiwa
+        </div>
+      </footer>
+    </div>
   )
 }
-
-export default App
