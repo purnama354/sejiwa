@@ -21,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { defaultRouteForRole } from "@/lib/auth"
 
 type FromLocation = { state?: { from?: { pathname?: string } } }
 
@@ -44,7 +45,15 @@ export default function LoginPage() {
     setServerError(null)
     try {
       await login(data.username, data.password)
-      navigate(from, { replace: true })
+      // If user came with a target, go there, otherwise role-based
+      const stateTarget = from !== "/dashboard" ? from : undefined
+      if (stateTarget) return navigate(stateTarget, { replace: true })
+      const role = useAuthStore.getState().user?.role as
+        | "user"
+        | "moderator"
+        | "admin"
+        | undefined
+      navigate(defaultRouteForRole(role ?? "user"), { replace: true })
     } catch (e: unknown) {
       const err = e as { response?: { data?: { message?: string } } }
       const msg = err?.response?.data?.message || "Login failed"

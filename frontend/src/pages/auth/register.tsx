@@ -21,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { defaultRouteForRole } from "@/lib/auth"
 
 export default function RegisterPage() {
   const navigate = useNavigate()
@@ -40,7 +41,12 @@ export default function RegisterPage() {
     setServerError(null)
     try {
       await registerUser(data.username, data.password)
-      navigate("/dashboard", { replace: true })
+      const role = useAuthStore.getState().user?.role as
+        | "user"
+        | "moderator"
+        | "admin"
+        | undefined
+      navigate(defaultRouteForRole(role ?? "user"), { replace: true })
     } catch (e: unknown) {
       const err = e as { response?: { data?: { message?: string } } }
       const msg = err?.response?.data?.message || "Registration failed"
