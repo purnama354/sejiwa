@@ -28,6 +28,14 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err?.response?.status === 401) {
+      // If already on auth pages, just surface error
+      if (
+        typeof location !== "undefined" &&
+        (location.pathname.startsWith("/login") ||
+          location.pathname.startsWith("/register"))
+      ) {
+        return Promise.reject(err)
+      }
       storage.setAccessToken(null)
       storage.setRefreshToken(null)
       storage.setUser(null)

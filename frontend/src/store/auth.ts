@@ -27,18 +27,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     storage.setRefreshToken(auth.refresh_token)
     storage.setUser(auth.user)
     setAccessToken(auth.access_token)
-    set({
+    set((state) => ({
+      ...state,
       accessToken: auth.access_token,
       refreshToken: auth.refresh_token,
       user: auth.user,
-    })
+    }))
   },
   clearSession: () => {
     storage.setAccessToken(null)
     storage.setRefreshToken(null)
     storage.setUser(null)
     setAccessToken(null)
-    set({ accessToken: null, refreshToken: null, user: null })
+    set((state) => ({
+      ...state,
+      accessToken: null,
+      refreshToken: null,
+      user: null,
+    }))
   },
   login: async (username, password) => {
     const res = await apiLogin({ username, password })

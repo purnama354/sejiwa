@@ -4,7 +4,7 @@ import LogoutButton from "@/components/logout-button"
 import "./App.css"
 
 export default function App() {
-  const isAuthed = useAuthStore((s: AuthState) => s.isAuthenticated)
+  const isAuthed = useAuthStore((s: AuthState) => Boolean(s.accessToken))
   const user = useAuthStore((s: AuthState) => s.user)
   return (
     <div className="min-h-dvh flex flex-col">
