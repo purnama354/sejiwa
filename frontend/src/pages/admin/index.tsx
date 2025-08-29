@@ -1,7 +1,8 @@
 import { useState } from "react"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createAdmin, createModerator } from "@/services/admin"
-import type { CreateAdminRequest, CreateModeratorRequest } from "@/types/api"
+import { listCategories, createCategory, updateCategory, deleteCategory } from "@/services/categories"
+import type { CreateAdminRequest, CreateModeratorRequest, Category } from "@/types/api"
 
 export default function AdminPage() {
   return (
@@ -13,6 +14,7 @@ export default function AdminPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <CreateAdminCard />
         <CreateModeratorCard />
+        <CategoriesCard />
       </div>
     </div>
   )
@@ -157,6 +159,67 @@ function CreateModeratorCard() {
         {message && (
           <div className="text-sm text-muted-foreground">{message}</div>
         )}
+      </div>
+    </div>
+  )
+}
+
+function CategoriesCard() {
+  const qc = useQueryClient()
+  const { data, isLoading, isError } = useQuery({ queryKey: ["categories"], queryFn: listCategories })
+  const [draft, setDraft] = useState<{ name: string; description: string }>({ name: "", description: "" })
+
+  const createMut = useMutation({
+    mutationFn: createCategory,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
+  })
+  const updateMut = useMutation({
+    mutationFn: ({ id, name, description, is_locked }: { id: string } & Partial<Category>) =>
+      updateCategory(id, { name, description, is_locked }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
+  })
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => deleteCategory(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
+  })
+
+  return (
+    <div className="rounded-lg border p-4 md:col-span-2">
+      <h2 className="font-medium">Manage Categories</h2>
+      <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
+        <input className="border rounded px-2 py-1" placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+        <input className="border rounded px-2 py-1" placeholder="Description" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
+        <button className="border rounded px-3 py-1 disabled:opacity-50" disabled={createMut.isPending || !draft.name.trim()} onClick={() => createMut.mutate({ name: draft.name.trim(), description: draft.description.trim() || undefined })}>
+          {createMut.isPending ? "Adding…" : "Add"}
+        </button>
+      </div>
+      <div className="mt-4 divide-y">
+        {isLoading && <div>Loading…</div>}
+        {isError && <div className="text-red-600">Failed to load categories</div>}
+        {data?.map((c) => (
+          <CategoryRow key={c.id} cat={c} onSave={(payload) => updateMut.mutate({ id: c.id, ...payload })} onDelete={() => deleteMut.mutate(c.id)} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CategoryRow({ cat, onSave, onDelete }: { cat: Category; onSave: (p: Partial<Category>) => void; onDelete: () => void }) {
+  const [edit, setEdit] = useState<Partial<Category>>({ name: cat.name, description: cat.description, is_locked: cat.is_locked })
+  const dirty = edit.name !== cat.name || edit.description !== cat.description || edit.is_locked !== cat.is_locked
+  return (
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 py-3">
+      <div className="flex-1 min-w-0">
+        <div className="text-sm text-muted-foreground">{cat.slug}</div>
+        <div className="flex gap-2 mt-1">
+          <input className="border rounded px-2 py-1 flex-1" value={edit.name ?? ""} onChange={(e) => setEdit({ ...edit, name: e.target.value })} />
+          <input className="border rounded px-2 py-1 flex-[2]" value={edit.description ?? ""} onChange={(e) => setEdit({ ...edit, description: e.target.value })} />
+        </div>
+      </div>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!edit.is_locked} onChange={(e) => setEdit({ ...edit, is_locked: e.target.checked })} /> Locked</label>
+      <div className="ml-auto flex items-center gap-2">
+        <button className="border rounded px-3 py-1 disabled:opacity-50" disabled={!dirty} onClick={() => onSave(edit)}>Save</button>
+        <button className="border rounded px-3 py-1" onClick={onDelete}>Delete</button>
       </div>
     </div>
   )

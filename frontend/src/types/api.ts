@@ -145,3 +145,26 @@ export type ModeratorProfile = {
   last_active_at: string
   created_by?: string
 }
+
+// Category DTOs
+export type Category = {
+  id: string
+  name: string
+  slug: string
+  description: string
+  thread_count: number
+  is_locked: boolean
+  created_at: string | Date
+  updated_at: string | Date
+}
+
+export type CreateCategoryRequest = {
+  name: string
+  description?: string
+}
+
+export type UpdateCategoryRequest = {
+  name?: string
+  description?: string
+  is_locked?: boolean
+}
