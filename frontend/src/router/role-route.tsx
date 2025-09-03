@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from "react"
 import { Navigate, useLocation } from "react-router-dom"
 import { useAuthStore, type AuthState } from "@/store/auth"
+import { defaultRouteForRole } from "@/lib/auth"
 
 type Allowed = "user" | "moderator" | "admin"
 
@@ -16,12 +17,12 @@ export default function RoleRoute({
     return <Navigate to="/login" replace state={{ from: location }} />
 
   // If user isn't in the allowed roles, redirect to dashboard
-  if (!role || !allow.includes(role as Allowed))
-    return <Navigate to="/dashboard" replace />
+  if (!role || !allow.includes(role as Allowed)) {
+    const target = role ? defaultRouteForRole(role as Allowed) : "/dashboard"
+    return <Navigate to={target} replace />
+  }
 
-  // Special handling for moderation section
-  // If we're in the moderation path and user is admin, just let them through
-  // Admins should be able to access all moderator functionalities
+  // No special-casing. Use explicit allowlists per route.
 
   return children
 }

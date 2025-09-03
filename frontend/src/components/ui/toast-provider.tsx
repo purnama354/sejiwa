@@ -1,10 +1,12 @@
 import React, { useState, useCallback } from "react"
-import { Toast, ToastProps, ToastVariant } from "./toast"
+import { Toast } from "./toast"
+import type { ToastProps, ToastVariant } from "./toast"
 import { createPortal } from "react-dom"
 import { ToastContext } from "./toast-context"
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = useState<ToastProps[]>([])
+  type ToastItem = ToastProps & { exiting?: boolean }
+  const [toasts, setToasts] = useState<ToastItem[]>([])
 
   const removeToast = useCallback((id: string) => {
     setToasts((prevToasts) =>
@@ -60,7 +62,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {typeof document !== "undefined" &&
         createPortal(
           <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
-            {toasts.map((toast) => (
+            {toasts.map((toast: ToastItem) => (
               <div
                 key={toast.id}
                 className={toast.exiting ? "toast-exit" : "toast-enter"}

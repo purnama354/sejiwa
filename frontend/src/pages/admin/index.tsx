@@ -43,26 +43,24 @@ export default function AdminPage() {
     {
       id: "1",
       username: "testuser",
-      email: "test@example.com",
-      full_name: "Test User",
       role: "user",
       status: "active",
       thread_count: 5,
       reply_count: 10,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  last_active_at: new Date().toISOString()
     },
     {
       id: "2",
       username: "suspendeduser",
-      email: "suspended@example.com",
-      full_name: "Suspended User",
       role: "user",
       status: "suspended",
       thread_count: 3,
       reply_count: 7,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  last_active_at: new Date().toISOString()
     },
   ]
 

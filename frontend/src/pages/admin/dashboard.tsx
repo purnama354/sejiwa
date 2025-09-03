@@ -186,17 +186,7 @@ export default function AdminDashboard() {
                   </span>
                 </div>
               </button>
-              <button
-                className="w-full text-left p-3 rounded-lg hover:bg-slate-50/80 transition-colors border border-slate-200/60"
-                onClick={() => navigate("/moderation/reports")}
-              >
-                <div className="flex items-center gap-3">
-                  <MessageSquare className="w-5 h-5 text-slate-400" />
-                  <span className="font-medium text-slate-700">
-                    Review Reports
-                  </span>
-                </div>
-              </button>
+              {/* Removed link to moderation area to prevent admins from using moderator UI */}
             </div>
           </div>
         </div>

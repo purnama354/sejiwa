@@ -1,5 +1,5 @@
 import { createContext } from "react"
-import { ToastOptions } from "./use-toast"
+import type { ToastOptions } from "./use-toast"
 
 interface ToastContextValue {
   toast: (props: ToastOptions) => string

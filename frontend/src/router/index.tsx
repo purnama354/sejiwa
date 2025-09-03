@@ -1,8 +1,8 @@
 import { createBrowserRouter, Navigate } from "react-router-dom"
 import { lazy } from "react"
 import App from "@/App"
-import ProtectedRoute from "@/router/protected-route"
 import RoleRoute from "@/router/role-route"
+import PublicOnly from "@/router/public-only"
 import Fallback from "@/router/fallback"
 const LoginPage = lazy(() => import("@/pages/auth/login"))
 const RegisterPage = lazy(() => import("@/pages/auth/register"))
@@ -25,33 +25,37 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: (
-          <Fallback>
-            <LoginPage />
-          </Fallback>
+          <PublicOnly>
+            <Fallback>
+              <LoginPage />
+            </Fallback>
+          </PublicOnly>
         ),
       },
       {
         path: "register",
         element: (
-          <Fallback>
-            <RegisterPage />
-          </Fallback>
+          <PublicOnly>
+            <Fallback>
+              <RegisterPage />
+            </Fallback>
+          </PublicOnly>
         ),
       },
       {
         path: "dashboard",
         element: (
-          <ProtectedRoute>
+          <RoleRoute allow={["user"]}>
             <Fallback>
               <DashboardPage />
             </Fallback>
-          </ProtectedRoute>
+          </RoleRoute>
         ),
       },
       {
         path: "moderation",
         element: (
-          <RoleRoute allow={["moderator", "admin"]}>
+          <RoleRoute allow={["moderator"]}>
             <Fallback>
               <ModeratorLayout />
             </Fallback>
