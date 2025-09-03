@@ -21,9 +21,14 @@ export default function RoleRoute({
   // If user isn't in the allowed roles, redirect to dashboard
   if (!role || !allow.includes(role as Allowed)) {
     // Compute redirect target
-    const target = computeRedirect(role as Allowed | undefined, allow) ?? "/dashboard"
+    const target =
+      computeRedirect(role as Allowed | undefined, allow) ?? "/dashboard"
     // Notify user
-    toast({ title: "Not authorized", description: "You don't have access to that section.", variant: "warning" })
+    toast({
+      title: "Not authorized",
+      description: "You don't have access to that section.",
+      variant: "warning",
+    })
     return <Navigate to={target} replace />
   }
 

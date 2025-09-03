@@ -2,14 +2,22 @@ import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { ConfirmationModal } from "@/components/ui/modal"
 import type { UserProfile } from "@/types/api"
-import { banUser, unbanUser, promoteToAdmin, promoteToModerator } from "@/services/users"
+import {
+  banUser,
+  unbanUser,
+  promoteToAdmin,
+  promoteToModerator,
+} from "@/services/users"
 import { useToast } from "@/components/ui/use-toast"
 
 function getErrorMessage(err: unknown): string {
   if (typeof err === "string") return err
   if (err instanceof Error) return err.message
   if (err && typeof err === "object") {
-    const e = err as { message?: unknown; response?: { data?: { message?: unknown } } }
+    const e = err as {
+      message?: unknown
+      response?: { data?: { message?: unknown } }
+    }
     const apiMsg = e.response?.data?.message
     if (typeof apiMsg === "string") return apiMsg
     if (typeof e.message === "string") return e.message
@@ -43,7 +51,10 @@ export function BanUserModal({
       await banUser(userId, { reason, duration })
     },
     onSuccess: async () => {
-      toast({ title: "User banned", description: `${user?.username} has been banned.` })
+      toast({
+        title: "User banned",
+        description: `${user?.username} has been banned.`,
+      })
       await qc.invalidateQueries({ queryKey: ["users"] })
       setBanReason("")
       setBanDuration(undefined)
@@ -51,7 +62,11 @@ export function BanUserModal({
     },
     onError: (err: unknown) => {
       const message = getErrorMessage(err)
-      toast({ title: "Failed to ban user", description: message, variant: "error" })
+      toast({
+        title: "Failed to ban user",
+        description: message,
+        variant: "error",
+      })
     },
   })
 
@@ -130,13 +145,20 @@ export function UnbanUserModal({
       await unbanUser(userId)
     },
     onSuccess: async () => {
-      toast({ title: "User unbanned", description: `${user?.username} has been unbanned.` })
+      toast({
+        title: "User unbanned",
+        description: `${user?.username} has been unbanned.`,
+      })
       await qc.invalidateQueries({ queryKey: ["users"] })
       onClose()
     },
     onError: (err: unknown) => {
       const message = getErrorMessage(err)
-      toast({ title: "Failed to unban user", description: message, variant: "error" })
+      toast({
+        title: "Failed to unban user",
+        description: message,
+        variant: "error",
+      })
     },
   })
 
@@ -189,13 +211,20 @@ export function PromoteUserModal({
       }
     },
     onSuccess: async (_data, variables) => {
-      toast({ title: "User promoted", description: `${user?.username} is now a ${variables.toRole}.` })
+      toast({
+        title: "User promoted",
+        description: `${user?.username} is now a ${variables.toRole}.`,
+      })
       await qc.invalidateQueries({ queryKey: ["users"] })
       onClose()
     },
     onError: (err: unknown) => {
       const message = getErrorMessage(err)
-      toast({ title: "Failed to promote user", description: message, variant: "error" })
+      toast({
+        title: "Failed to promote user",
+        description: message,
+        variant: "error",
+      })
     },
   })
 

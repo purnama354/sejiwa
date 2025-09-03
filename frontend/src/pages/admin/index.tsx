@@ -56,19 +56,35 @@ export default function AdminPage() {
   }, [active, status, q])
 
   // Fetch users
-  const { data: userData, isLoading, isRefetching, error } = useQuery({
-    queryKey: ["users", roleFilter || "", status || "", page, pageSize, q || ""],
+  const {
+    data: userData,
+    isLoading,
+    isRefetching,
+    error,
+  } = useQuery({
+    queryKey: [
+      "users",
+      roleFilter || "",
+      status || "",
+      page,
+      pageSize,
+      q || "",
+    ],
     queryFn: () => {
-      console.log("Fetching users with params:", { 
-        role: roleFilter, 
-        status: status || undefined, 
-        page, 
-        pageSize, 
-        query: q || undefined 
+      console.log("Fetching users with params:", {
+        role: roleFilter,
+        status: status || undefined,
+        page,
+        pageSize,
+        query: q || undefined,
       })
       return getUsers({
         role: roleFilter as "user" | "moderator" | "admin" | undefined,
-        status: (status || undefined) as "active" | "inactive" | "suspended" | undefined,
+        status: (status || undefined) as
+          | "active"
+          | "inactive"
+          | "suspended"
+          | undefined,
         page,
         pageSize,
         query: q || undefined,
@@ -78,8 +94,8 @@ export default function AdminPage() {
     staleTime: 30000,
     retry: 3,
   })
-  
-  console.log("API response:", { userData, error })
+
+  // console.log("API response:", { userData, error })
   const items = userData?.items ?? []
   const total = userData?.total ?? 0
   const totalPages = userData?.totalPages ?? 1
@@ -172,7 +188,9 @@ export default function AdminPage() {
             {/* List */}
             <div className="rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-4">
               {isLoading ? (
-                <div className="text-center py-12 text-slate-600">Loading users…</div>
+                <div className="text-center py-12 text-slate-600">
+                  Loading users…
+                </div>
               ) : items.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-slate-600">No {active} found</div>
@@ -370,7 +388,7 @@ function CreateAdminCard() {
   })
   const [message, setMessage] = useState<string>("")
   const queryClient = useQueryClient()
-  const { mutateAsync, isPending } = useMutation({ 
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: createAdmin,
     onSuccess: () => {
       // Invalidate users query to refresh the list after creating an admin
