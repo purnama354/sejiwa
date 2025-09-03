@@ -10,8 +10,10 @@ import {
   Folder,
   Activity,
 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 export default function AdminDashboard() {
+  const navigate = useNavigate()
   const { data: stats } = useQuery({
     queryKey: ["moderation-stats"],
     queryFn: () => getModerationStats(),
@@ -162,15 +164,21 @@ export default function AdminDashboard() {
               </h2>
             </div>
             <div className="space-y-3">
-              <button className="w-full text-left p-3 rounded-lg hover:bg-slate-50/80 transition-colors border border-slate-200/60">
+              <button
+                className="w-full text-left p-3 rounded-lg hover:bg-slate-50/80 transition-colors border border-slate-200/60"
+                onClick={() => navigate("/admin/users")}
+              >
                 <div className="flex items-center gap-3">
                   <Users className="w-5 h-5 text-slate-400" />
                   <span className="font-medium text-slate-700">
-                    Create Moderator
+                    Manage Users
                   </span>
                 </div>
               </button>
-              <button className="w-full text-left p-3 rounded-lg hover:bg-slate-50/80 transition-colors border border-slate-200/60">
+              <button
+                className="w-full text-left p-3 rounded-lg hover:bg-slate-50/80 transition-colors border border-slate-200/60"
+                onClick={() => navigate("/admin/categories")}
+              >
                 <div className="flex items-center gap-3">
                   <Folder className="w-5 h-5 text-slate-400" />
                   <span className="font-medium text-slate-700">
@@ -178,7 +186,10 @@ export default function AdminDashboard() {
                   </span>
                 </div>
               </button>
-              <button className="w-full text-left p-3 rounded-lg hover:bg-slate-50/80 transition-colors border border-slate-200/60">
+              <button
+                className="w-full text-left p-3 rounded-lg hover:bg-slate-50/80 transition-colors border border-slate-200/60"
+                onClick={() => navigate("/moderation/reports")}
+              >
                 <div className="flex items-center gap-3">
                   <MessageSquare className="w-5 h-5 text-slate-400" />
                   <span className="font-medium text-slate-700">

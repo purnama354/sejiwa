@@ -50,7 +50,7 @@ export default function AdminCategories() {
     if (newCategory.name.trim()) {
       createMut.mutate({
         name: newCategory.name.trim(),
-        description: newCategory.description.trim() || undefined,
+        description: newCategory.description?.trim() || undefined,
       })
     }
   }

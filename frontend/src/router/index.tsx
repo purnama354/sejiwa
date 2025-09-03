@@ -10,6 +10,9 @@ import AdminLayout from "@/pages/admin/layout"
 import AdminDashboard from "@/pages/admin/dashboard"
 import AdminPage from "@/pages/admin"
 import AdminCategories from "@/pages/admin/categories"
+import ModeratorLayout from "@/pages/moderation/layout"
+import ModeratorDashboard from "@/pages/moderation/dashboard"
+import AdminSettings from "@/pages/admin/settings"
 
 const router = createBrowserRouter([
   {
@@ -31,9 +34,14 @@ const router = createBrowserRouter([
         path: "moderation",
         element: (
           <RoleRoute allow={["moderator", "admin"]}>
-            <ModerationPage />
+            <ModeratorLayout />
           </RoleRoute>
         ),
+        children: [
+          { index: true, element: <Navigate to="dashboard" replace /> },
+          { path: "dashboard", element: <ModeratorDashboard /> },
+          { path: "reports", element: <ModerationPage /> },
+        ],
       },
       {
         path: "admin",
@@ -47,6 +55,7 @@ const router = createBrowserRouter([
           { path: "dashboard", element: <AdminDashboard /> },
           { path: "users", element: <AdminPage /> },
           { path: "categories", element: <AdminCategories /> },
+          { path: "settings", element: <AdminSettings /> },
         ],
       },
     ],
