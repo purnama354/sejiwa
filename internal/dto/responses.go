@@ -77,6 +77,15 @@ type ReplyListResponse struct {
 	TotalPages int             `json:"total_pages"`
 }
 
+// UserListResponse for admin user listing (camelCase to match frontend)
+type UserListResponse struct {
+	Items      []UserProfile `json:"items"`
+	Total      int64         `json:"total"`
+	Page       int           `json:"page"`
+	PageSize   int           `json:"pageSize"`
+	TotalPages int           `json:"totalPages"`
+}
+
 // NewErrorResponse creates a new error response
 func NewErrorResponse(error, code string, details []ValidationError) ErrorResponse {
 	return ErrorResponse{

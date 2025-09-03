@@ -69,7 +69,7 @@ func main() {
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
-	adminHandler := handlers.NewAdminHandler(adminService)
+	adminHandler := handlers.NewAdminHandler(adminService, userService)
 	userHandler := handlers.NewUserHandler(userService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	threadHandler := handlers.NewThreadHandler(threadService)

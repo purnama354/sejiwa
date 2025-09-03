@@ -117,6 +117,9 @@ func RegisterRoutes(
 				adminAuthRoutes.POST("/create-moderator", adminHandler.CreateModerator)
 			}
 
+			// Users listing for admin panel
+			adminRoutes.GET("/users", adminHandler.ListUsers)
+
 			// Test endpoint for admin access
 			adminRoutes.GET("/test", func(c *gin.Context) {
 				userID, _ := c.Get(middleware.ContextUserIDKey)

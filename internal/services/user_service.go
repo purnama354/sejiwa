@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/purnama354/sejiwa-api/internal/dto"
+	"github.com/purnama354/sejiwa-api/internal/models"
 	"github.com/purnama354/sejiwa-api/internal/repository"
 
 	"github.com/google/uuid"
@@ -19,6 +20,7 @@ var (
 type UserService interface {
 	GetUserProfile(userID uuid.UUID) (*dto.UserProfile, error)
 	UpdateUserProfile(userID uuid.UUID, req dto.UpdateUserRequest) (*dto.UserProfile, error)
+	ListUsers(role *models.UserRole, status *models.UserStatus, query *string, offset, limit int) ([]models.User, int64, error)
 }
 
 type userService struct {
@@ -98,4 +100,9 @@ func (s *userService) UpdateUserProfile(userID uuid.UUID, req dto.UpdateUserRequ
 
 	// Return updated profile
 	return s.GetUserProfile(userID)
+}
+
+// ListUsers returns users with optional filters and pagination
+func (s *userService) ListUsers(role *models.UserRole, status *models.UserStatus, query *string, offset, limit int) ([]models.User, int64, error) {
+	return s.userRepo.List(role, status, query, offset, limit)
 }

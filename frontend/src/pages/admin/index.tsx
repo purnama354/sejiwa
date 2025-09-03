@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createAdmin, createModerator } from "@/services/admin"
 import { getUsers } from "@/services/users"
 import type {
@@ -56,17 +56,30 @@ export default function AdminPage() {
   }, [active, status, q])
 
   // Fetch users
-  const { data: userData, isLoading, isRefetching } = useQuery({
+  const { data: userData, isLoading, isRefetching, error } = useQuery({
     queryKey: ["users", roleFilter || "", status || "", page, pageSize, q || ""],
-    queryFn: () =>
-      getUsers({
+    queryFn: () => {
+      console.log("Fetching users with params:", { 
+        role: roleFilter, 
+        status: status || undefined, 
+        page, 
+        pageSize, 
+        query: q || undefined 
+      })
+      return getUsers({
         role: roleFilter as "user" | "moderator" | "admin" | undefined,
         status: (status || undefined) as "active" | "inactive" | "suspended" | undefined,
         page,
         pageSize,
         query: q || undefined,
-      }),
+      })
+    },
+    // Use fixed values instead of referencing items which isn't defined yet
+    staleTime: 30000,
+    retry: 3,
   })
+  
+  console.log("API response:", { userData, error })
   const items = userData?.items ?? []
   const total = userData?.total ?? 0
   const totalPages = userData?.totalPages ?? 1
@@ -356,7 +369,14 @@ function CreateAdminCard() {
     full_name: "",
   })
   const [message, setMessage] = useState<string>("")
-  const { mutateAsync, isPending } = useMutation({ mutationFn: createAdmin })
+  const queryClient = useQueryClient()
+  const { mutateAsync, isPending } = useMutation({ 
+    mutationFn: createAdmin,
+    onSuccess: () => {
+      // Invalidate users query to refresh the list after creating an admin
+      queryClient.invalidateQueries({ queryKey: ["users"] })
+    },
+  })
   function extractMessage(e: unknown) {
     type AxiosErr = { response?: { data?: { message?: string } } }
     if (e && typeof e === "object" && "response" in e) {
@@ -477,8 +497,13 @@ function CreateModeratorCard() {
     permissions: ["manage_reports", "ban_users"],
   })
   const [message, setMessage] = useState<string>("")
+  const queryClient = useQueryClient()
   const { mutateAsync, isPending } = useMutation({
     mutationFn: createModerator,
+    onSuccess: () => {
+      // Invalidate users query to refresh the list after creating a moderator
+      queryClient.invalidateQueries({ queryKey: ["users"] })
+    },
   })
   function extractMessage(e: unknown) {
     type AxiosErr = { response?: { data?: { message?: string } } }

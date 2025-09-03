@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/purnama354/sejiwa-api/internal/dto"
+	"github.com/purnama354/sejiwa-api/internal/models"
 	"github.com/purnama354/sejiwa-api/internal/middleware"
 	"github.com/purnama354/sejiwa-api/internal/services"
 	"github.com/purnama354/sejiwa-api/internal/utils"
@@ -16,10 +17,11 @@ import (
 
 type AdminHandler struct {
 	adminService services.AdminService
+	userService  services.UserService
 }
 
-func NewAdminHandler(adminService services.AdminService) *AdminHandler {
-	return &AdminHandler{adminService: adminService}
+func NewAdminHandler(adminService services.AdminService, userService services.UserService) *AdminHandler {
+	return &AdminHandler{adminService: adminService, userService: userService}
 }
 
 func (h *AdminHandler) CreateAdmin(c *gin.Context) {
@@ -156,4 +158,70 @@ func (h *AdminHandler) CreateModerator(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, moderatorProfile)
+}
+
+// ListUsers returns paginated users for admin panel with optional filters
+func (h *AdminHandler) ListUsers(c *gin.Context) {
+	// Parse query params
+	role := c.Query("role")
+	status := c.Query("status")
+	q := c.Query("query")
+	page, limit := utils.GetPaginationParams(c)
+	if limit <= 0 {
+		limit = 10
+	}
+	offset := (page - 1) * limit
+
+	// Map to model enums
+	var rolePtr *models.UserRole
+	var statusPtr *models.UserStatus
+	if role == string(models.RoleUser) || role == string(models.RoleModerator) || role == string(models.RoleAdmin) {
+		r := models.UserRole(role)
+		rolePtr = &r
+	}
+	if status == string(models.StatusActive) || status == string(models.StatusInactive) || status == string(models.StatusSuspended) {
+		s := models.UserStatus(status)
+		statusPtr = &s
+	}
+	var queryPtr *string
+	if q != "" {
+		queryPtr = &q
+	}
+
+	// Use repository through service where applicable; temporary direct list since service lacks method
+	users, total, err := h.userService.ListUsers(rolePtr, statusPtr, queryPtr, offset, limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to list users", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+
+	// Map to DTOs
+	items := make([]dto.UserProfile, 0, len(users))
+	for _, u := range users {
+		lastActive := time.Now()
+		if u.LastActiveAt != nil {
+			lastActive = *u.LastActiveAt
+		}
+		items = append(items, dto.UserProfile{
+			ID:           u.ID.String(),
+			Username:     u.Username,
+			CreatedAt:    u.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:    u.UpdatedAt.Format(time.RFC3339),
+			Status:       string(u.Status),
+			Role:         string(u.Role),
+			ThreadCount:  u.ThreadCount,
+			ReplyCount:   u.ReplyCount,
+			LastActiveAt: lastActive.Format(time.RFC3339),
+		})
+	}
+
+	totalPages := int((total + int64(limit) - 1) / int64(limit))
+	resp := dto.UserListResponse{
+		Items:      items,
+		Total:      total,
+		Page:       page,
+		PageSize:   limit,
+		TotalPages: totalPages,
+	}
+	c.JSON(http.StatusOK, resp)
 }

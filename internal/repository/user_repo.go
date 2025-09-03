@@ -14,6 +14,7 @@ type UserRepository interface {
 	FindByID(id uuid.UUID) (*models.User, error)
 	FindByEmail(email string) (*models.User, error)
 	Update(user *models.User) error
+	List(role *models.UserRole, status *models.UserStatus, query *string, offset, limit int) ([]models.User, int64, error)
 }
 
 type userRepository struct {
@@ -62,4 +63,32 @@ func (r *userRepository) FindByEmail(email string) (*models.User, error) {
 // Update modifies an existing user record in the database.
 func (r *userRepository) Update(user *models.User) error {
 	return r.db.Save(user).Error
+}
+
+// List retrieves users with optional filters and pagination
+func (r *userRepository) List(role *models.UserRole, status *models.UserStatus, query *string, offset, limit int) ([]models.User, int64, error) {
+	var users []models.User
+	var total int64
+
+	dbq := r.db.Model(&models.User{})
+	if role != nil {
+		dbq = dbq.Where("role = ?", *role)
+	}
+	if status != nil {
+		dbq = dbq.Where("status = ?", *status)
+	}
+	if query != nil && *query != "" {
+		like := "%" + *query + "%"
+		dbq = dbq.Where("username ILIKE ?", like)
+	}
+
+	if err := dbq.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if err := dbq.Order("created_at DESC").Offset(offset).Limit(limit).Find(&users).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return users, total, nil
 }
