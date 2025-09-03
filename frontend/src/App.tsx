@@ -17,7 +17,7 @@ export default function App() {
             {isAuthed ? (
               <>
                 {user?.role === "admin" && <Link to="/admin">Admin</Link>}
-                {(user?.role === "admin" || user?.role === "moderator") && (
+                {( user?.role === "moderator") && (
                   <Link to="/moderation">Moderation</Link>
                 )}
                 <span className="text-foreground">{user?.username}</span>
