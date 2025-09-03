@@ -13,7 +13,9 @@ export default function AdminModerators() {
     permissions: ["manage_reports", "ban_users"],
   })
   const [message, setMessage] = useState<string>("")
-  const { mutateAsync, isPending } = useMutation({ mutationFn: createModerator })
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: createModerator,
+  })
 
   return (
     <div className="max-w-xl">
@@ -26,12 +28,36 @@ export default function AdminModerators() {
             <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
               <Shield className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-lg font-semibold text-slate-900">New Moderator</h2>
+            <h2 className="text-lg font-semibold text-slate-900">
+              New Moderator
+            </h2>
           </div>
-          <Field icon={User} placeholder="Username" value={form.username} onChange={(v) => setForm({ ...form, username: v })} />
-          <Field icon={Mail} placeholder="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
-          <Field icon={User} placeholder="Full name" value={form.full_name || ""} onChange={(v) => setForm({ ...form, full_name: v })} />
-          <Field icon={Lock} placeholder="Password" type="password" value={form.password} onChange={(v) => setForm({ ...form, password: v })} />
+          <Field
+            icon={User}
+            placeholder="Username"
+            value={form.username}
+            onChange={(v) => setForm({ ...form, username: v })}
+          />
+          <Field
+            icon={Mail}
+            placeholder="Email"
+            type="email"
+            value={form.email}
+            onChange={(v) => setForm({ ...form, email: v })}
+          />
+          <Field
+            icon={User}
+            placeholder="Full name"
+            value={form.full_name || ""}
+            onChange={(v) => setForm({ ...form, full_name: v })}
+          />
+          <Field
+            icon={Lock}
+            placeholder="Password"
+            type="password"
+            value={form.password}
+            onChange={(v) => setForm({ ...form, password: v })}
+          />
           <button
             className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-2.5 font-medium text-white disabled:opacity-50"
             disabled={isPending}
@@ -40,13 +66,24 @@ export default function AdminModerators() {
               try {
                 await mutateAsync(form)
                 setMessage("Moderator created successfully")
-                setForm({ username: "", password: "", email: "", full_name: "", permissions: ["manage_reports", "ban_users"] })
+                setForm({
+                  username: "",
+                  password: "",
+                  email: "",
+                  full_name: "",
+                  permissions: ["manage_reports", "ban_users"],
+                })
               } catch (e) {
-                setMessage(e instanceof Error ? e.message : "Failed to create moderator")
+                setMessage(
+                  e instanceof Error ? e.message : "Failed to create moderator"
+                )
               }
             }}
           >
-            <div className="flex items-center justify-center gap-2"><Plus className="w-4 h-4" />Create Moderator</div>
+            <div className="flex items-center justify-center gap-2">
+              <Plus className="w-4 h-4" />
+              Create Moderator
+            </div>
           </button>
           {message && <div className="text-sm text-slate-600">{message}</div>}
         </div>
@@ -55,7 +92,10 @@ export default function AdminModerators() {
   )
 }
 
-function Field({ icon: Icon, ...props }: {
+function Field({
+  icon: Icon,
+  ...props
+}: {
   icon: React.ComponentType<{ className?: string }>
   placeholder: string
   value: string

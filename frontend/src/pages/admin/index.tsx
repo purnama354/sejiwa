@@ -1,25 +1,202 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useMutation } from "@tanstack/react-query"
 import { createAdmin, createModerator } from "@/services/admin"
-import type { CreateAdminRequest, CreateModeratorRequest } from "@/types/api"
-import { Shield, UserPlus, Mail, User, Lock } from "lucide-react"
+import type {
+  CreateAdminRequest,
+  CreateModeratorRequest,
+  UserProfile,
+} from "@/types/api"
+import {
+  Shield,
+  UserPlus,
+  Mail,
+  User,
+  Lock,
+  Search,
+  Filter,
+  Ban,
+  RotateCcw,
+  Crown,
+} from "lucide-react"
 
 export default function AdminPage() {
+  type Tab = "users" | "moderators" | "admins"
+  const [active, setActive] = useState<Tab>("users")
+  const [q, setQ] = useState("")
+  const [status, setStatus] = useState<"" | UserProfile["status"]>("")
+
+  // Placeholder list until backend user listing endpoints exist
+  const items: UserProfile[] = useMemo(() => [], [])
+
+  const filtered = useMemo(() => {
+    return items.filter((u) => {
+      const roleOk =
+        active === "users"
+          ? u.role === "user"
+          : active === "moderators"
+          ? u.role === "moderator"
+          : u.role === "admin"
+      const statusOk = status ? u.status === status : true
+      const qOk = q ? u.username.toLowerCase().includes(q.toLowerCase()) : true
+      return roleOk && statusOk && qOk
+    })
+  }, [items, active, status, q])
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
         <p className="text-slate-600 mt-1">
-          Create and manage privileged accounts
+          Manage users, moderators, and admins
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <CreateAdminCard />
-        <CreateModeratorCard />
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Left: list & filters (2 cols) */}
+        <div className="lg:col-span-2 space-y-4">
+          {/* Tabs */}
+          <div className="flex items-center gap-2">
+            <TabButton
+              label="Users"
+              active={active === "users"}
+              onClick={() => setActive("users")}
+            />
+            <TabButton
+              label="Moderators"
+              active={active === "moderators"}
+              onClick={() => setActive("moderators")}
+            />
+            <TabButton
+              label="Admins"
+              active={active === "admins"}
+              onClick={() => setActive("admins")}
+            />
+          </div>
+
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-3 rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-4">
+            <div className="relative flex-1 min-w-56">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search username…"
+                className="w-full rounded-lg border border-slate-200 bg-white/80 pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              />
+            </div>
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <select
+                value={status}
+                onChange={(e) =>
+                  setStatus(e.target.value as "" | UserProfile["status"])
+                }
+                className="appearance-none w-44 rounded-lg border border-slate-200 bg-white/80 pl-9 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              >
+                <option value="">All status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </div>
+          </div>
+
+          {/* List */}
+          <div className="rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-4">
+            {filtered.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-slate-600">No {active} found</div>
+                <div className="text-xs text-slate-500 mt-1">
+                  Listing API not wired yet — filters/UI ready.
+                </div>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-slate-500">
+                      <th className="py-2">Username</th>
+                      <th className="py-2">Role</th>
+                      <th className="py-2">Status</th>
+                      <th className="py-2">Threads</th>
+                      <th className="py-2">Replies</th>
+                      <th className="py-2 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((u) => (
+                      <tr key={u.id} className="border-t border-slate-100">
+                        <td className="py-2 font-medium text-slate-900">
+                          {u.username}
+                        </td>
+                        <td className="py-2 capitalize">{u.role}</td>
+                        <td className="py-2 capitalize">{u.status}</td>
+                        <td className="py-2">{u.thread_count}</td>
+                        <td className="py-2">{u.reply_count}</td>
+                        <td className="py-2">
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50"
+                              title="Ban (wire to /moderation/users/{id}/ban)"
+                            >
+                              <Ban className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50"
+                              title="Unban (wire to /moderation/users/{id}/unban)"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                            </button>
+                            {active !== "admins" && (
+                              <button
+                                className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50"
+                                title="Promote"
+                              >
+                                <Crown className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right: create forms (1 col) */}
+        <div className="space-y-6">
+          <CreateAdminCard />
+          <CreateModeratorCard />
+        </div>
       </div>
     </div>
+  )
+}
+
+function TabButton({
+  label,
+  active,
+  onClick,
+}: {
+  label: string
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+        active
+          ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow"
+          : "bg-white/70 border border-slate-200/60 text-slate-700 hover:bg-slate-50"
+      }`}
+    >
+      {label}
+    </button>
   )
 }
 

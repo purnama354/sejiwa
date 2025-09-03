@@ -1,18 +1,20 @@
 import { createBrowserRouter, Navigate } from "react-router-dom"
+import { lazy } from "react"
 import App from "@/App"
-import LoginPage from "@/pages/auth/login"
-import RegisterPage from "@/pages/auth/register"
 import ProtectedRoute from "@/router/protected-route"
 import RoleRoute from "@/router/role-route"
-import DashboardPage from "@/pages/dashboard"
-import ModerationPage from "@/pages/moderation"
-import AdminLayout from "@/pages/admin/layout"
-import AdminDashboard from "@/pages/admin/dashboard"
-import AdminPage from "@/pages/admin"
-import AdminCategories from "@/pages/admin/categories"
-import ModeratorLayout from "@/pages/moderation/layout"
-import ModeratorDashboard from "@/pages/moderation/dashboard"
-import AdminSettings from "@/pages/admin/settings"
+import Fallback from "@/router/fallback"
+const LoginPage = lazy(() => import("@/pages/auth/login"))
+const RegisterPage = lazy(() => import("@/pages/auth/register"))
+const DashboardPage = lazy(() => import("@/pages/dashboard"))
+const ModerationPage = lazy(() => import("@/pages/moderation"))
+const AdminLayout = lazy(() => import("@/pages/admin/layout"))
+const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"))
+const AdminPage = lazy(() => import("@/pages/admin"))
+const AdminCategories = lazy(() => import("@/pages/admin/categories"))
+const ModeratorLayout = lazy(() => import("@/pages/moderation/layout"))
+const ModeratorDashboard = lazy(() => import("@/pages/moderation/dashboard"))
+const AdminSettings = lazy(() => import("@/pages/admin/settings"))
 
 const router = createBrowserRouter([
   {
@@ -20,13 +22,29 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       { index: true, element: <Navigate to="/login" replace /> },
-      { path: "login", element: <LoginPage /> },
-      { path: "register", element: <RegisterPage /> },
+      {
+        path: "login",
+        element: (
+          <Fallback>
+            <LoginPage />
+          </Fallback>
+        ),
+      },
+      {
+        path: "register",
+        element: (
+          <Fallback>
+            <RegisterPage />
+          </Fallback>
+        ),
+      },
       {
         path: "dashboard",
         element: (
           <ProtectedRoute>
-            <DashboardPage />
+            <Fallback>
+              <DashboardPage />
+            </Fallback>
           </ProtectedRoute>
         ),
       },
@@ -34,28 +52,74 @@ const router = createBrowserRouter([
         path: "moderation",
         element: (
           <RoleRoute allow={["moderator", "admin"]}>
-            <ModeratorLayout />
+            <Fallback>
+              <ModeratorLayout />
+            </Fallback>
           </RoleRoute>
         ),
         children: [
           { index: true, element: <Navigate to="dashboard" replace /> },
-          { path: "dashboard", element: <ModeratorDashboard /> },
-          { path: "reports", element: <ModerationPage /> },
+          {
+            path: "dashboard",
+            element: (
+              <Fallback>
+                <ModeratorDashboard />
+              </Fallback>
+            ),
+          },
+          {
+            path: "reports",
+            element: (
+              <Fallback>
+                <ModerationPage />
+              </Fallback>
+            ),
+          },
         ],
       },
       {
         path: "admin",
         element: (
           <RoleRoute allow={["admin"]}>
-            <AdminLayout />
+            <Fallback>
+              <AdminLayout />
+            </Fallback>
           </RoleRoute>
         ),
         children: [
           { index: true, element: <Navigate to="dashboard" replace /> },
-          { path: "dashboard", element: <AdminDashboard /> },
-          { path: "users", element: <AdminPage /> },
-          { path: "categories", element: <AdminCategories /> },
-          { path: "settings", element: <AdminSettings /> },
+          {
+            path: "dashboard",
+            element: (
+              <Fallback>
+                <AdminDashboard />
+              </Fallback>
+            ),
+          },
+          {
+            path: "users",
+            element: (
+              <Fallback>
+                <AdminPage />
+              </Fallback>
+            ),
+          },
+          {
+            path: "categories",
+            element: (
+              <Fallback>
+                <AdminCategories />
+              </Fallback>
+            ),
+          },
+          {
+            path: "settings",
+            element: (
+              <Fallback>
+                <AdminSettings />
+              </Fallback>
+            ),
+          },
         ],
       },
     ],

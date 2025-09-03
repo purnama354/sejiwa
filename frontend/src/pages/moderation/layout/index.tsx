@@ -1,13 +1,22 @@
 import { Outlet, Link, useLocation } from "react-router-dom"
 import { useAuthStore } from "@/store/auth"
-import { ShieldCheck, LayoutDashboard, MessageSquareWarning } from "lucide-react"
+import {
+  ShieldCheck,
+  LayoutDashboard,
+  MessageSquareWarning,
+} from "lucide-react"
 
 export default function ModeratorLayout() {
   const user = useAuthStore((s) => s.user)
   const location = useLocation()
 
   const nav = [
-    { to: "/moderation", label: "Dashboard", icon: LayoutDashboard, exact: true },
+    {
+      to: "/moderation",
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      exact: true,
+    },
     { to: "/moderation/reports", label: "Reports", icon: MessageSquareWarning },
   ]
 
@@ -43,7 +52,11 @@ export default function ModeratorLayout() {
                       : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
                   }`}
                 >
-                  <Icon className={`w-5 h-5 ${active ? "text-white" : "text-slate-400"}`} />
+                  <Icon
+                    className={`w-5 h-5 ${
+                      active ? "text-white" : "text-slate-400"
+                    }`}
+                  />
                   <span className="font-medium">{n.label}</span>
                 </Link>
               )
@@ -51,8 +64,12 @@ export default function ModeratorLayout() {
           </nav>
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200/60">
             <div className="px-3">
-              <div className="text-sm font-medium text-slate-900 truncate">{user?.username}</div>
-              <div className="text-xs text-slate-500 capitalize">{user?.role}</div>
+              <div className="text-sm font-medium text-slate-900 truncate">
+                {user?.username}
+              </div>
+              <div className="text-xs text-slate-500 capitalize">
+                {user?.role}
+              </div>
             </div>
           </div>
         </aside>

@@ -14,7 +14,12 @@ export default function AdminLayout() {
   const location = useLocation()
 
   const navItems = [
-    { path: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard", exact: true },
+    {
+      path: "/admin/dashboard",
+      icon: LayoutDashboard,
+      label: "Dashboard",
+      exact: true,
+    },
     { path: "/admin/categories", icon: Folder, label: "Categories" },
     { path: "/admin/users", icon: Users, label: "Users" },
     { path: "/admin/settings", icon: Settings, label: "Settings" },
