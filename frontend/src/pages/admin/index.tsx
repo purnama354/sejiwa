@@ -60,7 +60,7 @@ export default function AdminPage() {
     data: userData,
     isLoading,
     isRefetching,
-    error,
+    // error,
   } = useQuery({
     queryKey: [
       "users",
@@ -71,13 +71,13 @@ export default function AdminPage() {
       q || "",
     ],
     queryFn: () => {
-      console.log("Fetching users with params:", {
-        role: roleFilter,
-        status: status || undefined,
-        page,
-        pageSize,
-        query: q || undefined,
-      })
+      // console.log("Fetching users with params:", {
+      //   role: roleFilter,
+      //   status: status || undefined,
+      //   page,
+      //   pageSize,
+      //   query: q || undefined,
+      // })
       return getUsers({
         role: roleFilter as "user" | "moderator" | "admin" | undefined,
         status: (status || undefined) as
@@ -200,36 +200,36 @@ export default function AdminPage() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
+                  <table className="w-full text-sm table-fixed">
                     <thead>
-                      <tr className="text-left text-slate-500">
-                        <th className="py-2">Username</th>
-                        <th className="py-2">Role</th>
-                        <th className="py-2">Status</th>
-                        <th className="py-2">Threads</th>
-                        <th className="py-2">Replies</th>
-                        <th className="py-2 text-right">Actions</th>
+                      <tr className="text-left text-slate-500 border-b border-slate-200">
+                        <th className="py-3 px-3 w-1/4 font-medium">Username</th>
+                        <th className="py-3 px-3 w-20 font-medium">Role</th>
+                        <th className="py-3 px-3 w-20 font-medium">Status</th>
+                        <th className="py-3 px-3 w-16 font-medium text-center">Threads</th>
+                        <th className="py-3 px-3 w-16 font-medium text-center">Replies</th>
+                        <th className="py-3 px-3 w-32 font-medium text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {items.map((u) => (
-                        <tr key={u.id} className="border-t border-slate-100">
-                          <td className="py-2 font-medium text-slate-900">
+                        <tr key={u.id} className="border-b border-slate-100 hover:bg-slate-50/50">
+                          <td className="py-3 px-3 font-medium text-slate-900 truncate">
                             {u.username}
                           </td>
-                          <td className="py-2">
+                          <td className="py-3 px-3">
                             <RoleBadge role={u.role} />
                           </td>
-                          <td className="py-2">
+                          <td className="py-3 px-3">
                             <StatusBadge status={u.status} />
                           </td>
-                          <td className="py-2">{u.thread_count}</td>
-                          <td className="py-2">{u.reply_count}</td>
-                          <td className="py-2">
-                            <div className="flex gap-2 justify-end">
+                          <td className="py-3 px-3 text-center text-slate-600">{u.thread_count}</td>
+                          <td className="py-3 px-3 text-center text-slate-600">{u.reply_count}</td>
+                          <td className="py-3 px-3">
+                            <div className="flex gap-1 justify-end">
                               {u.status !== "suspended" && (
                                 <button
-                                  className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50"
+                                  className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50 transition-colors"
                                   title="Ban user"
                                   onClick={() => {
                                     setSelectedUser(u)
@@ -241,7 +241,7 @@ export default function AdminPage() {
                               )}
                               {u.status === "suspended" && (
                                 <button
-                                  className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50"
+                                  className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50 transition-colors"
                                   title="Unban user"
                                   onClick={() => {
                                     setSelectedUser(u)
@@ -253,7 +253,7 @@ export default function AdminPage() {
                               )}
                               {active !== "admins" && u.role !== "admin" && (
                                 <button
-                                  className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50"
+                                  className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50 transition-colors"
                                   title="Promote"
                                   onClick={() => {
                                     setSelectedUser(u)
