@@ -1,6 +1,7 @@
-import { useState } from "react"
-import { useMutation } from "@tanstack/react-query"
+import { useEffect, useState } from "react"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { createAdmin, createModerator } from "@/services/admin"
+import { getUsers } from "@/services/users"
 import type {
   CreateAdminRequest,
   CreateModeratorRequest,
@@ -37,48 +38,38 @@ export default function AdminPage() {
   const [showBanModal, setShowBanModal] = useState(false)
   const [showUnbanModal, setShowUnbanModal] = useState(false)
   const [showPromoteModal, setShowPromoteModal] = useState(false)
+  // Pagination + role filter
+  const [page, setPage] = useState(1)
+  const pageSize = 10
+  const roleFilter =
+    active === "users"
+      ? "user"
+      : active === "moderators"
+      ? "moderator"
+      : active === "admins"
+      ? "admin"
+      : undefined
 
-  // Mock data for development until backend is ready
-  const mockUsers: UserProfile[] = [
-    {
-      id: "1",
-      username: "testuser",
-      role: "user",
-      status: "active",
-      thread_count: 5,
-      reply_count: 10,
-      created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  last_active_at: new Date().toISOString()
-    },
-    {
-      id: "2",
-      username: "suspendeduser",
-      role: "user",
-      status: "suspended",
-      thread_count: 3,
-      reply_count: 7,
-      created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  last_active_at: new Date().toISOString()
-    },
-  ]
+  // Reset page on filter changes
+  useEffect(() => {
+    setPage(1)
+  }, [active, status, q])
 
-  // Filter mock data based on active tab and filters
-  const filtered = mockUsers.filter((u) => {
-    // Filter by role based on active tab
-    if (active === "users" && u.role !== "user") return false
-    if (active === "moderators" && u.role !== "moderator") return false
-    if (active === "admins" && u.role !== "admin") return false
-
-    // Filter by status if selected
-    if (status && u.status !== status) return false
-
-    // Filter by search query
-    if (q && !u.username.toLowerCase().includes(q.toLowerCase())) return false
-
-    return true
+  // Fetch users
+  const { data: userData, isLoading, isRefetching } = useQuery({
+    queryKey: ["users", roleFilter || "", status || "", page, pageSize, q || ""],
+    queryFn: () =>
+      getUsers({
+        role: roleFilter as "user" | "moderator" | "admin" | undefined,
+        status: (status || undefined) as "active" | "inactive" | "suspended" | undefined,
+        page,
+        pageSize,
+        query: q || undefined,
+      }),
   })
+  const items = userData?.items ?? []
+  const total = userData?.total ?? 0
+  const totalPages = userData?.totalPages ?? 1
 
   return (
     <div className="space-y-6">
@@ -167,11 +158,13 @@ export default function AdminPage() {
 
             {/* List */}
             <div className="rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-4">
-              {filtered.length === 0 ? (
+              {isLoading ? (
+                <div className="text-center py-12 text-slate-600">Loading users…</div>
+              ) : items.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-slate-600">No {active} found</div>
                   <div className="text-xs text-slate-500 mt-1">
-                    Listing API not wired yet — filters/UI ready.
+                    Try adjusting your filters
                   </div>
                 </div>
               ) : (
@@ -188,7 +181,7 @@ export default function AdminPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filtered.map((u) => (
+                      {items.map((u) => (
                         <tr key={u.id} className="border-t border-slate-100">
                           <td className="py-2 font-medium text-slate-900">
                             {u.username}
@@ -247,6 +240,28 @@ export default function AdminPage() {
                   </table>
                 </div>
               )}
+            </div>
+            {/* Pagination */}
+            <div className="flex items-center justify-between px-1">
+              <div className="text-xs text-slate-500">
+                Page {page} of {totalPages} • {total} total
+              </div>
+              <div className="flex gap-2">
+                <button
+                  className="px-3 py-1.5 text-sm border rounded disabled:opacity-50"
+                  disabled={page <= 1 || isLoading || isRefetching}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Previous
+                </button>
+                <button
+                  className="px-3 py-1.5 text-sm border rounded disabled:opacity-50"
+                  disabled={page >= totalPages || isLoading || isRefetching}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
         )}

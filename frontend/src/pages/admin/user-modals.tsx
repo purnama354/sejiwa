@@ -1,6 +1,21 @@
 import { useState } from "react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { ConfirmationModal } from "@/components/ui/modal"
 import type { UserProfile } from "@/types/api"
+import { banUser, unbanUser, promoteToAdmin, promoteToModerator } from "@/services/users"
+import { useToast } from "@/components/ui/use-toast"
+
+function getErrorMessage(err: unknown): string {
+  if (typeof err === "string") return err
+  if (err instanceof Error) return err.message
+  if (err && typeof err === "object") {
+    const e = err as { message?: unknown; response?: { data?: { message?: unknown } } }
+    const apiMsg = e.response?.data?.message
+    if (typeof apiMsg === "string") return apiMsg
+    if (typeof e.message === "string") return e.message
+  }
+  return "Unknown error"
+}
 
 export function BanUserModal({
   isOpen,
@@ -13,30 +28,32 @@ export function BanUserModal({
 }) {
   const [banReason, setBanReason] = useState("")
   const [banDuration, setBanDuration] = useState<number | undefined>(undefined)
-
-  // Mock mutation with toast notification
-  const isPending = false
-  const mutate = ({
-    userId,
-    reason,
-    duration,
-  }: {
-    userId: string
-    reason: string
-    duration?: number
-  }) => {
-    // In a real implementation, we would import useToast from '@/components/ui/use-toast'
-    // const { toast } = useToast()
-    // toast({ title: "User banned successfully" })
-    alert(
-      `Mock ban user API called with userId: ${userId}, reason: ${reason}, duration: ${
-        duration || "permanent"
-      }`
-    )
-    onClose()
-    setBanReason("")
-    setBanDuration(undefined)
-  }
+  const { toast } = useToast()
+  const qc = useQueryClient()
+  const { mutate, isPending } = useMutation({
+    mutationFn: async ({
+      userId,
+      reason,
+      duration,
+    }: {
+      userId: string
+      reason: string
+      duration?: number
+    }) => {
+      await banUser(userId, { reason, duration })
+    },
+    onSuccess: async () => {
+      toast({ title: "User banned", description: `${user?.username} has been banned.` })
+      await qc.invalidateQueries({ queryKey: ["users"] })
+      setBanReason("")
+      setBanDuration(undefined)
+      onClose()
+    },
+    onError: (err: unknown) => {
+      const message = getErrorMessage(err)
+      toast({ title: "Failed to ban user", description: message, variant: "error" })
+    },
+  })
 
   return (
     <ConfirmationModal
@@ -106,15 +123,22 @@ export function UnbanUserModal({
   onClose: () => void
   user: UserProfile | null
 }) {
-  // Mock mutation with toast notification
-  const isPending = false
-  const mutate = (userId: string) => {
-    // In a real implementation, we would import useToast from '@/components/ui/use-toast'
-    // const { toast } = useToast()
-    // toast({ title: "User unbanned successfully", variant: "success" })
-    alert(`Mock unban user API called with userId: ${userId}`)
-    onClose()
-  }
+  const { toast } = useToast()
+  const qc = useQueryClient()
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (userId: string) => {
+      await unbanUser(userId)
+    },
+    onSuccess: async () => {
+      toast({ title: "User unbanned", description: `${user?.username} has been unbanned.` })
+      await qc.invalidateQueries({ queryKey: ["users"] })
+      onClose()
+    },
+    onError: (err: unknown) => {
+      const message = getErrorMessage(err)
+      toast({ title: "Failed to unban user", description: message, variant: "error" })
+    },
+  })
 
   return (
     <ConfirmationModal
@@ -148,27 +172,32 @@ export function PromoteUserModal({
   onClose: () => void
   user: UserProfile | null
 }) {
-  // Mock mutation with toast notification
-  const isPending = false
-  const mutate = ({
-    userId,
-    toRole,
-  }: {
-    userId: string
-    toRole: "moderator" | "admin"
-  }) => {
-    // In a real implementation, we would import useToast from '@/components/ui/use-toast'
-    // const { toast } = useToast()
-    // toast({
-    //   title: `User promoted to ${toRole} successfully`,
-    //   variant: "success",
-    //   description: `User has been granted ${toRole} permissions`
-    // })
-    alert(
-      `Mock promote user API called with userId: ${userId}, toRole: ${toRole}`
-    )
-    onClose()
-  }
+  const { toast } = useToast()
+  const qc = useQueryClient()
+  const { mutate, isPending } = useMutation({
+    mutationFn: async ({
+      userId,
+      toRole,
+    }: {
+      userId: string
+      toRole: "moderator" | "admin"
+    }) => {
+      if (toRole === "moderator") {
+        await promoteToModerator(userId)
+      } else {
+        await promoteToAdmin(userId)
+      }
+    },
+    onSuccess: async (_data, variables) => {
+      toast({ title: "User promoted", description: `${user?.username} is now a ${variables.toRole}.` })
+      await qc.invalidateQueries({ queryKey: ["users"] })
+      onClose()
+    },
+    onError: (err: unknown) => {
+      const message = getErrorMessage(err)
+      toast({ title: "Failed to promote user", description: message, variant: "error" })
+    },
+  })
 
   const nextRole =
     user?.role === "user"
