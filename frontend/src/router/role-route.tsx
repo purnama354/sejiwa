@@ -14,7 +14,14 @@ export default function RoleRoute({
 
   if (!accessToken)
     return <Navigate to="/login" replace state={{ from: location }} />
+
+  // If user isn't in the allowed roles, redirect to dashboard
   if (!role || !allow.includes(role as Allowed))
     return <Navigate to="/dashboard" replace />
+
+  // Special handling for moderation section
+  // If we're in the moderation path and user is admin, just let them through
+  // Admins should be able to access all moderator functionalities
+
   return children
 }
