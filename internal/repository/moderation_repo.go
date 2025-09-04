@@ -153,11 +153,11 @@ func (r *moderationActionRepository) GetStats(moderatorID *uuid.UUID) (*dto.Mode
 	// Calculate average response time (simplified - you may want to improve this)
 	var avgHours float64
 	err = r.db.Raw(`
-        SELECT AVG(EXTRACT(EPOCH FROM (ma.created_at - r.created_at))/3600) as avg_hours
-        FROM moderation_actions ma
-        JOIN reports r ON ma.report_id = r.id
-        WHERE ma.created_at >= CURRENT_DATE - INTERVAL '30 days'
-    `).Scan(&avgHours).Error
+		SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (ma.created_at - r.created_at))/3600), 0) as avg_hours
+		FROM moderation_actions ma
+		JOIN reports r ON ma.report_id = r.id
+		WHERE ma.created_at >= CURRENT_DATE - INTERVAL '30 days'
+	`).Scan(&avgHours).Error
 
 	if err == nil {
 		stats.AverageResponseTime = avgHours
