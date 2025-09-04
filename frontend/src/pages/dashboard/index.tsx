@@ -1,17 +1,17 @@
 export default function DashboardPage() {
   return (
-    <div className="p-6">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 p-8 text-white">
+    <div className="p-4 sm:p-6">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 p-6 sm:p-8 text-white">
         <div className="relative z-10">
-          <h1 className="text-2xl font-bold">Welcome to Sejiwa</h1>
-          <p className="text-blue-100">
+          <h1 className="text-xl sm:text-2xl font-bold">Welcome to Sejiwa</h1>
+          <p className="text-blue-100 text-sm sm:text-base">
             A safe, supportive space for open conversation.
           </p>
         </div>
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-32 translate-x-32" />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         <Card
           title="Start a thread"
           desc="Share your experience or ask a question."

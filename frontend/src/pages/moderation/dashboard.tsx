@@ -118,13 +118,13 @@ export default function ModeratorDashboard() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 p-8 text-white">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 p-6 sm:p-8 text-white">
         <div className="relative z-10">
-          <h1 className="text-3xl font-bold mb-2">Moderation Center</h1>
-          <p className="text-emerald-100 text-lg">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Moderation Center</h1>
+          <p className="text-emerald-100 text-base sm:text-lg">
             Keep the community safe, supportive, and thriving.
           </p>
-          <div className="flex items-center gap-6 mt-4 text-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mt-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-emerald-300 rounded-full animate-pulse" />
               <span>Active Session</span>
@@ -138,13 +138,13 @@ export default function ModeratorDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {cards.map((card) => {
           const Icon = card.icon
           return (
             <div
               key={card.label}
-              className="group relative overflow-hidden rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+              className="group relative overflow-hidden rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
               onClick={card.action}
             >
               {card.urgent && (
@@ -153,11 +153,11 @@ export default function ModeratorDashboard() {
                 </div>
               )}
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-600 mb-1">
                     {card.label}
                   </p>
-                  <p className="text-3xl font-bold text-slate-900">
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900">
                     {card.value}
                   </p>
                   <p className="text-xs text-slate-500 mt-1">
@@ -165,9 +165,9 @@ export default function ModeratorDashboard() {
                   </p>
                 </div>
                 <div
-                  className={`w-14 h-14 rounded-xl bg-gradient-to-r ${card.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                  className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-r ${card.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}
                 >
-                  <Icon className="w-7 h-7 text-white" />
+                  <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
               </div>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent to-slate-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -177,33 +177,33 @@ export default function ModeratorDashboard() {
       </div>
 
       {/* Priority Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {priorities.map((priority) => (
           <div
             key={priority.label}
             className={`rounded-xl border p-4 ${priority.color}`}
           >
-            <div className="text-2xl font-bold mb-1">{priority.count}</div>
+            <div className="text-xl sm:text-2xl font-bold mb-1">{priority.count}</div>
             <div className="text-sm font-medium">{priority.label}</div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Recent Reports Preview */}
-        <div className="lg:col-span-2">
-          <div className="rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-6">
+        <div className="xl:col-span-2">
+          <div className="rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-4 sm:p-6 shadow-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
                   <AlertTriangle className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-xl font-semibold text-slate-900">
+                <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
                   Recent Reports
                 </h2>
               </div>
               <button 
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 self-start sm:self-center"
                 onClick={() => navigate("/moderation/reports")}
               >
                 View all <ArrowRight className="w-4 h-4" />

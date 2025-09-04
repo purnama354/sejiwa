@@ -60,12 +60,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="relative min-h-dvh grid place-items-center overflow-hidden">
+    <div className="relative min-h-dvh grid place-items-center overflow-hidden px-4">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_700px_at_50%_-20%,oklch(0.98_0.02_160),transparent)]" />
       <Card className="relative w-full max-w-sm border bg-card/70 shadow-xl backdrop-blur">
-        <CardHeader>
-          <CardTitle className="text-3xl">Create account</CardTitle>
-          <CardDescription className="text-base">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl sm:text-3xl">Create account</CardTitle>
+          <CardDescription className="text-sm sm:text-base">
             Join Sejiwa today
           </CardDescription>
         </CardHeader>

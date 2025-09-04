@@ -36,17 +36,17 @@ export default function ModerationPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl p-6">
-      <div className="mb-6 flex items-end justify-between gap-4">
+    <div className="mx-auto max-w-6xl p-4 sm:p-6">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Moderation Queue</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-semibold">Moderation Queue</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Review and act on community reports.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <select
-            className="border rounded px-2 py-1 bg-background"
+            className="border rounded px-3 py-2 bg-background text-sm"
             value={status}
             onChange={(e) => {
               setStatus(e.target.value)
@@ -58,7 +58,7 @@ export default function ModerationPage() {
             <option value="resolved">Resolved</option>
           </select>
           <select
-            className="border rounded px-2 py-1 bg-background"
+            className="border rounded px-3 py-2 bg-background text-sm"
             value={priority}
             onChange={(e) => {
               setPriority(e.target.value)
@@ -81,31 +81,33 @@ export default function ModerationPage() {
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {data?.reports?.map((r) => (
           <ReportCard key={r.id} report={r} onAction={act} />
         ))}
       </div>
 
       {data && (
-        <div className="mt-6 flex items-center justify-between">
-          <button
-            className="border rounded px-3 py-1 disabled:opacity-50"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Previous
-          </button>
-          <div className="text-sm text-muted-foreground">
+        <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-sm text-muted-foreground order-2 sm:order-1">
             Page {data.page} of {data.total_pages}
           </div>
-          <button
-            className="border rounded px-3 py-1 disabled:opacity-50"
-            disabled={data.page >= data.total_pages}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </button>
+          <div className="flex items-center gap-2 order-1 sm:order-2">
+            <button
+              className="border rounded px-3 py-2 disabled:opacity-50 text-sm"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Previous
+            </button>
+            <button
+              className="border rounded px-3 py-2 disabled:opacity-50 text-sm"
+              disabled={data.page >= data.total_pages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -121,8 +123,8 @@ function ReportCard({
 }) {
   return (
     <div className="rounded-lg border bg-card/60 backdrop-blur p-4">
-      <div className="flex items-start justify-between gap-4">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
           <div className="text-sm text-muted-foreground">
             {report.content_type.toUpperCase()} •{" "}
             {report.reason.replaceAll("_", " ")}
@@ -135,7 +137,7 @@ function ReportCard({
             {report.content_preview || report.description}
           </div>
         </div>
-        <div className="text-right">
+        <div className="text-right flex-shrink-0">
           <div className="text-xs">
             Status: <span className="uppercase">{report.status}</span>
           </div>
@@ -146,37 +148,37 @@ function ReportCard({
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
         <button
-          className="px-2 py-1 border rounded text-xs"
+          className="px-2 py-1 border rounded text-xs hover:bg-muted transition-colors"
           onClick={() => onAction(report, "dismiss")}
         >
           Dismiss
         </button>
         <button
-          className="px-2 py-1 border rounded text-xs"
+          className="px-2 py-1 border rounded text-xs hover:bg-muted transition-colors"
           onClick={() => onAction(report, "warn_user")}
         >
           Warn
         </button>
         <button
-          className="px-2 py-1 border rounded text-xs"
+          className="px-2 py-1 border rounded text-xs hover:bg-muted transition-colors"
           onClick={() => onAction(report, "hide_content")}
         >
           Hide
         </button>
         <button
-          className="px-2 py-1 border rounded text-xs"
+          className="px-2 py-1 border rounded text-xs hover:bg-muted transition-colors"
           onClick={() => onAction(report, "delete_content")}
         >
           Delete
         </button>
         <button
-          className="px-2 py-1 border rounded text-xs"
+          className="px-2 py-1 border rounded text-xs hover:bg-muted transition-colors"
           onClick={() => onAction(report, "ban_user_temp")}
         >
           Temp Ban
         </button>
         <button
-          className="px-2 py-1 border rounded text-xs"
+          className="px-2 py-1 border rounded text-xs hover:bg-muted transition-colors"
           onClick={() => onAction(report, "ban_user_permanent")}
         >
           Permaban
