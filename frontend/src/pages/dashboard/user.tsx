@@ -1,36 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
-import {
-  MessageSquare,
-  Plus,
-  TrendingUp,
-  Heart,
-  BookOpen,
-  Users,
-  Calendar,
-  ArrowRight,
-  User,
-  Settings,
-  Bell,
-  Bookmark,
-  MessageCircle,
-  Eye,
-  ListFilter,
-  BarChart2,
-  Sparkles,
-  Shield,
-  CheckCircle2,
-  Leaf,
-} from "lucide-react"
+import { MessageSquare, Plus, TrendingUp, BookOpen, ArrowRight, Settings, Bell, Bookmark, MessageCircle, Eye, ListFilter, BarChart2, Sparkles, Shield, CheckCircle2, Leaf } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-  getUserStats,
-  getUserActivity,
-  getUserCategories,
-  type UserStats,
-  type UserActivity,
-  type CategorySubscription,
-} from "@/services/user"
+import { getUserStats, getUserActivity, getUserCategories } from "@/services/user"
 
 export default function UserDashboard() {
   const navigate = useNavigate()

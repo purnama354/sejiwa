@@ -44,7 +44,7 @@ export default function SavedThreadsPage() {
       toast({
         title: "Error",
         description: "Failed to unsave thread. Please try again.",
-        variant: "destructive",
+  variant: "error",
       })
     },
   })
@@ -136,7 +136,17 @@ export default function SavedThreadsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {savedThreads.map((thread) => (
+          {savedThreads.map((thread: {
+            id: string
+            title: string
+            preview: string
+            category: string
+            category_slug: string
+            replies: number
+            created_at: string
+            is_locked?: boolean
+            has_new_replies?: boolean
+          }) => (
             <Card key={thread.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-4">

@@ -48,11 +48,11 @@ export default function SubscriptionButton({
         description: `You're now following ${categoryName}.`,
       })
     },
-    onError: () => {
+  onError: () => {
       toast({
         title: "Error",
         description: "Failed to subscribe. Please try again.",
-        variant: "destructive",
+    variant: "error",
       })
     },
   })
@@ -72,11 +72,11 @@ export default function SubscriptionButton({
         description: `You're no longer following ${categoryName}.`,
       })
     },
-    onError: () => {
+  onError: () => {
       toast({
         title: "Error",
         description: "Failed to unsubscribe. Please try again.",
-        variant: "destructive",
+    variant: "error",
       })
     },
   })
