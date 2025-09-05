@@ -283,13 +283,13 @@ function CTA() {
                 size="lg"
                 className="bg-white text-slate-900 hover:bg-white/90"
               >
-                <Link to="/register">Create your anonymous account</Link>
+                <Link to="/register">Create account</Link>
               </Button>
               <Button
                 asChild
                 variant="outline"
                 size="lg"
-                className="border-white/30 text-white hover:bg-white/10"
+                className="border-white text-white hover:bg-white/10 hover:text-white/90 bg-transparent"
               >
                 <Link to="/login">Sign in</Link>
               </Button>
