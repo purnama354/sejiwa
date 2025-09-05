@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
+import { useQuery } from "@tanstack/react-query"
+import { listCategories } from "@/services/categories"
 
 export default function HomePage() {
   return (
@@ -9,6 +11,7 @@ export default function HomePage() {
       <HowItWorks />
       <Guidelines />
       <ExploreCategories />
+      <ReadWithoutAccount />
       <CTA />
     </div>
   )
@@ -213,15 +216,62 @@ function Guidelines() {
 }
 
 function ExploreCategories() {
-  // Static first; can be replaced with API via listCategories() + react-query
-  const categories = [
-    { name: "Anxiety", desc: "Coping tools, daily management, support." },
-    { name: "Depression", desc: "You're not alone—share and learn." },
-    { name: "Relationships", desc: "Communication, boundaries, healing." },
-    { name: "Work & Burnout", desc: "Stress, balance, and recovery." },
-    { name: "Self-esteem", desc: "Growth, self-talk, self-care." },
-    { name: "Grief", desc: "Space to process and remember." },
-  ] as const
+  const {
+    data: categories,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["categories"],
+    queryFn: listCategories,
+  })
+
+  // Fallback static data for demo/offline scenarios
+  const fallbackCategories = [
+    {
+      id: "1",
+      name: "Anxiety",
+      description: "Coping tools, daily management, support.",
+      thread_count: 24,
+      slug: "anxiety",
+    },
+    {
+      id: "2",
+      name: "Depression",
+      description: "You're not alone—share and learn.",
+      thread_count: 18,
+      slug: "depression",
+    },
+    {
+      id: "3",
+      name: "Relationships",
+      description: "Communication, boundaries, healing.",
+      thread_count: 31,
+      slug: "relationships",
+    },
+    {
+      id: "4",
+      name: "Work & Burnout",
+      description: "Stress, balance, and recovery.",
+      thread_count: 12,
+      slug: "work-burnout",
+    },
+    {
+      id: "5",
+      name: "Self-esteem",
+      description: "Growth, self-talk, self-care.",
+      thread_count: 15,
+      slug: "self-esteem",
+    },
+    {
+      id: "6",
+      name: "Grief",
+      description: "Space to process and remember.",
+      thread_count: 8,
+      slug: "grief",
+    },
+  ]
+
+  const displayCategories = categories || fallbackCategories
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10 sm:py-12">
@@ -238,26 +288,154 @@ function ExploreCategories() {
           <Link to="/register">Create an account</Link>
         </Button>
       </div>
-      <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {categories.map((c) => (
-          <div
-            key={c.name}
-            className="group rounded-xl border bg-white/70 backdrop-blur-sm p-5 shadow hover:shadow-md transition-all"
-          >
-            <div className="flex items-center justify-between">
-              <div className="font-semibold text-slate-900">{c.name}</div>
-              <span className="text-xs rounded-full px-2 py-1 bg-secondary text-secondary-foreground">
-                Public
-              </span>
+
+      {isLoading ? (
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-xl border bg-white/70 backdrop-blur-sm p-5 shadow animate-pulse"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="h-5 bg-slate-200 rounded w-20"></div>
+                <div className="h-4 bg-slate-200 rounded-full w-12"></div>
+              </div>
+              <div className="h-4 bg-slate-200 rounded w-full mb-4"></div>
+              <div className="h-8 bg-slate-200 rounded w-24"></div>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">{c.desc}</p>
-            <div className="mt-4">
-              <Button asChild size="sm" variant="outline">
-                <Link to="/login">View threads</Link>
-              </Button>
+          ))}
+        </div>
+      ) : error ? (
+        <div className="mt-5 text-center py-8">
+          <p className="text-muted-foreground">
+            Unable to load categories. Using demo data.
+          </p>
+        </div>
+      ) : (
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {displayCategories.slice(0, 6).map((c) => (
+            <div
+              key={c.id || c.name}
+              className="group rounded-xl border bg-white/70 backdrop-blur-sm p-5 shadow hover:shadow-md transition-all"
+            >
+              <div className="flex items-center justify-between">
+                <div className="font-semibold text-slate-900">{c.name}</div>
+                <span className="text-xs rounded-full px-2 py-1 bg-secondary text-secondary-foreground">
+                  {c.thread_count || 0} threads
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                {c.description}
+              </p>
+              <div className="mt-4 flex gap-2">
+                <Button asChild size="sm" variant="outline">
+                  <Link to="/login">View threads</Link>
+                </Button>
+                <Button asChild size="sm" variant="ghost">
+                  <Link to={`/preview/${c.slug || c.name.toLowerCase()}`}>
+                    Preview
+                  </Link>
+                </Button>
+              </div>
             </div>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
+function ReadWithoutAccount() {
+  const sampleThreads = [
+    {
+      id: "1",
+      title: "Starting my anxiety recovery journey",
+      excerpt:
+        "After years of struggling, I'm finally ready to take the first step...",
+      category: "Anxiety",
+      replies: 12,
+      timeAgo: "2h ago",
+    },
+    {
+      id: "2",
+      title: "Finding hope after a difficult breakup",
+      excerpt: "It's been 3 months and I'm slowly learning to trust again...",
+      category: "Relationships",
+      replies: 8,
+      timeAgo: "4h ago",
+    },
+    {
+      id: "3",
+      title: "Burnout recovery: my 6-month progress",
+      excerpt: "Sharing what's helped me rebuild my energy and motivation...",
+      category: "Work & Burnout",
+      replies: 15,
+      timeAgo: "1d ago",
+    },
+  ]
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 py-10 sm:py-12">
+      <div className="rounded-2xl border bg-gradient-to-br from-slate-50 to-blue-50/30 p-6 sm:p-8">
+        <div className="text-center mb-6">
+          <h2 className="text-xl sm:text-2xl font-semibold">
+            Get a feel for our community
+          </h2>
+          <p className="text-sm sm:text-base text-muted-foreground mt-2">
+            Read some recent threads to see how people support each other here.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {sampleThreads.map((thread) => (
+            <div
+              key={thread.id}
+              className="rounded-xl border bg-white/80 backdrop-blur-sm p-4 sm:p-5 shadow hover:shadow-md transition-all group cursor-pointer"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs rounded-full px-2 py-1 bg-blue-100 text-blue-700 font-medium">
+                      {thread.category}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {thread.timeAgo}
+                    </span>
+                  </div>
+                  <h3 className="font-medium text-slate-900 group-hover:text-blue-700 transition-colors">
+                    {thread.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                    {thread.excerpt}
+                  </p>
+                  <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+                    <span>{thread.replies} supportive replies</span>
+                    <span>•</span>
+                    <span>Anonymous community</span>
+                  </div>
+                </div>
+                <div className="flex-shrink-0">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center mt-6">
+          <p className="text-sm text-muted-foreground mb-4">
+            Want to join the conversation? Create your anonymous account to
+            participate.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button asChild>
+              <Link to="/register">Join the community</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/login">Already have an account?</Link>
+            </Button>
           </div>
-        ))}
+        </div>
       </div>
     </section>
   )
