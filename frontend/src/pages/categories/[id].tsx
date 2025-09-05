@@ -199,7 +199,7 @@ export default function CategoryDetails() {
             <p className="text-slate-600 mb-6">
               Be the first to start a conversation
             </p>
-            <Button onClick={() => navigate("/threads/new")}>
+            <Button onClick={() => navigate(`/threads/new?category_id=${id}`)}>
               Create Thread
             </Button>
           </div>

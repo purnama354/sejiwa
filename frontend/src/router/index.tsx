@@ -21,6 +21,7 @@ const NotificationSettings = lazy(() => import("@/pages/profile/notifications"))
 const SavedThreadsPage = lazy(() => import("@/pages/profile/saved"))
 const CategoryDetailsPage = lazy(() => import("@/pages/categories/[id]"))
 const ThreadDetailsPage = lazy(() => import("@/pages/threads/[id]"))
+const CreateThreadPage = lazy(() => import("@/pages/threads/new"))
 
 const router = createBrowserRouter([
   {
@@ -71,6 +72,16 @@ const router = createBrowserRouter([
           <Fallback>
             <CategoryDetailsPage />
           </Fallback>
+        ),
+      },
+      {
+        path: "threads/new",
+        element: (
+          <RoleRoute allow={["user"]}>
+            <Fallback>
+              <CreateThreadPage />
+            </Fallback>
+          </RoleRoute>
         ),
       },
       {
