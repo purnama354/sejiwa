@@ -4,6 +4,7 @@ import App from "@/App"
 import RoleRoute from "@/router/role-route"
 import PublicOnly from "@/router/public-only"
 import Fallback from "@/router/fallback"
+const HomePage = lazy(() => import("@/pages/home"))
 const LoginPage = lazy(() => import("@/pages/auth/login"))
 const RegisterPage = lazy(() => import("@/pages/auth/register"))
 const DashboardPage = lazy(() => import("@/pages/dashboard"))
@@ -21,7 +22,16 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
-      { index: true, element: <Navigate to="/login" replace /> },
+      {
+        index: true,
+        element: (
+          <PublicOnly>
+            <Fallback>
+              <HomePage />
+            </Fallback>
+          </PublicOnly>
+        ),
+      },
       {
         path: "login",
         element: (

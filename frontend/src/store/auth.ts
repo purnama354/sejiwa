@@ -14,6 +14,7 @@ export type AuthState = {
   clearSession: () => void
   login: (username: string, password: string) => Promise<void>
   register: (username: string, password: string) => Promise<void>
+  logout: () => void
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -57,6 +58,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   register: async (username, password) => {
     const res = await apiRegister({ username, password })
     get().setSession(res)
+  },
+  logout: () => {
+    get().clearSession()
   },
 }))
 

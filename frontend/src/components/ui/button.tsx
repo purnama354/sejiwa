@@ -30,10 +30,27 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+}
+
+type AnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement>
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, ...props }, ref) => {
+  ({ className, variant, size, asChild, ...props }, ref) => {
+    if (asChild) {
+      const { children, ...rest } = props as unknown as AnchorProps & {
+        children?: React.ReactNode
+      }
+      return (
+        <a
+          className={cn(buttonVariants({ variant, size }), className)}
+          {...rest}
+        >
+          {children}
+        </a>
+      )
+    }
     return (
       <button
         className={cn(buttonVariants({ variant, size }), className)}

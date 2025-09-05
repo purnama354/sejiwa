@@ -5,8 +5,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   EyeOff,
-  Trash2,
-  Timer,
   Activity,
   Shield,
   FileText,
@@ -28,7 +26,7 @@ export default function ModeratorDashboard() {
 
   const { data: recentReports } = useQuery({
     queryKey: ["recent-reports-dashboard"],
-    queryFn: () => getReports({ page: 1, limit: 5, status: "pending" }),
+    queryFn: () => getReports({ page: 1, pageSize: 5, status: "pending" }),
   })
 
   const cards = [
@@ -332,7 +330,7 @@ function Stat({
 }: { 
   label: string
   value: number | string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   isTime?: boolean 
 }) {
   return (
