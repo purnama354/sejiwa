@@ -230,10 +230,27 @@ function CategoryCard({
     description: category.description,
     is_locked: category.is_locked,
     is_private: category.is_private,
+    password: "",
+    clearPassword: false,
   })
 
   const handleSave = () => {
-    onUpdate(editData)
+    // Prepare data for update
+    const updateData: Partial<Category> = {
+      name: editData.name,
+      description: editData.description,
+      is_locked: editData.is_locked,
+      is_private: editData.is_private,
+    }
+
+    // Handle password operations
+    if (editData.clearPassword) {
+      updateData.clear_password = true
+    } else if (editData.password) {
+      updateData.password = editData.password
+    }
+
+    onUpdate(updateData)
     setIsEditing(false)
   }
 
@@ -243,6 +260,8 @@ function CategoryCard({
       description: category.description,
       is_locked: category.is_locked,
       is_private: category.is_private,
+      password: "",
+      clearPassword: false,
     })
     setIsEditing(false)
   }
@@ -325,6 +344,55 @@ function CategoryCard({
             />
             <span className="text-slate-600">Private category</span>
           </label>
+
+          {editData.is_private && (
+            <div className="space-y-3 border rounded-lg p-3 bg-slate-50">
+              <h4 className="text-sm font-medium text-slate-700">
+                Password Settings
+              </h4>
+              <div>
+                <label className="text-sm text-slate-600 block mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={editData.password}
+                  onChange={(e) =>
+                    setEditData({
+                      ...editData,
+                      password: e.target.value,
+                      clearPassword: false,
+                    })
+                  }
+                  placeholder={
+                    category.has_password ? "Change password" : "Set password"
+                  }
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                />
+              </div>
+
+              {category.has_password && (
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={editData.clearPassword}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        clearPassword: e.target.checked,
+                        password: e.target.checked ? "" : editData.password,
+                      })
+                    }
+                    className="rounded border-slate-300 text-red-600 focus:ring-red-500"
+                  />
+                  <span className="text-slate-600">
+                    Remove password protection
+                  </span>
+                </label>
+              )}
+            </div>
+          )}
+
           <div className="flex items-center gap-2">
             <button
               onClick={handleSave}
@@ -350,6 +418,14 @@ function CategoryCard({
             {category.is_private && (
               <Badge variant="warning" className="gap-1">
                 <Shield className="w-3 h-3" /> Private
+              </Badge>
+            )}
+            {category.is_private && category.has_password && (
+              <Badge
+                variant="outline"
+                className="gap-1 bg-blue-50 text-blue-700 border-blue-200"
+              >
+                <Lock className="w-3 h-3" /> Password
               </Badge>
             )}
           </div>

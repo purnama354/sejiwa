@@ -155,6 +155,7 @@ export type Category = {
   thread_count: number
   is_locked: boolean
   is_private: boolean
+  has_password: boolean
   created_at: string | Date
   updated_at: string | Date
 }
@@ -171,7 +172,8 @@ export type UpdateCategoryRequest = {
   description?: string
   is_locked?: boolean
   is_private?: boolean
-  set_password?: string
+  password?: string
+  clear_password?: boolean
 }
 
 export type SubscribeRequest = {

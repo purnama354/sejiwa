@@ -159,7 +159,7 @@ definitions:
         type: string
         enum: [all, categories, none]
 
-  SubscriptionRequest:
+  SubscribeRequest:
     type: object
     required:
       - category_id
@@ -170,6 +170,24 @@ definitions:
       password:
         type: string
         description: Optional password when joining a private category
+
+  UnsubscribeRequest:
+    type: object
+    required:
+      - category_id
+    properties:
+      category_id:
+        type: string
+        format: uuid
+
+  UnsaveThreadRequest:
+    type: object
+    required:
+      - thread_id
+    properties:
+      thread_id:
+        type: string
+        format: uuid
 
   SaveThreadRequest:
     type: object
@@ -1536,7 +1554,7 @@ paths:
           name: request
           required: true
           schema:
-            $ref: "#/definitions/SubscriptionRequest"
+            $ref: "#/definitions/SubscribeRequest"
       responses:
         "200":
           $ref: "#/responses/successResponse"
