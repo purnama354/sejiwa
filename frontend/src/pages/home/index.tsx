@@ -268,8 +268,8 @@ function CTA() {
   return (
     <section className="mx-auto max-w-6xl px-4 pb-14 sm:pb-20">
       <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 p-6 sm:p-8 text-white">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div className="relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center justify-center min-h-[340px]">
+          <div className="relative z-10 flex flex-col justify-center items-center text-center h-full">
             <h3 className="text-2xl sm:text-3xl font-bold mb-3">
               Ready to talk—or just listen?
             </h3>
