@@ -27,11 +27,9 @@ const router = createBrowserRouter([
       {
         index: true,
         element: (
-          <PublicOnly>
-            <Fallback>
-              <HomePage />
-            </Fallback>
-          </PublicOnly>
+          <Fallback>
+            <HomePage />
+          </Fallback>
         ),
       },
       {

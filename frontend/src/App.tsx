@@ -26,6 +26,12 @@ export default function App() {
           <nav className="ml-auto flex items-center gap-3">
             {isAuthed ? (
               <>
+                <Link
+                  to="/"
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent"
+                >
+                  Home
+                </Link>
                 {user?.role === "admin" && (
                   <Link
                     to="/admin"
@@ -53,6 +59,9 @@ export default function App() {
               </>
             ) : (
               <div className="flex items-center gap-2">
+                <Button asChild variant="ghost" size="sm">
+                  <Link to="/">Home</Link>
+                </Button>
                 <Button asChild variant="ghost" size="sm">
                   <Link to="/login">Sign in</Link>
                 </Button>
