@@ -35,7 +35,7 @@ export default function JoinCategoryModal({
   const onSubmit = async () => {
     setSubmitting(true)
     try {
-      await api.post("/api/v1/users/me/subscriptions", {
+      await api.post("/users/me/subscriptions", {
         category_id: categoryId,
         password: password || undefined,
       })

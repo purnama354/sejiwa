@@ -39,7 +39,7 @@ export default function SubscriptionButton({
 
   const subscribeMutation = useMutation({
     mutationFn: async (password?: string) => {
-      const { data } = await api.post("/api/v1/users/me/subscriptions", {
+      const { data } = await api.post("/users/me/subscriptions", {
         category_id: categoryId,
         password,
       })
@@ -64,7 +64,7 @@ export default function SubscriptionButton({
 
   const unsubscribeMutation = useMutation({
     mutationFn: async () => {
-      const { data } = await api.delete("/api/v1/users/me/subscriptions", {
+      const { data } = await api.delete("/users/me/subscriptions", {
         data: { category_id: categoryId },
       })
       return data

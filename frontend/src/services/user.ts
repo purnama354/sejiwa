@@ -50,38 +50,38 @@ export type CategorySubscription = {
 
 // Get user statistics
 export async function getUserStats(): Promise<UserStats> {
-  const { data } = await api.get("/api/v1/users/me/stats")
+  const { data } = await api.get("/users/me/stats")
   return data
 }
 
 // Get user activity (threads, replies, saved)
 export async function getUserActivity(): Promise<UserActivity> {
-  const { data } = await api.get("/api/v1/users/me/activity")
+  const { data } = await api.get("/users/me/activity")
   return data
 }
 
 // Get user's subscribed categories
 export async function getUserCategories(): Promise<CategorySubscription[]> {
   // Prefer subscriptions endpoint now that it's backed by a real table
-  const { data } = await api.get("/api/v1/users/me/subscriptions")
+  const { data } = await api.get("/users/me/subscriptions")
   return data
 }
 
 // Saved threads APIs
 export async function listSavedThreads() {
-  const { data } = await api.get("/api/v1/users/me/saved-threads")
+  const { data } = await api.get("/users/me/saved-threads")
   return data
 }
 
 export async function saveThread(thread_id: string) {
-  const { data } = await api.post("/api/v1/users/me/saved-threads", {
+  const { data } = await api.post("/users/me/saved-threads", {
     thread_id,
   })
   return data
 }
 
 export async function unsaveThread(thread_id: string) {
-  const { data } = await api.delete("/api/v1/users/me/saved-threads", {
+  const { data } = await api.delete("/users/me/saved-threads", {
     data: { thread_id },
   })
   return data
@@ -89,7 +89,7 @@ export async function unsaveThread(thread_id: string) {
 
 // Get user's notification preferences
 export async function getUserNotificationPreferences() {
-  const { data } = await api.get("/api/v1/users/me/preferences")
+  const { data } = await api.get("/users/me/preferences")
   return data.notifications
 }
 
@@ -101,7 +101,7 @@ export async function updateUserNotificationPreferences(preferences: {
   community_announcements?: boolean
 }) {
   const { data } = await api.put(
-    "/api/v1/users/me/preferences/notifications",
+    "/users/me/preferences/notifications",
     preferences
   )
   return data
@@ -109,7 +109,7 @@ export async function updateUserNotificationPreferences(preferences: {
 
 // Get user privacy settings
 export async function getUserPrivacySettings() {
-  const { data } = await api.get("/api/v1/users/me/preferences")
+  const { data } = await api.get("/users/me/preferences")
   return data.privacy
 }
 
@@ -119,9 +119,6 @@ export async function updateUserPrivacySettings(settings: {
   allow_direct_messages?: boolean
   content_visibility?: "all" | "categories" | "none"
 }) {
-  const { data } = await api.put(
-    "/api/v1/users/me/preferences/privacy",
-    settings
-  )
+  const { data } = await api.put("/users/me/preferences/privacy", settings)
   return data
 }

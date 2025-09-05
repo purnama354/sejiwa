@@ -1,20 +1,23 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import {
-  Lock,
-  MessageSquare,
-  Clock,
-  Shield,
-  ChevronLeft,
-  ArrowLeft,
-} from "lucide-react"
+import { Lock, MessageSquare, Clock, Shield, ArrowLeft } from "lucide-react"
 import api from "@/lib/api"
 import PrivateCategoryCTA from "@/components/private-category-cta"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { Thread } from "@/types/api"
+
+type ThreadItem = {
+  id: string
+  title: string
+  created_at: string
+  reply_count: number
+  is_locked?: boolean
+  is_pinned?: boolean
+  preview?: string
+  content: string
+}
 
 export default function CategoryDetails() {
   const { id } = useParams<{ id: string }>()
@@ -22,32 +25,24 @@ export default function CategoryDetails() {
   const [is403, setIs403] = useState(false)
   const [categoryName, setCategoryName] = useState("")
 
-  const {
-    data: category,
-    isLoading: categoryLoading,
-    error: categoryError,
-  } = useQuery({
+  const { data: category, isLoading: categoryLoading } = useQuery({
     queryKey: ["category", id],
     queryFn: async () => {
       try {
-        const { data } = await api.get(`/api/v1/categories/${id}`)
+        const { data } = await api.get(`/categories/${id}`)
         setCategoryName(data.name)
         return data
-      } catch (error) {
+      } catch {
         return null
       }
     },
   })
 
-  const {
-    data: threadsData,
-    isLoading: threadsLoading,
-    error: threadsError,
-  } = useQuery({
+  const { data: threadsData, isLoading: threadsLoading } = useQuery({
     queryKey: ["category-threads", id],
     queryFn: async () => {
       try {
-        const { data } = await api.get(`/api/v1/categories/${id}/threads`)
+        const { data } = await api.get(`/categories/${id}/threads`)
         setIs403(false)
         return data
       } catch (error) {
@@ -146,7 +141,7 @@ export default function CategoryDetails() {
       {/* Threads List */}
       {!is403 && threadsData?.threads && threadsData.threads.length > 0 ? (
         <div className="space-y-4">
-          {threadsData.threads.map((thread: Thread) => (
+          {threadsData.threads.map((thread: ThreadItem) => (
             <Card key={thread.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">

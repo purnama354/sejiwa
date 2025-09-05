@@ -8,7 +8,13 @@ import api from "@/lib/api"
 import PrivateCategoryCTA from "@/components/private-category-cta"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import SaveThreadButton from "@/components/save-thread-button"
-import type { Reply } from "@/types/api"
+type ReplyItem = {
+  id: string
+  author_username: string
+  created_at: string
+  is_edited?: boolean
+  content: string
+}
 
 export default function ThreadDetails() {
   const { id } = useParams<{ id: string }>()
@@ -21,7 +27,7 @@ export default function ThreadDetails() {
     queryKey: ["thread", id],
     queryFn: async () => {
       try {
-        const { data } = await api.get(`/api/v1/threads/${id}`)
+        const { data } = await api.get(`/threads/${id}`)
         setIs403(false)
         // Store category info for potential 403 handling
         if (data.category) {
@@ -54,7 +60,7 @@ export default function ThreadDetails() {
   const { data: replies, isLoading: repliesLoading } = useQuery({
     queryKey: ["thread-replies", id],
     queryFn: async () => {
-      const { data } = await api.get(`/api/v1/threads/${id}/replies`)
+      const { data } = await api.get(`/threads/${id}/replies`)
       return data
     },
     enabled: !!thread && !is403, // Only fetch replies if thread loaded and no 403
@@ -187,7 +193,7 @@ export default function ThreadDetails() {
               </div>
             ) : replies?.replies && replies.replies.length > 0 ? (
               <div className="space-y-4">
-                {replies.replies.map((reply: Reply) => (
+                {replies.replies.map((reply: ReplyItem) => (
                   <Card key={reply.id} className="bg-white/80">
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">

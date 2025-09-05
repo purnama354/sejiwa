@@ -6,7 +6,11 @@ import {
   updateCategory,
   deleteCategory,
 } from "@/services/categories"
-import type { Category, CreateCategoryRequest } from "@/types/api"
+import type {
+  Category,
+  CreateCategoryRequest,
+  UpdateCategoryRequest,
+} from "@/types/api"
 import {
   Plus,
   Edit3,
@@ -219,7 +223,7 @@ function CategoryCard({
   isDeleting,
 }: {
   category: Category
-  onUpdate: (data: Partial<Category>) => void
+  onUpdate: (data: UpdateCategoryRequest) => void
   onDelete: () => void
   isUpdating: boolean
   isDeleting: boolean
@@ -236,7 +240,7 @@ function CategoryCard({
 
   const handleSave = () => {
     // Prepare data for update
-    const updateData: Partial<Category> = {
+    const updateData: UpdateCategoryRequest = {
       name: editData.name,
       description: editData.description,
       is_locked: editData.is_locked,
