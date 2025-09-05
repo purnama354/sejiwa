@@ -1,8 +1,9 @@
 import { Outlet, Link } from "react-router-dom"
+import { useState } from "react"
 import { useAuthStore, type AuthState } from "@/store/auth"
 import LogoutButton from "@/components/logout-button"
 import { Button } from "@/components/ui/button"
-import { Heart, Shield } from "lucide-react"
+import { Heart, Shield, Menu } from "lucide-react"
 import "./App.css"
 
 export default function App() {
@@ -11,7 +12,7 @@ export default function App() {
   return (
     <div className="min-h-dvh flex flex-col">
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center gap-4">
+        <div className="mx-auto max-w-6xl px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-4">
           <Link
             to="/"
             className="flex items-center gap-2 font-bold text-lg hover:opacity-80 transition-opacity"
@@ -23,7 +24,8 @@ export default function App() {
               Sejiwa
             </span>
           </Link>
-          <nav className="ml-auto flex items-center gap-3">
+          {/* Desktop nav */}
+          <nav className="ml-auto hidden sm:flex items-center gap-3">
             {isAuthed ? (
               <>
                 <Link
@@ -32,6 +34,14 @@ export default function App() {
                 >
                   Home
                 </Link>
+                {user?.role === "user" && (
+                  <Link
+                    to="/dashboard"
+                    className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent"
+                  >
+                    Dashboard
+                  </Link>
+                )}
                 {user?.role === "admin" && (
                   <Link
                     to="/admin"
@@ -51,7 +61,7 @@ export default function App() {
                   </Link>
                 )}
                 <div className="flex items-center gap-3 pl-3 border-l border-border">
-                  <span className="text-sm font-medium text-foreground">
+                  <span className="text-sm font-medium text-foreground hidden sm:inline">
                     {user?.username}
                   </span>
                   <LogoutButton />
@@ -71,6 +81,8 @@ export default function App() {
               </div>
             )}
           </nav>
+          {/* Mobile menu toggle */}
+          <MobileNav isAuthed={isAuthed} userRole={user?.role || null} username={user?.username || null} />
         </div>
       </header>
       <main className="flex-1">
@@ -81,6 +93,101 @@ export default function App() {
           © {new Date().getFullYear()} Sejiwa
         </div>
       </footer>
+    </div>
+  )
+}
+
+type MobileNavProps = {
+  isAuthed: boolean
+  userRole: string | null
+  username: string | null
+}
+
+function MobileNav({ isAuthed, userRole, username }: MobileNavProps) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="ml-auto sm:hidden relative">
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label="Toggle menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <Menu className="w-5 h-5" />
+      </Button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-56 rounded-lg border bg-background shadow-lg p-2 z-50">
+          {isAuthed ? (
+            <div className="flex flex-col">
+              <Link
+                to="/"
+                className="px-3 py-2 rounded-md text-sm hover:bg-accent"
+                onClick={() => setOpen(false)}
+              >
+                Home
+              </Link>
+              {userRole === "user" && (
+                <Link
+                  to="/dashboard"
+                  className="px-3 py-2 rounded-md text-sm hover:bg-accent"
+                  onClick={() => setOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              )}
+              {userRole === "admin" && (
+                <Link
+                  to="/admin"
+                  className="px-3 py-2 rounded-md text-sm hover:bg-accent"
+                  onClick={() => setOpen(false)}
+                >
+                  Admin
+                </Link>
+              )}
+              {userRole === "moderator" && (
+                <Link
+                  to="/moderation"
+                  className="px-3 py-2 rounded-md text-sm hover:bg-accent"
+                  onClick={() => setOpen(false)}
+                >
+                  Moderation
+                </Link>
+              )}
+              {username && (
+                <div className="px-3 pt-2 pb-1 text-xs text-muted-foreground">Signed in as {username}</div>
+              )}
+              <div className="px-2 pt-1">
+                <LogoutButton />
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col">
+              <Link
+                to="/"
+                className="px-3 py-2 rounded-md text-sm hover:bg-accent"
+                onClick={() => setOpen(false)}
+              >
+                Home
+              </Link>
+              <Link
+                to="/login"
+                className="px-3 py-2 rounded-md text-sm hover:bg-accent"
+                onClick={() => setOpen(false)}
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/register"
+                className="px-3 py-2 rounded-md text-sm hover:bg-accent"
+                onClick={() => setOpen(false)}
+              >
+                Get started
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
