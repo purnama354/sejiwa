@@ -29,6 +29,9 @@ type CreateAdminRequest struct {
 type CreateCategoryRequest struct {
 	Name        string `json:"name" binding:"required,min=3,max=50"`
 	Description string `json:"description,omitempty" binding:"max=255"`
+	IsPrivate   bool   `json:"is_private"`
+	// Password is optional; if provided for private categories, will be hashed and stored
+	Password *string `json:"password,omitempty" binding:"omitempty,min=4,max=128"`
 }
 
 // CreateThreadRequest defines the structure for creating a new thread
@@ -80,7 +83,8 @@ type UpdatePrivacySettingsRequest struct {
 
 // Subscription and saved thread requests
 type SubscribeRequest struct {
-	CategoryID string `json:"category_id" binding:"required,uuid"`
+	CategoryID string  `json:"category_id" binding:"required,uuid"`
+	Password   *string `json:"password,omitempty" binding:"omitempty,min=0,max=128"`
 }
 
 type UnsubscribeRequest struct {

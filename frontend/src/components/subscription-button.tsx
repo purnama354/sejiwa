@@ -1,15 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Heart, HeartOff, Plus, Minus } from "lucide-react"
+import { Heart, HeartOff, Plus, Minus, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { getUserCategories } from "@/services/user"
 import api from "@/lib/api"
+import { useState } from "react"
+import JoinCategoryModal from "@/components/join-category-modal"
 
 interface SubscriptionButtonProps {
   categoryId: string
   categoryName: string
   isSubscribed?: boolean
   variant?: "default" | "compact"
+  isPrivate?: boolean
 }
 
 export default function SubscriptionButton({
@@ -17,6 +20,7 @@ export default function SubscriptionButton({
   categoryName,
   isSubscribed: initialSubscribed,
   variant = "default",
+  isPrivate = false,
 }: SubscriptionButtonProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -34,9 +38,10 @@ export default function SubscriptionButton({
     false
 
   const subscribeMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (password?: string) => {
       const { data } = await api.post("/api/v1/users/me/subscriptions", {
         category_id: categoryId,
+        password,
       })
       return data
     },
@@ -48,11 +53,11 @@ export default function SubscriptionButton({
         description: `You're now following ${categoryName}.`,
       })
     },
-  onError: () => {
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to subscribe. Please try again.",
-    variant: "error",
+        variant: "error",
       })
     },
   })
@@ -72,20 +77,38 @@ export default function SubscriptionButton({
         description: `You're no longer following ${categoryName}.`,
       })
     },
-  onError: () => {
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to unsubscribe. Please try again.",
-    variant: "error",
+        variant: "error",
       })
     },
   })
 
-  const handleToggleSubscription = () => {
+  const [showJoin, setShowJoin] = useState(false)
+
+  const handleToggleSubscription = async () => {
     if (isSubscribed) {
       unsubscribeMutation.mutate()
     } else {
-      subscribeMutation.mutate()
+      try {
+        await subscribeMutation.mutateAsync(undefined)
+      } catch (e) {
+        const status = (e as { response?: { status?: number } })?.response
+          ?.status
+        const code = (e as { response?: { data?: { code?: string } } })
+          ?.response?.data?.code
+  if ((status === 400 && code === "PASSWORD_REQUIRED") || status === 403) {
+          setShowJoin(true)
+        } else if (status === 401 && code === "INVALID_PASSWORD") {
+          toast({
+            title: "Invalid password",
+            description: "Please try again.",
+            variant: "error",
+          })
+        }
+      }
     }
   }
 
@@ -93,46 +116,62 @@ export default function SubscriptionButton({
 
   if (variant === "compact") {
     return (
-      <Button
-        variant={isSubscribed ? "secondary" : "default"}
-        size="sm"
-        onClick={handleToggleSubscription}
-        disabled={isPending}
-        className="flex items-center gap-1"
-      >
-        {isSubscribed ? (
-          <>
-            <Minus className="w-3 h-3" />
-            Unfollow
-          </>
-        ) : (
-          <>
-            <Plus className="w-3 h-3" />
-            Follow
-          </>
-        )}
-      </Button>
+      <>
+        <Button
+          variant={isSubscribed ? "secondary" : "default"}
+          size="sm"
+          onClick={handleToggleSubscription}
+          disabled={isPending}
+          className="flex items-center gap-1"
+        >
+          {isSubscribed ? (
+            <>
+              <Minus className="w-3 h-3" />
+              Unfollow
+            </>
+          ) : (
+            <>
+              <Plus className="w-3 h-3" />
+              Follow
+            </>
+          )}
+        </Button>
+        <JoinCategoryModal
+          isOpen={showJoin}
+          onClose={() => setShowJoin(false)}
+          categoryId={categoryId}
+          categoryName={categoryName}
+        />
+      </>
     )
   }
 
   return (
-    <Button
-      variant={isSubscribed ? "outline" : "default"}
-      onClick={handleToggleSubscription}
-      disabled={isPending}
-      className="flex items-center gap-2"
-    >
-      {isSubscribed ? (
-        <>
-          <HeartOff className="w-4 h-4" />
-          Unsubscribe
-        </>
-      ) : (
-        <>
-          <Heart className="w-4 h-4" />
-          Subscribe
-        </>
-      )}
-    </Button>
+    <>
+      <Button
+        variant={isSubscribed ? "outline" : "default"}
+        onClick={handleToggleSubscription}
+        disabled={isPending}
+        className="flex items-center gap-2"
+      >
+        {isSubscribed ? (
+          <>
+            <HeartOff className="w-4 h-4" />
+            Unsubscribe
+          </>
+        ) : (
+          <>
+            {isPrivate ? <Lock className="w-4 h-4" /> : <Heart className="w-4 h-4" />}
+            {isPrivate ? "Join" : "Subscribe"}
+          </>
+        )}
+      </Button>
+      <JoinCategoryModal
+        isOpen={showJoin}
+        onClose={() => setShowJoin(false)}
+        categoryId={categoryId}
+        categoryName={categoryName}
+      />
+    </>
   )
 }

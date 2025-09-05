@@ -6,6 +6,9 @@ type UpdateCategoryRequest struct {
 	Name        *string `json:"name,omitempty" binding:"omitempty,min=3,max=50"`
 	Description *string `json:"description,omitempty" binding:"omitempty,max=255"`
 	IsLocked    *bool   `json:"is_locked,omitempty"`
+	IsPrivate   *bool   `json:"is_private,omitempty"`
+	// SetPassword allows admins to set/replace the join password; send empty string to clear
+	SetPassword *string `json:"set_password,omitempty" binding:"omitempty,min=0,max=128"`
 }
 
 // AuthResponse defines the structure for successful authentication responses.
@@ -41,6 +44,7 @@ type CategoryResponse struct {
 	Description string    `json:"description"`
 	ThreadCount int       `json:"thread_count"`
 	IsLocked    bool      `json:"is_locked"`
+	IsPrivate   bool      `json:"is_private"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }

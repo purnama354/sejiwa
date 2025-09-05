@@ -7,7 +7,8 @@ import {
   deleteCategory,
 } from "@/services/categories"
 import type { Category, CreateCategoryRequest } from "@/types/api"
-import { Plus, Edit3, Trash2, Lock, Save, X, Folder, Hash } from "lucide-react"
+import { Plus, Edit3, Trash2, Lock, Save, X, Folder, Hash, Shield } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 export default function AdminCategories() {
   const qc = useQueryClient()
@@ -218,6 +219,7 @@ function CategoryCard({
     name: category.name,
     description: category.description,
     is_locked: category.is_locked,
+  is_private: category.is_private,
   })
 
   const handleSave = () => {
@@ -229,7 +231,8 @@ function CategoryCard({
     setEditData({
       name: category.name,
       description: category.description,
-      is_locked: category.is_locked,
+  is_locked: category.is_locked,
+  is_private: category.is_private,
     })
     setIsEditing(false)
   }
@@ -301,6 +304,17 @@ function CategoryCard({
             />
             <span className="text-slate-600">Lock category</span>
           </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={editData.is_private}
+              onChange={(e) =>
+                setEditData({ ...editData, is_private: e.target.checked })
+              }
+              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-slate-600">Private category</span>
+          </label>
           <div className="flex items-center gap-2">
             <button
               onClick={handleSave}
@@ -321,7 +335,14 @@ function CategoryCard({
         </div>
       ) : (
         <div>
-          <h3 className="font-semibold text-slate-900 mb-1">{category.name}</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-slate-900">{category.name}</h3>
+            {category.is_private && (
+              <Badge variant="warning" className="gap-1">
+                <Shield className="w-3 h-3" /> Private
+              </Badge>
+            )}
+          </div>
           <p className="text-slate-600 text-sm mb-3 line-clamp-2">
             {category.description || "No description"}
           </p>

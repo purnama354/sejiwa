@@ -119,6 +119,10 @@ func (h *ThreadHandler) GetByID(c *gin.Context) {
 			c.JSON(http.StatusNotFound, dto.NewErrorResponse("Thread not found", "THREAD_NOT_FOUND", nil))
 			return
 		}
+		if errors.Is(err, services.ErrCategoryPrivate) {
+			c.JSON(http.StatusForbidden, dto.NewErrorResponse("Category is private. Join to view this thread.", "CATEGORY_PRIVATE", nil))
+			return
+		}
 		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to retrieve thread", "INTERNAL_SERVER_ERROR", nil))
 		return
 	}
@@ -135,10 +139,20 @@ func (h *ThreadHandler) GetByCategory(c *gin.Context) {
 
 	page, pageSize := h.getPaginationParams(c)
 
-	threads, err := h.threadService.GetByCategory(categoryID, page, pageSize)
+	var userID *uuid.UUID
+	if uid, exists := c.Get(middleware.ContextUserIDKey); exists {
+		parsed := uid.(uuid.UUID)
+		userID = &parsed
+	}
+
+	threads, err := h.threadService.GetByCategory(categoryID, page, pageSize, userID)
 	if err != nil {
 		if errors.Is(err, services.ErrCategoryNotFound) {
 			c.JSON(http.StatusNotFound, dto.NewErrorResponse("Category not found", "CATEGORY_NOT_FOUND", nil))
+			return
+		}
+		if errors.Is(err, services.ErrCategoryPrivate) {
+			c.JSON(http.StatusForbidden, dto.NewErrorResponse("Category is private. Join to view threads.", "CATEGORY_PRIVATE", nil))
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to retrieve threads", "INTERNAL_SERVER_ERROR", nil))

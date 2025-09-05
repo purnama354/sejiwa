@@ -4,7 +4,14 @@ import {
   updateUserNotificationPreferences,
 } from "@/services/user"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, Users, MessageSquare, ListFilter, Check, AtSign } from "lucide-react"
+import {
+  ChevronLeft,
+  Users,
+  MessageSquare,
+  ListFilter,
+  Check,
+  AtSign,
+} from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 type NotificationPreferences = {

@@ -167,6 +167,9 @@ definitions:
       category_id:
         type: string
         format: uuid
+      password:
+        type: string
+        description: Optional password when joining a private category
 
   SaveThreadRequest:
     type: object
@@ -250,6 +253,8 @@ definitions:
         type: string
       IsLocked:
         type: boolean
+      IsPrivate:
+        type: boolean
       Name:
         type: string
       Slug:
@@ -277,6 +282,9 @@ definitions:
       is_locked:
         type: boolean
         x-go-name: IsLocked
+      is_private:
+        type: boolean
+        x-go-name: IsPrivate
       name:
         type: string
         x-go-name: Name
@@ -316,6 +324,12 @@ definitions:
       description:
         type: string
         x-go-name: Description
+      is_private:
+        type: boolean
+        x-go-name: IsPrivate
+      password:
+        type: string
+        x-go-name: Password
       name:
         type: string
         x-go-name: Name
@@ -1285,6 +1299,12 @@ definitions:
       is_locked:
         type: boolean
         x-go-name: IsLocked
+      is_private:
+        type: boolean
+        x-go-name: IsPrivate
+      set_password:
+        type: string
+        x-go-name: SetPassword
       name:
         type: string
         x-go-name: Name
@@ -1516,7 +1536,7 @@ paths:
           name: request
           required: true
           schema:
-            $ref: "#/definitions/SubscribeRequest"
+            $ref: "#/definitions/SubscriptionRequest"
       responses:
         "200":
           $ref: "#/responses/successResponse"

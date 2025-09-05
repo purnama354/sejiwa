@@ -7,6 +7,7 @@ import (
 	"github.com/purnama354/sejiwa-api/internal/dto"
 	"github.com/purnama354/sejiwa-api/internal/models"
 	"github.com/purnama354/sejiwa-api/internal/repository"
+	"github.com/purnama354/sejiwa-api/internal/utils"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -28,6 +29,8 @@ type UserService interface {
 	GetMyActivity(userID uuid.UUID) (*dto.UserActivityResponse, error)
 	GetMyCategories(userID uuid.UUID) ([]dto.CategorySubscription, error)
 	SubscribeCategory(userID, categoryID uuid.UUID) error
+	// JoinCategory validates access for private categories; if password is set, it must match. On success, subscribes the user.
+	JoinCategory(userID, categoryID uuid.UUID, password *string) error
 	UnsubscribeCategory(userID, categoryID uuid.UUID) error
 	ListSavedThreads(userID uuid.UUID, offset, limit int) ([]dto.ThreadPreview, int64, error)
 	SaveThread(userID, threadID uuid.UUID) error
@@ -35,25 +38,27 @@ type UserService interface {
 }
 
 type userService struct {
-	userRepo repository.UserRepository
-	prefRepo repository.PreferencesRepository
-	threadRepo repository.ThreadRepository
-	replyRepo  repository.ReplyRepository
-	reportRepo repository.ReportRepository
-	subRepo    repository.SubscriptionRepository
-	savedRepo  repository.SavedThreadRepository
+	userRepo     repository.UserRepository
+	prefRepo     repository.PreferencesRepository
+	threadRepo   repository.ThreadRepository
+	replyRepo    repository.ReplyRepository
+	reportRepo   repository.ReportRepository
+	subRepo      repository.SubscriptionRepository
+	savedRepo    repository.SavedThreadRepository
+	categoryRepo repository.CategoryRepository
 }
 
 // NewUserService creates a new instance of UserService
-func NewUserService(userRepo repository.UserRepository, prefRepo repository.PreferencesRepository, threadRepo repository.ThreadRepository, replyRepo repository.ReplyRepository, reportRepo repository.ReportRepository, subRepo repository.SubscriptionRepository, savedRepo repository.SavedThreadRepository) UserService {
+func NewUserService(userRepo repository.UserRepository, prefRepo repository.PreferencesRepository, threadRepo repository.ThreadRepository, replyRepo repository.ReplyRepository, reportRepo repository.ReportRepository, subRepo repository.SubscriptionRepository, savedRepo repository.SavedThreadRepository, categoryRepo repository.CategoryRepository) UserService {
 	return &userService{
-	userRepo: userRepo,
-	prefRepo: prefRepo,
-		threadRepo: threadRepo,
-		replyRepo: replyRepo,
-		reportRepo: reportRepo,
-	subRepo: subRepo,
-	savedRepo: savedRepo,
+		userRepo:     userRepo,
+		prefRepo:     prefRepo,
+		threadRepo:   threadRepo,
+		replyRepo:    replyRepo,
+		reportRepo:   reportRepo,
+		subRepo:      subRepo,
+		savedRepo:    savedRepo,
+		categoryRepo: categoryRepo,
 	}
 }
 
@@ -298,13 +303,15 @@ func (s *userService) GetMyActivity(userID uuid.UUID) (*dto.UserActivityResponse
 // GetMyCategories returns unique categories from user's threads (approximation of subscriptions)
 func (s *userService) GetMyCategories(userID uuid.UUID) ([]dto.CategorySubscription, error) {
 	subs, err := s.subRepo.ListByUser(userID)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	out := make([]dto.CategorySubscription, 0, len(subs))
 	for _, ssub := range subs {
 		out = append(out, dto.CategorySubscription{
-			ID: ssub.Category.ID.String(),
-			Name: ssub.Category.Name,
-			Slug: ssub.Category.Slug,
+			ID:          ssub.Category.ID.String(),
+			Name:        ssub.Category.Name,
+			Slug:        ssub.Category.Slug,
 			ThreadCount: ssub.Category.ThreadCount,
 			Description: ssub.Category.Description,
 		})
@@ -316,28 +323,53 @@ func (s *userService) SubscribeCategory(userID, categoryID uuid.UUID) error {
 	return s.subRepo.Subscribe(userID, categoryID)
 }
 
+func (s *userService) JoinCategory(userID, categoryID uuid.UUID, password *string) error {
+	// Fetch category
+	cat, err := s.categoryRepo.FindByID(categoryID)
+	if err != nil {
+		return err
+	}
+	if !cat.IsPrivate {
+		return s.subRepo.Subscribe(userID, categoryID)
+	}
+	// Private: if password is set on category, verify
+	if cat.Password != nil && *cat.Password != "" {
+		if password == nil {
+			return errors.New("PASSWORD_REQUIRED")
+		}
+		if !utils.CheckPasswordHash(*password, *cat.Password) {
+			return errors.New("INVALID_PASSWORD")
+		}
+	}
+	return s.subRepo.Subscribe(userID, categoryID)
+}
+
 func (s *userService) UnsubscribeCategory(userID, categoryID uuid.UUID) error {
 	return s.subRepo.Unsubscribe(userID, categoryID)
 }
 
 func (s *userService) ListSavedThreads(userID uuid.UUID, offset, limit int) ([]dto.ThreadPreview, int64, error) {
 	saved, total, err := s.savedRepo.ListByUser(userID, offset, limit)
-	if err != nil { return nil, 0, err }
+	if err != nil {
+		return nil, 0, err
+	}
 	previews := make([]dto.ThreadPreview, 0, len(saved))
 	for _, st := range saved {
 		t := st.Thread
 		preview := t.Content
-		if len(preview) > 140 { preview = preview[:140] }
+		if len(preview) > 140 {
+			preview = preview[:140]
+		}
 		previews = append(previews, dto.ThreadPreview{
-			ID: t.ID.String(),
-			Title: t.Title,
-			Category: t.Category.Name,
+			ID:           t.ID.String(),
+			Title:        t.Title,
+			Category:     t.Category.Name,
 			CategorySlug: t.Category.Slug,
-			Replies: t.ReplyCount,
-			CreatedAt: t.CreatedAt.Format(time.RFC3339),
-			Preview: preview,
-			HasNew: false,
-			IsLocked: t.IsLocked,
+			Replies:      t.ReplyCount,
+			CreatedAt:    t.CreatedAt.Format(time.RFC3339),
+			Preview:      preview,
+			HasNew:       false,
+			IsLocked:     t.IsLocked,
 		})
 	}
 	return previews, total, nil

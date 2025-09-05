@@ -192,7 +192,7 @@ func RegisterRoutes(
 			userRoutes.PUT("/me/preferences/notifications", userHandler.UpdateNotificationPreferences)
 			userRoutes.PUT("/me/preferences/privacy", userHandler.UpdatePrivacySettings)
 
-			// Subscriptions
+			// Subscriptions (join/leave category; join supports optional password for private categories)
 			userRoutes.GET("/me/subscriptions", userHandler.GetMyCategories)
 			userRoutes.POST("/me/subscriptions", userHandler.SubscribeCategory)
 			userRoutes.DELETE("/me/subscriptions", userHandler.UnsubscribeCategory)

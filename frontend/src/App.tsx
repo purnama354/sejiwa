@@ -82,7 +82,11 @@ export default function App() {
             )}
           </nav>
           {/* Mobile menu toggle */}
-          <MobileNav isAuthed={isAuthed} userRole={user?.role || null} username={user?.username || null} />
+          <MobileNav
+            isAuthed={isAuthed}
+            userRole={user?.role || null}
+            username={user?.username || null}
+          />
         </div>
       </header>
       <main className="flex-1">
@@ -153,74 +157,76 @@ function MobileNav({ isAuthed, userRole, username }: MobileNavProps) {
             ref={menuRef}
             className="absolute right-0 mt-2 w-56 rounded-lg border bg-background shadow-lg p-2 z-50"
           >
-          {isAuthed ? (
-            <div className="flex flex-col">
-              <Link
-                to="/"
-                className="px-3 py-2 rounded-md text-sm hover:bg-accent"
-                onClick={() => setOpen(false)}
-              >
-                Home
-              </Link>
-              {userRole === "user" && (
+            {isAuthed ? (
+              <div className="flex flex-col">
                 <Link
-                  to="/dashboard"
+                  to="/"
                   className="px-3 py-2 rounded-md text-sm hover:bg-accent"
                   onClick={() => setOpen(false)}
                 >
-                  Dashboard
+                  Home
                 </Link>
-              )}
-              {userRole === "admin" && (
-                <Link
-                  to="/admin"
-                  className="px-3 py-2 rounded-md text-sm hover:bg-accent"
-                  onClick={() => setOpen(false)}
-                >
-                  Admin
-                </Link>
-              )}
-              {userRole === "moderator" && (
-                <Link
-                  to="/moderation"
-                  className="px-3 py-2 rounded-md text-sm hover:bg-accent"
-                  onClick={() => setOpen(false)}
-                >
-                  Moderation
-                </Link>
-              )}
-              {username && (
-                <div className="px-3 pt-2 pb-1 text-xs text-muted-foreground">Signed in as {username}</div>
-              )}
-              <div className="px-2 pt-1">
-                <LogoutButton />
+                {userRole === "user" && (
+                  <Link
+                    to="/dashboard"
+                    className="px-3 py-2 rounded-md text-sm hover:bg-accent"
+                    onClick={() => setOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                )}
+                {userRole === "admin" && (
+                  <Link
+                    to="/admin"
+                    className="px-3 py-2 rounded-md text-sm hover:bg-accent"
+                    onClick={() => setOpen(false)}
+                  >
+                    Admin
+                  </Link>
+                )}
+                {userRole === "moderator" && (
+                  <Link
+                    to="/moderation"
+                    className="px-3 py-2 rounded-md text-sm hover:bg-accent"
+                    onClick={() => setOpen(false)}
+                  >
+                    Moderation
+                  </Link>
+                )}
+                {username && (
+                  <div className="px-3 pt-2 pb-1 text-xs text-muted-foreground">
+                    Signed in as {username}
+                  </div>
+                )}
+                <div className="px-2 pt-1">
+                  <LogoutButton />
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex flex-col">
-              <Link
-                to="/"
-                className="px-3 py-2 rounded-md text-sm hover:bg-accent"
-                onClick={() => setOpen(false)}
-              >
-                Home
-              </Link>
-              <Link
-                to="/login"
-                className="px-3 py-2 rounded-md text-sm hover:bg-accent"
-                onClick={() => setOpen(false)}
-              >
-                Sign in
-              </Link>
-              <Link
-                to="/register"
-                className="px-3 py-2 rounded-md text-sm hover:bg-accent"
-                onClick={() => setOpen(false)}
-              >
-                Get started
-              </Link>
-            </div>
-          )}
+            ) : (
+              <div className="flex flex-col">
+                <Link
+                  to="/"
+                  className="px-3 py-2 rounded-md text-sm hover:bg-accent"
+                  onClick={() => setOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link
+                  to="/login"
+                  className="px-3 py-2 rounded-md text-sm hover:bg-accent"
+                  onClick={() => setOpen(false)}
+                >
+                  Sign in
+                </Link>
+                <Link
+                  to="/register"
+                  className="px-3 py-2 rounded-md text-sm hover:bg-accent"
+                  onClick={() => setOpen(false)}
+                >
+                  Get started
+                </Link>
+              </div>
+            )}
           </div>
         </>
       )}

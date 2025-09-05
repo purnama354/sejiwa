@@ -30,11 +30,11 @@ export default function SaveThreadButton({
         description: `"${threadTitle}" has been saved for later.`,
       })
     },
-  onError: () => {
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to save thread. Please try again.",
-    variant: "error",
+        variant: "error",
       })
     },
   })
@@ -49,11 +49,11 @@ export default function SaveThreadButton({
         description: `"${threadTitle}" has been removed from saved.`,
       })
     },
-  onError: () => {
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to unsave thread. Please try again.",
-    variant: "error",
+        variant: "error",
       })
     },
   })

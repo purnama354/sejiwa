@@ -58,9 +58,9 @@ func main() {
 	// Initialize services
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret)
 	adminService := services.NewAdminService(userRepo)
-	userService := services.NewUserService(userRepo, prefRepo, threadRepo, replyRepo, reportRepo, subscriptionRepo, savedThreadRepo)
+	userService := services.NewUserService(userRepo, prefRepo, threadRepo, replyRepo, reportRepo, subscriptionRepo, savedThreadRepo, categoryRepo)
 	categoryService := services.NewCategoryService(categoryRepo)
-	threadService := services.NewThreadService(threadRepo, categoryRepo, userRepo)
+	threadService := services.NewThreadService(threadRepo, categoryRepo, userRepo, subscriptionRepo)
 	replyService := services.NewReplyService(replyRepo, threadRepo, userRepo)
 	reportService := services.NewReportService(reportRepo, threadRepo, replyRepo, userRepo)
 	moderationService := services.NewModerationService(reportRepo, userRepo, threadRepo, replyRepo, moderationRepo)

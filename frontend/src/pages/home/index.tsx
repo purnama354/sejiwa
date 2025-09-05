@@ -1,5 +1,9 @@
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import SubscriptionButton from "@/components/subscription-button"
+import type { Category as CategoryType } from "@/types/api"
+import { Lock } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { listCategories } from "@/services/categories"
 import {
@@ -580,13 +584,20 @@ function ExploreCategories() {
         </div>
       ) : (
         <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {displayCategories.slice(0, 6).map((c) => (
+          {displayCategories.slice(0, 6).map((c: Partial<CategoryType>) => (
             <div
               key={c.id || c.name}
               className="group rounded-xl border bg-white/70 backdrop-blur-sm p-5 shadow hover:shadow-md transition-all"
             >
               <div className="flex items-center justify-between">
-                <div className="font-semibold text-slate-900">{c.name}</div>
+                <div className="font-semibold text-slate-900 flex items-center gap-2">
+                  {c.name}
+                  {c.is_private && (
+                    <Badge variant="warning" className="gap-1">
+                      <Lock className="w-3 h-3" /> Private
+                    </Badge>
+                  )}
+                </div>
                 <span className="text-xs rounded-full px-2 py-1 bg-secondary text-secondary-foreground">
                   {c.thread_count || 0} threads
                 </span>
@@ -595,11 +606,26 @@ function ExploreCategories() {
                 {c.description}
               </p>
               <div className="mt-4 flex gap-2">
-                <Button asChild size="sm" variant="outline">
-                  <Link to="/login">View threads</Link>
-                </Button>
+                {c.is_private ? (
+                  c.id && c.name ? (
+                    <SubscriptionButton
+                      categoryId={c.id}
+                      categoryName={c.name}
+                      isPrivate
+                      variant="compact"
+                    />
+                  ) : (
+                    <Button asChild size="sm" variant="outline">
+                      <Link to="/login">Join</Link>
+                    </Button>
+                  )
+                ) : (
+                  <Button asChild size="sm" variant="outline">
+                    <Link to={c.id ? `/categories/${c.id}` : "/login"}>View threads</Link>
+                  </Button>
+                )}
                 <Button asChild size="sm" variant="ghost">
-                  <Link to={`/preview/${c.slug || c.name.toLowerCase()}`}>
+                  <Link to={`/preview/${c.slug || c.name?.toLowerCase() || "category"}`}>
                     Preview
                   </Link>
                 </Button>

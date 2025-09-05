@@ -141,6 +141,7 @@ func toCategoryResponse(c *models.Category) dto.CategoryResponse {
 		Description: c.Description,
 		ThreadCount: c.ThreadCount,
 		IsLocked:    c.IsLocked,
+		IsPrivate:   c.IsPrivate,
 		CreatedAt:   c.CreatedAt,
 		UpdatedAt:   c.UpdatedAt,
 	}

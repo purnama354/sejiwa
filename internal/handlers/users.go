@@ -179,13 +179,13 @@ func (h *UserHandler) GetPreferences(c *gin.Context) {
 	// map to DTOs for frontend expectations
 	resp := gin.H{
 		"notifications": gin.H{
-			"thread_replies":           pref.NotifyThreadReplies,
-			"mentions":                 pref.NotifyMentions,
-			"category_updates":         pref.NotifyCategoryUpdates,
-			"community_announcements":  pref.NotifyAnnouncements,
+			"thread_replies":          pref.NotifyThreadReplies,
+			"mentions":                pref.NotifyMentions,
+			"category_updates":        pref.NotifyCategoryUpdates,
+			"community_announcements": pref.NotifyAnnouncements,
 		},
 		"privacy": gin.H{
-			"show_active_status":   pref.ShowActiveStatus,
+			"show_active_status":    pref.ShowActiveStatus,
 			"allow_direct_messages": pref.AllowDirectMessages,
 			"content_visibility":    string(pref.ContentVisibility),
 		},
@@ -236,7 +236,7 @@ func (h *UserHandler) UpdatePrivacySettings(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"show_active_status":   pref.ShowActiveStatus,
+		"show_active_status":    pref.ShowActiveStatus,
 		"allow_direct_messages": pref.AllowDirectMessages,
 		"content_visibility":    string(pref.ContentVisibility),
 	})
@@ -290,52 +290,112 @@ func (h *UserHandler) GetMyCategories(c *gin.Context) {
 // Subscribe to a category
 func (h *UserHandler) SubscribeCategory(c *gin.Context) {
 	userID, exists := c.Get(middleware.ContextUserIDKey)
-	if !exists { c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil)); return }
-	var body struct{ CategoryID string `json:"category_id" binding:"required,uuid"` }
-	if err := c.ShouldBindJSON(&body); err != nil { c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err))); return }
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	var body struct {
+		CategoryID string  `json:"category_id" binding:"required,uuid"`
+		Password   *string `json:"password,omitempty"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
+		return
+	}
 	cid, _ := uuid.Parse(body.CategoryID)
-	if err := h.userService.SubscribeCategory(userID.(uuid.UUID), cid); err != nil { c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to subscribe", "INTERNAL_SERVER_ERROR", nil)); return }
+	if err := h.userService.JoinCategory(userID.(uuid.UUID), cid, body.Password); err != nil {
+		switch err.Error() {
+		case "PASSWORD_REQUIRED":
+			c.JSON(http.StatusBadRequest, dto.NewErrorResponse("Password required to join this category", "PASSWORD_REQUIRED", nil))
+			return
+		case "INVALID_PASSWORD":
+			c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid password", "INVALID_PASSWORD", nil))
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to subscribe", "INTERNAL_SERVER_ERROR", nil))
+			return
+		}
+	}
 	c.JSON(http.StatusOK, gin.H{"subscribed": true})
 }
 
 // Unsubscribe from a category
 func (h *UserHandler) UnsubscribeCategory(c *gin.Context) {
 	userID, exists := c.Get(middleware.ContextUserIDKey)
-	if !exists { c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil)); return }
-	var body struct{ CategoryID string `json:"category_id" binding:"required,uuid"` }
-	if err := c.ShouldBindJSON(&body); err != nil { c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err))); return }
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	var body struct {
+		CategoryID string `json:"category_id" binding:"required,uuid"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
+		return
+	}
 	cid, _ := uuid.Parse(body.CategoryID)
-	if err := h.userService.UnsubscribeCategory(userID.(uuid.UUID), cid); err != nil { c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to unsubscribe", "INTERNAL_SERVER_ERROR", nil)); return }
+	if err := h.userService.UnsubscribeCategory(userID.(uuid.UUID), cid); err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to unsubscribe", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"subscribed": false})
 }
 
 // List saved threads
 func (h *UserHandler) ListSavedThreads(c *gin.Context) {
 	userID, exists := c.Get(middleware.ContextUserIDKey)
-	if !exists { c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil)); return }
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
 	previews, total, err := h.userService.ListSavedThreads(userID.(uuid.UUID), 0, 20)
-	if err != nil { c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to get saved threads", "INTERNAL_SERVER_ERROR", nil)); return }
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to get saved threads", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"items": previews, "total": total})
 }
 
 // Save a thread
 func (h *UserHandler) SaveThread(c *gin.Context) {
 	userID, exists := c.Get(middleware.ContextUserIDKey)
-	if !exists { c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil)); return }
-	var body struct{ ThreadID string `json:"thread_id" binding:"required,uuid"` }
-	if err := c.ShouldBindJSON(&body); err != nil { c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err))); return }
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	var body struct {
+		ThreadID string `json:"thread_id" binding:"required,uuid"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
+		return
+	}
 	tid, _ := uuid.Parse(body.ThreadID)
-	if err := h.userService.SaveThread(userID.(uuid.UUID), tid); err != nil { c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to save thread", "INTERNAL_SERVER_ERROR", nil)); return }
+	if err := h.userService.SaveThread(userID.(uuid.UUID), tid); err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to save thread", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"saved": true})
 }
 
 // Unsave a thread
 func (h *UserHandler) UnsaveThread(c *gin.Context) {
 	userID, exists := c.Get(middleware.ContextUserIDKey)
-	if !exists { c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil)); return }
-	var body struct{ ThreadID string `json:"thread_id" binding:"required,uuid"` }
-	if err := c.ShouldBindJSON(&body); err != nil { c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err))); return }
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	var body struct {
+		ThreadID string `json:"thread_id" binding:"required,uuid"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
+		return
+	}
 	tid, _ := uuid.Parse(body.ThreadID)
-	if err := h.userService.UnsaveThread(userID.(uuid.UUID), tid); err != nil { c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to unsave thread", "INTERNAL_SERVER_ERROR", nil)); return }
+	if err := h.userService.UnsaveThread(userID.(uuid.UUID), tid); err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to unsave thread", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"saved": false})
 }

@@ -44,7 +44,7 @@ export default function SavedThreadsPage() {
       toast({
         title: "Error",
         description: "Failed to unsave thread. Please try again.",
-  variant: "error",
+        variant: "error",
       })
     },
   })
@@ -136,78 +136,83 @@ export default function SavedThreadsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {savedThreads.map((thread: {
-            id: string
-            title: string
-            preview: string
-            category: string
-            category_slug: string
-            replies: number
-            created_at: string
-            is_locked?: boolean
-            has_new_replies?: boolean
-          }) => (
-            <Card key={thread.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg leading-tight mb-2">
-                      <button
-                        onClick={() => navigate(`/threads/${thread.id}`)}
-                        className="text-left hover:text-blue-600 transition-colors line-clamp-2"
-                      >
-                        {thread.title}
-                      </button>
-                    </CardTitle>
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                      <Badge
-                        variant="secondary"
-                        className="cursor-pointer hover:bg-blue-100"
-                        onClick={() =>
-                          navigate(`/categories/${thread.category_slug}`)
-                        }
-                      >
-                        {thread.category}
-                      </Badge>
-                      <div className="flex items-center gap-1">
-                        <MessageSquare className="w-3 h-3" />
-                        {thread.replies} replies
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {thread.created_at}
-                      </div>
-                      {thread.is_locked && (
-                        <div className="flex items-center gap-1 text-amber-600">
-                          <Lock className="w-3 h-3" />
-                          Locked
-                        </div>
-                      )}
-                      {thread.has_new_replies && (
-                        <Badge variant="default" className="text-xs">
-                          New replies
+          {savedThreads.map(
+            (thread: {
+              id: string
+              title: string
+              preview: string
+              category: string
+              category_slug: string
+              replies: number
+              created_at: string
+              is_locked?: boolean
+              has_new_replies?: boolean
+            }) => (
+              <Card
+                key={thread.id}
+                className="hover:shadow-md transition-shadow"
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-lg leading-tight mb-2">
+                        <button
+                          onClick={() => navigate(`/threads/${thread.id}`)}
+                          className="text-left hover:text-blue-600 transition-colors line-clamp-2"
+                        >
+                          {thread.title}
+                        </button>
+                      </CardTitle>
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                        <Badge
+                          variant="secondary"
+                          className="cursor-pointer hover:bg-blue-100"
+                          onClick={() =>
+                            navigate(`/categories/${thread.category_slug}`)
+                          }
+                        >
+                          {thread.category}
                         </Badge>
-                      )}
+                        <div className="flex items-center gap-1">
+                          <MessageSquare className="w-3 h-3" />
+                          {thread.replies} replies
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {thread.created_at}
+                        </div>
+                        {thread.is_locked && (
+                          <div className="flex items-center gap-1 text-amber-600">
+                            <Lock className="w-3 h-3" />
+                            Locked
+                          </div>
+                        )}
+                        {thread.has_new_replies && (
+                          <Badge variant="default" className="text-xs">
+                            New replies
+                          </Badge>
+                        )}
+                      </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleUnsave(thread.id)}
+                      disabled={unsaveMutation.isPending}
+                      className="flex-shrink-0 text-muted-foreground hover:text-red-600"
+                    >
+                      <BookmarkX className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleUnsave(thread.id)}
-                    disabled={unsaveMutation.isPending}
-                    className="flex-shrink-0 text-muted-foreground hover:text-red-600"
-                  >
-                    <BookmarkX className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {thread.preview}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {thread.preview}
+                  </p>
+                </CardContent>
+              </Card>
+            )
+          )}
         </div>
       )}
     </div>

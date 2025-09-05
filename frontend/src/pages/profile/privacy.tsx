@@ -43,7 +43,10 @@ export default function PrivacySettings() {
     fetchSettings()
   }, [])
 
-  const handleChange = (key: keyof PrivacySettings, value: any) => {
+  const handleChange = (
+    key: keyof PrivacySettings,
+    value: boolean | PrivacySettings["content_visibility"]
+  ) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
   }
 
@@ -60,7 +63,11 @@ export default function PrivacySettings() {
     }
   }
 
-  const contentVisibilityOptions = [
+  const contentVisibilityOptions: Array<{
+    value: PrivacySettings["content_visibility"]
+    label: string
+    description: string
+  }> = [
     {
       value: "all",
       label: "Everyone can see my content",

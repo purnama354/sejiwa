@@ -18,6 +18,7 @@ var (
 	ErrUnauthorizedAccess = errors.New("UNAUTHORIZED_ACCESS")
 	ErrCategoryLocked     = errors.New("CATEGORY_LOCKED")
 	ErrInvalidPage        = errors.New("INVALID_PAGE_PARAMETER")
+	ErrCategoryPrivate    = errors.New("CATEGORY_PRIVATE")
 )
 
 // ThreadService defines the interface for thread-related business logic
@@ -25,7 +26,7 @@ type ThreadService interface {
 	Create(req dto.CreateThreadRequest, authorID uuid.UUID) (*models.Thread, error)
 	GetByID(id uuid.UUID, userID *uuid.UUID, userRole *models.UserRole) (*models.Thread, error)
 	GetAll(page, pageSize int) (*dto.ThreadListResponse, error)
-	GetByCategory(categoryID uuid.UUID, page, pageSize int) (*dto.ThreadListResponse, error)
+	GetByCategory(categoryID uuid.UUID, page, pageSize int, userID *uuid.UUID) (*dto.ThreadListResponse, error)
 	GetByAuthor(authorID uuid.UUID, page, pageSize int) (*dto.ThreadListResponse, error)
 	Search(query string, page, pageSize int) (*dto.ThreadListResponse, error)
 	Update(id uuid.UUID, req dto.UpdateThreadRequest, userID uuid.UUID, userRole models.UserRole) (*models.Thread, error)
@@ -38,6 +39,7 @@ type threadService struct {
 	threadRepo   repository.ThreadRepository
 	categoryRepo repository.CategoryRepository
 	userRepo     repository.UserRepository
+	subRepo      repository.SubscriptionRepository
 }
 
 // NewThreadService creates a new instance of ThreadService
@@ -45,11 +47,13 @@ func NewThreadService(
 	threadRepo repository.ThreadRepository,
 	categoryRepo repository.CategoryRepository,
 	userRepo repository.UserRepository,
+	subRepo repository.SubscriptionRepository,
 ) ThreadService {
 	return &threadService{
 		threadRepo:   threadRepo,
 		categoryRepo: categoryRepo,
 		userRepo:     userRepo,
+		subRepo:      subRepo,
 	}
 }
 
@@ -72,6 +76,16 @@ func (s *threadService) Create(req dto.CreateThreadRequest, authorID uuid.UUID) 
 
 	if category.IsLocked {
 		return nil, ErrCategoryLocked
+	}
+
+	if category.IsPrivate {
+		subscribed, err := s.subRepo.IsSubscribed(authorID, categoryID)
+		if err != nil {
+			return nil, err
+		}
+		if !subscribed {
+			return nil, ErrCategoryPrivate
+		}
 	}
 
 	// Create new thread
@@ -105,6 +119,19 @@ func (s *threadService) Create(req dto.CreateThreadRequest, authorID uuid.UUID) 
 // GetByID retrieves a thread by ID and increments view count
 func (s *threadService) GetByID(id uuid.UUID, userID *uuid.UUID, userRole *models.UserRole) (*models.Thread, error) {
 	thread, err := s.threadRepo.FindByIDWithDetails(id)
+	// Enforce private category access
+	if thread.Category.IsPrivate {
+		if userID == nil {
+			return nil, ErrCategoryPrivate
+		}
+		subscribed, err := s.subRepo.IsSubscribed(*userID, thread.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+		if !subscribed && !(userRole != nil && (*userRole == models.RoleAdmin || *userRole == models.RoleModerator)) {
+			return nil, ErrCategoryPrivate
+		}
+	}
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrThreadNotFound
@@ -153,7 +180,7 @@ func (s *threadService) GetAll(page, pageSize int) (*dto.ThreadListResponse, err
 }
 
 // GetByCategory retrieves threads by category with pagination
-func (s *threadService) GetByCategory(categoryID uuid.UUID, page, pageSize int) (*dto.ThreadListResponse, error) {
+func (s *threadService) GetByCategory(categoryID uuid.UUID, page, pageSize int, userID *uuid.UUID) (*dto.ThreadListResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -162,12 +189,25 @@ func (s *threadService) GetByCategory(categoryID uuid.UUID, page, pageSize int) 
 	}
 
 	// Verify category exists
-	_, err := s.categoryRepo.FindByID(categoryID)
+	category, err := s.categoryRepo.FindByID(categoryID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrCategoryNotFound
 		}
 		return nil, err
+	}
+	// If category is private, require subscription
+	if category.IsPrivate {
+		if userID == nil {
+			return nil, ErrCategoryPrivate
+		}
+		subscribed, err := s.subRepo.IsSubscribed(*userID, categoryID)
+		if err != nil {
+			return nil, err
+		}
+		if !subscribed {
+			return nil, ErrCategoryPrivate
+		}
 	}
 
 	offset := (page - 1) * pageSize
