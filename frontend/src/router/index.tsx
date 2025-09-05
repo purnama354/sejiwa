@@ -16,6 +16,8 @@ const AdminCategories = lazy(() => import("@/pages/admin/categories"))
 const ModeratorLayout = lazy(() => import("@/pages/moderation/layout"))
 const ModeratorDashboard = lazy(() => import("@/pages/moderation/dashboard"))
 const AdminSettings = lazy(() => import("@/pages/admin/settings"))
+const PrivacySettings = lazy(() => import("@/pages/profile/privacy"))
+const NotificationSettings = lazy(() => import("@/pages/profile/notifications"))
 
 const router = createBrowserRouter([
   {
@@ -61,6 +63,31 @@ const router = createBrowserRouter([
             </Fallback>
           </RoleRoute>
         ),
+      },
+      {
+        path: "profile",
+        children: [
+          {
+            path: "privacy",
+            element: (
+              <RoleRoute allow={["user", "moderator", "admin"]}>
+                <Fallback>
+                  <PrivacySettings />
+                </Fallback>
+              </RoleRoute>
+            ),
+          },
+          {
+            path: "notifications",
+            element: (
+              <RoleRoute allow={["user", "moderator", "admin"]}>
+                <Fallback>
+                  <NotificationSettings />
+                </Fallback>
+              </RoleRoute>
+            ),
+          },
+        ],
       },
       {
         path: "moderation",
