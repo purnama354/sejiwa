@@ -62,7 +62,28 @@ export async function getUserActivity(): Promise<UserActivity> {
 
 // Get user's subscribed categories
 export async function getUserCategories(): Promise<CategorySubscription[]> {
-  const { data } = await api.get("/api/v1/users/me/categories")
+  // Prefer subscriptions endpoint now that it's backed by a real table
+  const { data } = await api.get("/api/v1/users/me/subscriptions")
+  return data
+}
+
+// Saved threads APIs
+export async function listSavedThreads() {
+  const { data } = await api.get("/api/v1/users/me/saved-threads")
+  return data
+}
+
+export async function saveThread(thread_id: string) {
+  const { data } = await api.post("/api/v1/users/me/saved-threads", {
+    thread_id,
+  })
+  return data
+}
+
+export async function unsaveThread(thread_id: string) {
+  const { data } = await api.delete("/api/v1/users/me/saved-threads", {
+    data: { thread_id },
+  })
   return data
 }
 

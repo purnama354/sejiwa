@@ -1,2488 +1,2562 @@
 definitions:
-    AnonymousAuthor:
-        description: AnonymousAuthor represents the anonymous author information
-        properties:
-            id:
-                type: string
-                x-go-name: ID
-            role:
-                type: string
-                x-go-name: Role
-            username:
-                type: string
-                x-go-name: Username
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    AuthResponse:
-        properties:
-            access_token:
-                type: string
-                x-go-name: AccessToken
-            expires_in:
-                format: int64
-                type: integer
-                x-go-name: ExpiresIn
-            refresh_token:
-                type: string
-                x-go-name: RefreshToken
-            token_type:
-                type: string
-                x-go-name: TokenType
-            user:
-                $ref: '#/definitions/UserProfile'
-        title: AuthResponse defines the structure for successful authentication responses.
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    BaseModel:
-        properties:
-            CreatedAt:
-                format: date-time
-                type: string
-            DeletedAt:
-                $ref: '#/definitions/DeletedAt'
-            ID:
-                format: uuid
-                type: string
-            UpdatedAt:
-                format: date-time
-                type: string
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/models
-    Category:
-        properties:
-            CreatedAt:
-                format: date-time
-                type: string
-            DeletedAt:
-                $ref: '#/definitions/DeletedAt'
-            Description:
-                type: string
-            ID:
-                format: uuid
-                type: string
-            IsLocked:
-                type: boolean
-            Name:
-                type: string
-            Slug:
-                type: string
-            ThreadCount:
-                format: int64
-                type: integer
-            UpdatedAt:
-                format: date-time
-                type: string
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/models
-    CategoryResponse:
-        properties:
-            created_at:
-                format: date-time
-                type: string
-                x-go-name: CreatedAt
-            description:
-                type: string
-                x-go-name: Description
-            id:
-                type: string
-                x-go-name: ID
-            is_locked:
-                type: boolean
-                x-go-name: IsLocked
-            name:
-                type: string
-                x-go-name: Name
-            slug:
-                type: string
-                x-go-name: Slug
-            thread_count:
-                format: int64
-                type: integer
-                x-go-name: ThreadCount
-            updated_at:
-                format: date-time
-                type: string
-                x-go-name: UpdatedAt
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    CreateAdminRequest:
-        description: CreateAdminRequest defines the structure for creating new admin accounts
-        properties:
-            email:
-                type: string
-                x-go-name: Email
-            full_name:
-                type: string
-                x-go-name: FullName
-            password:
-                type: string
-                x-go-name: Password
-            username:
-                type: string
-                x-go-name: Username
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    CreateCategoryRequest:
-        description: CreateCategoryRequest defines the structure for creating new categories
-        properties:
-            description:
-                type: string
-                x-go-name: Description
-            name:
-                type: string
-                x-go-name: Name
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    CreateModeratorNoteRequest:
-        properties:
-            note:
-                type: string
-                x-go-name: Note
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    CreateModeratorRequest:
-        description: CreateModeratorRequest defines the structure for creating new moderator accounts
-        properties:
-            email:
-                type: string
-                x-go-name: Email
-            full_name:
-                type: string
-                x-go-name: FullName
-            password:
-                type: string
-                x-go-name: Password
-            permissions:
-                items:
-                    type: string
-                type: array
-                x-go-name: Permissions
-            username:
-                type: string
-                x-go-name: Username
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    CreateReplyRequest:
-        properties:
-            content:
-                type: string
-                x-go-name: Content
-            parent_reply_id:
-                type: string
-                x-go-name: ParentReplyID
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    CreateReportRequest:
-        description: CreateReportRequest defines the structure for creating a new report
-        properties:
-            content_id:
-                type: string
-                x-go-name: ContentID
-            content_type:
-                type: string
-                x-go-name: ContentType
-            description:
-                type: string
-                x-go-name: Description
-            reason:
-                type: string
-                x-go-name: Reason
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    CreateThreadRequest:
-        description: CreateThreadRequest defines the structure for creating a new thread
-        properties:
-            category_id:
-                type: string
-                x-go-name: CategoryID
-            content:
-                type: string
-                x-go-name: Content
-            title:
-                type: string
-                x-go-name: Title
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    DeletedAt:
-        $ref: '#/definitions/NullTime'
-    ErrorResponse:
-        description: ErrorResponse defines the standard error response structure
-        properties:
-            code:
-                type: string
-                x-go-name: Code
-            details:
-                items:
-                    $ref: '#/definitions/ValidationError'
-                type: array
-                x-go-name: Details
-            error:
-                type: string
-                x-go-name: Error
-            message:
-                type: string
-                x-go-name: Message
-            success:
-                type: boolean
-                x-go-name: Success
-            timestamp:
-                type: string
-                x-go-name: Timestamp
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    LoginRequest:
-        properties:
-            password:
-                type: string
-                x-go-name: Password
-            username:
-                type: string
-                x-go-name: Username
-        title: LoginRequest defines the structure for a user login request.
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    ModerationAction:
-        properties:
-            Action:
-                enum:
-                    - dismiss
-                    - warn_user
-                    - hide_content
-                    - delete_content
-                    - ban_user_temp
-                    - ban_user_permanent
-                    - unban
-                type: string
-                x-go-enum-desc: |-
-                    dismiss ModerationActionDismiss
-                    warn_user ModerationActionWarnUser
-                    hide_content ModerationActionHideContent
-                    delete_content ModerationActionDeleteContent
-                    ban_user_temp ModerationActionBanUserTemp
-                    ban_user_permanent ModerationActionBanUserPerm
-                    unban ModerationActionUnban
-            BanExpiresAt:
-                format: date-time
-                type: string
-            ContentID:
-                format: uuid
-                type: string
-            ContentType:
-                enum:
-                    - thread
-                    - reply
-                    - user
-                type: string
-                x-go-enum-desc: |-
-                    thread ContentTypeThread
-                    reply ContentTypeReply
-                    user ContentTypeUser
-            CreatedAt:
-                format: date-time
-                type: string
-            DeletedAt:
-                $ref: '#/definitions/DeletedAt'
-            ID:
-                format: uuid
-                type: string
-            InternalNotes:
-                type: string
-            Moderator:
-                $ref: '#/definitions/User'
-            ModeratorID:
-                format: uuid
-                type: string
-            Reason:
-                type: string
-            Report:
-                $ref: '#/definitions/Report'
-            ReportID:
-                format: uuid
-                type: string
-            ReportedUser:
-                $ref: '#/definitions/User'
-            ReportedUserID:
-                format: uuid
-                type: string
-            UpdatedAt:
-                format: date-time
-                type: string
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/models
-    ModerationActionListResponse:
-        description: ModerationActionListResponse for paginated moderation action lists
-        properties:
-            actions:
-                items:
-                    $ref: '#/definitions/ModerationActionResponse'
-                type: array
-                x-go-name: Actions
-            page:
-                format: int64
-                type: integer
-                x-go-name: Page
-            page_size:
-                format: int64
-                type: integer
-                x-go-name: PageSize
-            total:
-                format: int64
-                type: integer
-                x-go-name: Total
-            total_pages:
-                format: int64
-                type: integer
-                x-go-name: TotalPages
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    ModerationActionRequest:
-        description: ModerationActionRequest defines the structure for moderation actions
-        properties:
-            action:
-                type: string
-                x-go-name: Action
-            ban_duration_days:
-                format: int64
-                type: integer
-                x-go-name: BanDurationDays
-            internal_notes:
-                type: string
-                x-go-name: InternalNotes
-            reason:
-                type: string
-                x-go-name: Reason
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    ModerationActionResponse:
-        description: ModerationActionResponse defines the structure for moderation action responses
-        properties:
-            action:
-                type: string
-                x-go-name: Action
-            ban_expires_at:
-                format: date-time
-                type: string
-                x-go-name: BanExpiresAt
-            content_id:
-                type: string
-                x-go-name: ContentID
-            content_type:
-                type: string
-                x-go-name: ContentType
-            created_at:
-                format: date-time
-                type: string
-                x-go-name: CreatedAt
-            id:
-                type: string
-                x-go-name: ID
-            moderator:
-                $ref: '#/definitions/AnonymousAuthor'
-            reason:
-                type: string
-                x-go-name: Reason
-            report_id:
-                type: string
-                x-go-name: ReportID
-            reported_user_id:
-                type: string
-                x-go-name: ReportedUserID
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    ModerationReportResponse:
-        description: ModerationReportResponse defines enhanced report structure for moderators
-        properties:
-            content:
-                x-go-name: Content
-            content_id:
-                type: string
-                x-go-name: ContentID
-            content_preview:
-                type: string
-                x-go-name: ContentPreview
-            content_type:
-                type: string
-                x-go-name: ContentType
-            created_at:
-                format: date-time
-                type: string
-                x-go-name: CreatedAt
-            description:
-                type: string
-                x-go-name: Description
-            id:
-                type: string
-                x-go-name: ID
-            priority:
-                type: string
-                x-go-name: Priority
-            reason:
-                type: string
-                x-go-name: Reason
-            reported_user:
-                $ref: '#/definitions/AnonymousAuthor'
-            reported_user_history:
-                $ref: '#/definitions/ReportedUserHistory'
-            reporter:
-                $ref: '#/definitions/AnonymousAuthor'
-            status:
-                type: string
-                x-go-name: Status
-            updated_at:
-                format: date-time
-                type: string
-                x-go-name: UpdatedAt
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    ModerationStatsResponse:
-        description: ModerationStatsResponse provides moderation statistics
-        properties:
-            actions_this_month:
-                format: int64
-                type: integer
-                x-go-name: ActionsThisMonth
-            actions_this_week:
-                format: int64
-                type: integer
-                x-go-name: ActionsThisWeek
-            average_response_time_hours:
-                format: double
-                type: number
-                x-go-name: AverageResponseTime
-            content_deleted:
-                format: int64
-                type: integer
-                x-go-name: ContentDeleted
-            content_hidden:
-                format: int64
-                type: integer
-                x-go-name: ContentHidden
-            pending_reports:
-                format: int64
-                type: integer
-                x-go-name: PendingReports
-            resolved_reports:
-                format: int64
-                type: integer
-                x-go-name: ResolvedReports
-            total_reports:
-                format: int64
-                type: integer
-                x-go-name: TotalReports
-            users_banned_perm:
-                format: int64
-                type: integer
-                x-go-name: UsersBannedPerm
-            users_banned_temp:
-                format: int64
-                type: integer
-                x-go-name: UsersBannedTemp
-            users_warned:
-                format: int64
-                type: integer
-                x-go-name: UsersWarned
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    ModeratorNote:
-        properties:
-            CreatedAt:
-                format: date-time
-                type: string
-            DeletedAt:
-                $ref: '#/definitions/DeletedAt'
-            ID:
-                format: uuid
-                type: string
-            UpdatedAt:
-                format: date-time
-                type: string
-            moderator:
-                $ref: '#/definitions/User'
-            moderator_id:
-                format: uuid
-                type: string
-                x-go-name: ModeratorID
-            note:
-                type: string
-                x-go-name: Note
-            user:
-                $ref: '#/definitions/User'
-            user_id:
-                format: uuid
-                type: string
-                x-go-name: UserID
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/models
-    ModeratorNoteResponse:
-        properties:
-            created_at:
-                format: date-time
-                type: string
-                x-go-name: CreatedAt
-            id:
-                format: uuid
-                type: string
-                x-go-name: ID
-            moderator_id:
-                format: uuid
-                type: string
-                x-go-name: ModeratorID
-            moderator_username:
-                description: Optional moderator info
-                type: string
-                x-go-name: ModeratorUsername
-            note:
-                type: string
-                x-go-name: Note
-            user_id:
-                format: uuid
-                type: string
-                x-go-name: UserID
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    ModeratorNotesListResponse:
-        properties:
-            notes:
-                items:
-                    $ref: '#/definitions/ModeratorNoteResponse'
-                type: array
-                x-go-name: Notes
-            pagination:
-                $ref: '#/definitions/PaginationResponse'
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    ModeratorProfile:
-        description: ModeratorProfile extends UserProfile for moderator-specific data
-        properties:
-            created_at:
-                type: string
-                x-go-name: CreatedAt
-            created_by:
-                type: string
-                x-go-name: CreatedBy
-            email:
-                type: string
-                x-go-name: Email
-            full_name:
-                type: string
-                x-go-name: FullName
-            id:
-                type: string
-                x-go-name: ID
-            last_active_at:
-                type: string
-                x-go-name: LastActiveAt
-            permissions:
-                items:
-                    type: string
-                type: array
-                x-go-name: Permissions
-            reply_count:
-                format: int64
-                type: integer
-                x-go-name: ReplyCount
-            role:
-                type: string
-                x-go-name: Role
-            status:
-                type: string
-                x-go-name: Status
-            thread_count:
-                format: int64
-                type: integer
-                x-go-name: ThreadCount
-            updated_at:
-                type: string
-                x-go-name: UpdatedAt
-            username:
-                type: string
-                x-go-name: Username
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    NullTime:
-        description: |-
-            NullTime implements the [Scanner] interface so
-            it can be used as a scan destination, similar to [NullString].
-        properties:
-            Time:
-                format: date-time
-                type: string
-            Valid:
-                type: boolean
-        title: NullTime represents a [time.Time] that may be null.
-        type: object
-        x-go-package: database/sql
-    PaginationResponse:
-        description: PaginationResponse defines pagination metadata for list responses
-        properties:
-            limit:
-                format: int64
-                type: integer
-                x-go-name: Limit
-            page:
-                format: int64
-                type: integer
-                x-go-name: Page
-            page_size:
-                format: int64
-                type: integer
-                x-go-name: PageSize
-            total:
-                format: int64
-                type: integer
-                x-go-name: Total
-            total_pages:
-                format: int64
-                type: integer
-                x-go-name: TotalPages
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    Permissions:
-        description: Permissions for moderators (stored as JSON in database)
+  AnonymousAuthor:
+    description: AnonymousAuthor represents the anonymous author information
+    properties:
+      id:
+        type: string
+        x-go-name: ID
+      role:
+        type: string
+        x-go-name: Role
+      username:
+        type: string
+        x-go-name: Username
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  AuthResponse:
+    properties:
+      access_token:
+        type: string
+        x-go-name: AccessToken
+      expires_in:
+        format: int64
+        type: integer
+        x-go-name: ExpiresIn
+      refresh_token:
+        type: string
+        x-go-name: RefreshToken
+      token_type:
+        type: string
+        x-go-name: TokenType
+      user:
+        $ref: "#/definitions/UserProfile"
+    title: AuthResponse defines the structure for successful authentication responses.
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  BaseModel:
+    properties:
+      CreatedAt:
+        format: date-time
+        type: string
+      DeletedAt:
+        $ref: "#/definitions/DeletedAt"
+      ID:
+        format: uuid
+        type: string
+      UpdatedAt:
+        format: date-time
+        type: string
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/models
+  Category:
+    properties:
+      CreatedAt:
+        format: date-time
+        type: string
+      DeletedAt:
+        $ref: "#/definitions/DeletedAt"
+      Description:
+        type: string
+      ID:
+        format: uuid
+        type: string
+      IsLocked:
+        type: boolean
+      Name:
+        type: string
+      Slug:
+        type: string
+      ThreadCount:
+        format: int64
+        type: integer
+      UpdatedAt:
+        format: date-time
+        type: string
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/models
+  CategoryResponse:
+    properties:
+      created_at:
+        format: date-time
+        type: string
+        x-go-name: CreatedAt
+      description:
+        type: string
+        x-go-name: Description
+      id:
+        type: string
+        x-go-name: ID
+      is_locked:
+        type: boolean
+        x-go-name: IsLocked
+      name:
+        type: string
+        x-go-name: Name
+      slug:
+        type: string
+        x-go-name: Slug
+      thread_count:
+        format: int64
+        type: integer
+        x-go-name: ThreadCount
+      updated_at:
+        format: date-time
+        type: string
+        x-go-name: UpdatedAt
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  CreateAdminRequest:
+    description: CreateAdminRequest defines the structure for creating new admin accounts
+    properties:
+      email:
+        type: string
+        x-go-name: Email
+      full_name:
+        type: string
+        x-go-name: FullName
+      password:
+        type: string
+        x-go-name: Password
+      username:
+        type: string
+        x-go-name: Username
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  CreateCategoryRequest:
+    description: CreateCategoryRequest defines the structure for creating new categories
+    properties:
+      description:
+        type: string
+        x-go-name: Description
+      name:
+        type: string
+        x-go-name: Name
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  CreateModeratorNoteRequest:
+    properties:
+      note:
+        type: string
+        x-go-name: Note
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  CreateModeratorRequest:
+    description: CreateModeratorRequest defines the structure for creating new moderator accounts
+    properties:
+      email:
+        type: string
+        x-go-name: Email
+      full_name:
+        type: string
+        x-go-name: FullName
+      password:
+        type: string
+        x-go-name: Password
+      permissions:
         items:
-            type: string
+          type: string
         type: array
-        x-go-package: github.com/purnama354/sejiwa-api/internal/models
-    RegisterRequest:
-        properties:
-            password:
-                type: string
-                x-go-name: Password
-            username:
-                type: string
-                x-go-name: Username
-        title: RegisterRequest defines the structure for a user registration request.
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    Reply:
-        properties:
-            Author:
-                $ref: '#/definitions/User'
-            AuthorID:
-                format: uuid
-                type: string
-            ChildReplies:
-                items:
-                    $ref: '#/definitions/Reply'
-                type: array
-            Content:
-                type: string
-            CreatedAt:
-                format: date-time
-                type: string
-            DeletedAt:
-                $ref: '#/definitions/DeletedAt'
-            ID:
-                format: uuid
-                type: string
-            IsEdited:
-                type: boolean
-            ModerationStatus:
-                enum:
-                    - pending
-                    - approved
-                    - hidden
-                    - deleted
-                type: string
-                x-go-enum-desc: |-
-                    pending ModerationStatusPending
-                    approved ModerationStatusApproved
-                    hidden ModerationStatusHidden
-                    deleted ModerationStatusDeleted
-            ParentReply:
-                $ref: '#/definitions/Reply'
-            ParentReplyID:
-                format: uuid
-                type: string
-            Thread:
-                $ref: '#/definitions/Thread'
-            ThreadID:
-                format: uuid
-                type: string
-            UpdatedAt:
-                format: date-time
-                type: string
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/models
-    ReplyListResponse:
-        description: ReplyListResponse for paginated reply lists
-        properties:
-            page:
-                format: int64
-                type: integer
-                x-go-name: Page
-            page_size:
-                format: int64
-                type: integer
-                x-go-name: PageSize
-            replies:
-                items:
-                    $ref: '#/definitions/ReplyResponse'
-                type: array
-                x-go-name: Replies
-            total:
-                format: int64
-                type: integer
-                x-go-name: Total
-            total_pages:
-                format: int64
-                type: integer
-                x-go-name: TotalPages
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    ReplyResponse:
-        description: ReplyResponse defines the structure for reply responses
-        properties:
-            author_username:
-                type: string
-                x-go-name: AuthorUsername
-            child_replies:
-                items:
-                    $ref: '#/definitions/ReplyResponse'
-                type: array
-                x-go-name: ChildReplies
-            content:
-                type: string
-                x-go-name: Content
-            created_at:
-                format: date-time
-                type: string
-                x-go-name: CreatedAt
-            id:
-                type: string
-                x-go-name: ID
-            is_edited:
-                type: boolean
-                x-go-name: IsEdited
-            moderation_status:
-                type: string
-                x-go-name: ModerationStatus
-            parent_reply_id:
-                type: string
-                x-go-name: ParentReplyID
-            thread_id:
-                type: string
-                x-go-name: ThreadID
-            updated_at:
-                format: date-time
-                type: string
-                x-go-name: UpdatedAt
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    Report:
-        properties:
-            ContentID:
-                format: uuid
-                type: string
-            ContentType:
-                enum:
-                    - thread
-                    - reply
-                    - user
-                type: string
-                x-go-enum-desc: |-
-                    thread ContentTypeThread
-                    reply ContentTypeReply
-                    user ContentTypeUser
-            CreatedAt:
-                format: date-time
-                type: string
-            DeletedAt:
-                $ref: '#/definitions/DeletedAt'
-            Description:
-                type: string
-            ID:
-                format: uuid
-                type: string
-            Priority:
-                enum:
-                    - low
-                    - medium
-                    - high
-                    - critical
-                type: string
-                x-go-enum-desc: |-
-                    low PriorityLow
-                    medium PriorityMedium
-                    high PriorityHigh
-                    critical PriorityCritical
-            Reason:
-                enum:
-                    - spam
-                    - harassment
-                    - hate_speech
-                    - inappropriate_content
-                    - self_harm
-                    - misinformation
-                    - other
-                type: string
-                x-go-enum-desc: |-
-                    spam ReasonSpam
-                    harassment ReasonHarassment
-                    hate_speech ReasonHateSpeech
-                    inappropriate_content ReasonInappropriate
-                    self_harm ReasonSelfHarm
-                    misinformation ReasonMisinformation
-                    other ReasonOther
-            ReportedUser:
-                $ref: '#/definitions/User'
-            ReportedUserID:
-                format: uuid
-                type: string
-            Reporter:
-                $ref: '#/definitions/User'
-            ReporterID:
-                format: uuid
-                type: string
-            Status:
-                enum:
-                    - pending
-                    - reviewed
-                    - resolved
-                type: string
-                x-go-enum-desc: |-
-                    pending ReportStatusPending
-                    reviewed ReportStatusReviewed
-                    resolved ReportStatusResolved
-            UpdatedAt:
-                format: date-time
-                type: string
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/models
-    ReportListResponse:
-        description: ReportListResponse for paginated report lists
-        properties:
-            page:
-                format: int64
-                type: integer
-                x-go-name: Page
-            page_size:
-                format: int64
-                type: integer
-                x-go-name: PageSize
-            reports:
-                items:
-                    $ref: '#/definitions/ModerationReportResponse'
-                type: array
-                x-go-name: Reports
-            total:
-                format: int64
-                type: integer
-                x-go-name: Total
-            total_pages:
-                format: int64
-                type: integer
-                x-go-name: TotalPages
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    ReportResponse:
-        description: ReportResponse defines the structure for report responses
-        properties:
-            content_id:
-                type: string
-                x-go-name: ContentID
-            content_type:
-                type: string
-                x-go-name: ContentType
-            created_at:
-                format: date-time
-                type: string
-                x-go-name: CreatedAt
-            description:
-                type: string
-                x-go-name: Description
-            id:
-                type: string
-                x-go-name: ID
-            priority:
-                type: string
-                x-go-name: Priority
-            reason:
-                type: string
-                x-go-name: Reason
-            reported_user_id:
-                type: string
-                x-go-name: ReportedUserID
-            reporter_id:
-                type: string
-                x-go-name: ReporterID
-            status:
-                type: string
-                x-go-name: Status
-            updated_at:
-                format: date-time
-                type: string
-                x-go-name: UpdatedAt
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    ReportedUserHistory:
-        description: ReportedUserHistory provides context about the reported user
-        properties:
-            account_age_days:
-                format: int64
-                type: integer
-                x-go-name: AccountAgeDays
-            previous_reports_count:
-                format: int64
-                type: integer
-                x-go-name: PreviousReportsCount
-            previous_violations_count:
-                format: int64
-                type: integer
-                x-go-name: PreviousViolationsCount
-            recent_activity_level:
-                type: string
-                x-go-name: RecentActivityLevel
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    SuccessResponse:
-        description: SuccessResponse defines the standard success response structure
-        properties:
-            message:
-                type: string
-                x-go-name: Message
-            success:
-                type: boolean
-                x-go-name: Success
-            timestamp:
-                type: string
-                x-go-name: Timestamp
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    Thread:
-        properties:
-            Author:
-                $ref: '#/definitions/User'
-            AuthorID:
-                format: uuid
-                type: string
-            Category:
-                $ref: '#/definitions/Category'
-            CategoryID:
-                format: uuid
-                type: string
-            Content:
-                type: string
-            CreatedAt:
-                format: date-time
-                type: string
-            DeletedAt:
-                $ref: '#/definitions/DeletedAt'
-            ID:
-                format: uuid
-                type: string
-            IsEdited:
-                type: boolean
-            IsLocked:
-                type: boolean
-            IsPinned:
-                type: boolean
-            LastReplyAt:
-                format: date-time
-                type: string
-            ModerationStatus:
-                enum:
-                    - pending
-                    - approved
-                    - hidden
-                    - deleted
-                type: string
-                x-go-enum-desc: |-
-                    pending ModerationStatusPending
-                    approved ModerationStatusApproved
-                    hidden ModerationStatusHidden
-                    deleted ModerationStatusDeleted
-            ReplyCount:
-                format: int64
-                type: integer
-            Title:
-                type: string
-            UpdatedAt:
-                format: date-time
-                type: string
-            ViewCount:
-                format: int64
-                type: integer
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/models
-    ThreadListResponse:
-        description: ThreadListResponse for paginated thread lists
-        properties:
-            page:
-                format: int64
-                type: integer
-                x-go-name: Page
-            page_size:
-                format: int64
-                type: integer
-                x-go-name: PageSize
-            threads:
-                items:
-                    $ref: '#/definitions/ThreadResponse'
-                type: array
-                x-go-name: Threads
-            total:
-                format: int64
-                type: integer
-                x-go-name: Total
-            total_pages:
-                format: int64
-                type: integer
-                x-go-name: TotalPages
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    ThreadResponse:
-        description: ThreadResponse defines the structure for thread responses
-        properties:
-            author_username:
-                type: string
-                x-go-name: AuthorUsername
-            category_id:
-                type: string
-                x-go-name: CategoryID
-            category_name:
-                type: string
-                x-go-name: CategoryName
-            category_slug:
-                type: string
-                x-go-name: CategorySlug
-            content:
-                type: string
-                x-go-name: Content
-            created_at:
-                format: date-time
-                type: string
-                x-go-name: CreatedAt
-            id:
-                type: string
-                x-go-name: ID
-            is_edited:
-                type: boolean
-                x-go-name: IsEdited
-            is_locked:
-                type: boolean
-                x-go-name: IsLocked
-            is_pinned:
-                type: boolean
-                x-go-name: IsPinned
-            last_reply_at:
-                format: date-time
-                type: string
-                x-go-name: LastReplyAt
-            moderation_status:
-                type: string
-                x-go-name: ModerationStatus
-            reply_count:
-                format: int64
-                type: integer
-                x-go-name: ReplyCount
-            title:
-                type: string
-                x-go-name: Title
-            updated_at:
-                format: date-time
-                type: string
-                x-go-name: UpdatedAt
-            view_count:
-                format: int64
-                type: integer
-                x-go-name: ViewCount
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    UpdateCategoryRequest:
-        properties:
-            description:
-                type: string
-                x-go-name: Description
-            is_locked:
-                type: boolean
-                x-go-name: IsLocked
-            name:
-                type: string
-                x-go-name: Name
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    UpdateReplyRequest:
-        description: UpdateReplyRequest defines the structure for updating a reply
-        properties:
-            content:
-                type: string
-                x-go-name: Content
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    UpdateThreadRequest:
-        description: UpdateThreadRequest defines the structure for updating a thread
-        properties:
-            content:
-                type: string
-                x-go-name: Content
-            title:
-                type: string
-                x-go-name: Title
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    UpdateUserRequest:
-        description: UpdateUserRequest defines the structure for updating user profile
-        properties:
-            username:
-                type: string
-                x-go-name: Username
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    User:
-        properties:
-            CreatedAt:
-                format: date-time
-                type: string
-            CreatedBy:
-                format: uuid
-                type: string
-            DeletedAt:
-                $ref: '#/definitions/DeletedAt'
-            Email:
-                type: string
-            FullName:
-                type: string
-            ID:
-                format: uuid
-                type: string
-            LastActiveAt:
-                format: date-time
-                type: string
-            Password:
-                type: string
-            Permissions:
-                $ref: '#/definitions/Permissions'
-            ReplyCount:
-                format: int64
-                type: integer
-            Role:
-                enum:
-                    - user
-                    - moderator
-                    - admin
-                type: string
-                x-go-enum-desc: |-
-                    user RoleUser
-                    moderator RoleModerator
-                    admin RoleAdmin
-            Status:
-                enum:
-                    - active
-                    - inactive
-                    - suspended
-                type: string
-                x-go-enum-desc: |-
-                    active StatusActive
-                    inactive StatusInactive
-                    suspended StatusSuspended
-            ThreadCount:
-                format: int64
-                type: integer
-            UpdatedAt:
-                format: date-time
-                type: string
-            Username:
-                type: string
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/models
-    UserBanRequest:
-        description: UserBanRequest for banning users
-        properties:
-            ban_duration_days:
-                format: int64
-                type: integer
-                x-go-name: BanDurationDays
-            ban_type:
-                type: string
-                x-go-name: BanType
-            internal_notes:
-                type: string
-                x-go-name: InternalNotes
-            reason:
-                type: string
-                x-go-name: Reason
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    UserProfile:
-        properties:
-            created_at:
-                type: string
-                x-go-name: CreatedAt
-            id:
-                type: string
-                x-go-name: ID
-            last_active_at:
-                type: string
-                x-go-name: LastActiveAt
-            reply_count:
-                format: int64
-                type: integer
-                x-go-name: ReplyCount
-            role:
-                type: string
-                x-go-name: Role
-            status:
-                type: string
-                x-go-name: Status
-            thread_count:
-                format: int64
-                type: integer
-                x-go-name: ThreadCount
-            updated_at:
-                type: string
-                x-go-name: UpdatedAt
-            username:
-                type: string
-                x-go-name: Username
-        title: UserProfile defines the user profile structure in auth responses.
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-    ValidationError:
-        description: ValidationError defines individual field validation errors
-        properties:
-            code:
-                type: string
-                x-go-name: Code
-            field:
-                type: string
-                x-go-name: Field
-            message:
-                type: string
-                x-go-name: Message
-        type: object
-        x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+        x-go-name: Permissions
+      username:
+        type: string
+        x-go-name: Username
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  CreateReplyRequest:
+    properties:
+      content:
+        type: string
+        x-go-name: Content
+      parent_reply_id:
+        type: string
+        x-go-name: ParentReplyID
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  CreateReportRequest:
+    description: CreateReportRequest defines the structure for creating a new report
+    properties:
+      content_id:
+        type: string
+        x-go-name: ContentID
+      content_type:
+        type: string
+        x-go-name: ContentType
+      description:
+        type: string
+        x-go-name: Description
+      reason:
+        type: string
+        x-go-name: Reason
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  CreateThreadRequest:
+    description: CreateThreadRequest defines the structure for creating a new thread
+    properties:
+      category_id:
+        type: string
+        x-go-name: CategoryID
+      content:
+        type: string
+        x-go-name: Content
+      title:
+        type: string
+        x-go-name: Title
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  DeletedAt:
+    $ref: "#/definitions/NullTime"
+  ErrorResponse:
+    description: ErrorResponse defines the standard error response structure
+    properties:
+      code:
+        type: string
+        x-go-name: Code
+      details:
+        items:
+          $ref: "#/definitions/ValidationError"
+        type: array
+        x-go-name: Details
+      error:
+        type: string
+        x-go-name: Error
+      message:
+        type: string
+        x-go-name: Message
+      success:
+        type: boolean
+        x-go-name: Success
+      timestamp:
+        type: string
+        x-go-name: Timestamp
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  LoginRequest:
+    properties:
+      password:
+        type: string
+        x-go-name: Password
+      username:
+        type: string
+        x-go-name: Username
+    title: LoginRequest defines the structure for a user login request.
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  ModerationAction:
+    properties:
+      Action:
+        enum:
+          - dismiss
+          - warn_user
+          - hide_content
+          - delete_content
+          - ban_user_temp
+          - ban_user_permanent
+          - unban
+        type: string
+        x-go-enum-desc: |-
+          dismiss ModerationActionDismiss
+          warn_user ModerationActionWarnUser
+          hide_content ModerationActionHideContent
+          delete_content ModerationActionDeleteContent
+          ban_user_temp ModerationActionBanUserTemp
+          ban_user_permanent ModerationActionBanUserPerm
+          unban ModerationActionUnban
+      BanExpiresAt:
+        format: date-time
+        type: string
+      ContentID:
+        format: uuid
+        type: string
+      ContentType:
+        enum:
+          - thread
+          - reply
+          - user
+        type: string
+        x-go-enum-desc: |-
+          thread ContentTypeThread
+          reply ContentTypeReply
+          user ContentTypeUser
+      CreatedAt:
+        format: date-time
+        type: string
+      DeletedAt:
+        $ref: "#/definitions/DeletedAt"
+      ID:
+        format: uuid
+        type: string
+      InternalNotes:
+        type: string
+      Moderator:
+        $ref: "#/definitions/User"
+      ModeratorID:
+        format: uuid
+        type: string
+      Reason:
+        type: string
+      Report:
+        $ref: "#/definitions/Report"
+      ReportID:
+        format: uuid
+        type: string
+      ReportedUser:
+        $ref: "#/definitions/User"
+      ReportedUserID:
+        format: uuid
+        type: string
+      UpdatedAt:
+        format: date-time
+        type: string
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/models
+  ModerationActionListResponse:
+    description: ModerationActionListResponse for paginated moderation action lists
+    properties:
+      actions:
+        items:
+          $ref: "#/definitions/ModerationActionResponse"
+        type: array
+        x-go-name: Actions
+      page:
+        format: int64
+        type: integer
+        x-go-name: Page
+      page_size:
+        format: int64
+        type: integer
+        x-go-name: PageSize
+      total:
+        format: int64
+        type: integer
+        x-go-name: Total
+      total_pages:
+        format: int64
+        type: integer
+        x-go-name: TotalPages
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  ModerationActionRequest:
+    description: ModerationActionRequest defines the structure for moderation actions
+    properties:
+      action:
+        type: string
+        x-go-name: Action
+      ban_duration_days:
+        format: int64
+        type: integer
+        x-go-name: BanDurationDays
+      internal_notes:
+        type: string
+        x-go-name: InternalNotes
+      reason:
+        type: string
+        x-go-name: Reason
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  ModerationActionResponse:
+    description: ModerationActionResponse defines the structure for moderation action responses
+    properties:
+      action:
+        type: string
+        x-go-name: Action
+      ban_expires_at:
+        format: date-time
+        type: string
+        x-go-name: BanExpiresAt
+      content_id:
+        type: string
+        x-go-name: ContentID
+      content_type:
+        type: string
+        x-go-name: ContentType
+      created_at:
+        format: date-time
+        type: string
+        x-go-name: CreatedAt
+      id:
+        type: string
+        x-go-name: ID
+      moderator:
+        $ref: "#/definitions/AnonymousAuthor"
+      reason:
+        type: string
+        x-go-name: Reason
+      report_id:
+        type: string
+        x-go-name: ReportID
+      reported_user_id:
+        type: string
+        x-go-name: ReportedUserID
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  ModerationReportResponse:
+    description: ModerationReportResponse defines enhanced report structure for moderators
+    properties:
+      content:
+        x-go-name: Content
+      content_id:
+        type: string
+        x-go-name: ContentID
+      content_preview:
+        type: string
+        x-go-name: ContentPreview
+      content_type:
+        type: string
+        x-go-name: ContentType
+      created_at:
+        format: date-time
+        type: string
+        x-go-name: CreatedAt
+      description:
+        type: string
+        x-go-name: Description
+      id:
+        type: string
+        x-go-name: ID
+      priority:
+        type: string
+        x-go-name: Priority
+      reason:
+        type: string
+        x-go-name: Reason
+      reported_user:
+        $ref: "#/definitions/AnonymousAuthor"
+      reported_user_history:
+        $ref: "#/definitions/ReportedUserHistory"
+      reporter:
+        $ref: "#/definitions/AnonymousAuthor"
+      status:
+        type: string
+        x-go-name: Status
+      updated_at:
+        format: date-time
+        type: string
+        x-go-name: UpdatedAt
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  ModerationStatsResponse:
+    description: ModerationStatsResponse provides moderation statistics
+    properties:
+      actions_this_month:
+        format: int64
+        type: integer
+        x-go-name: ActionsThisMonth
+      actions_this_week:
+        format: int64
+        type: integer
+        x-go-name: ActionsThisWeek
+      average_response_time_hours:
+        format: double
+        type: number
+        x-go-name: AverageResponseTime
+      content_deleted:
+        format: int64
+        type: integer
+        x-go-name: ContentDeleted
+      content_hidden:
+        format: int64
+        type: integer
+        x-go-name: ContentHidden
+      pending_reports:
+        format: int64
+        type: integer
+        x-go-name: PendingReports
+      resolved_reports:
+        format: int64
+        type: integer
+        x-go-name: ResolvedReports
+      total_reports:
+        format: int64
+        type: integer
+        x-go-name: TotalReports
+      users_banned_perm:
+        format: int64
+        type: integer
+        x-go-name: UsersBannedPerm
+      users_banned_temp:
+        format: int64
+        type: integer
+        x-go-name: UsersBannedTemp
+      users_warned:
+        format: int64
+        type: integer
+        x-go-name: UsersWarned
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  ModeratorNote:
+    properties:
+      CreatedAt:
+        format: date-time
+        type: string
+      DeletedAt:
+        $ref: "#/definitions/DeletedAt"
+      ID:
+        format: uuid
+        type: string
+      UpdatedAt:
+        format: date-time
+        type: string
+      moderator:
+        $ref: "#/definitions/User"
+      moderator_id:
+        format: uuid
+        type: string
+        x-go-name: ModeratorID
+      note:
+        type: string
+        x-go-name: Note
+      user:
+        $ref: "#/definitions/User"
+      user_id:
+        format: uuid
+        type: string
+        x-go-name: UserID
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/models
+  ModeratorNoteResponse:
+    properties:
+      created_at:
+        format: date-time
+        type: string
+        x-go-name: CreatedAt
+      id:
+        format: uuid
+        type: string
+        x-go-name: ID
+      moderator_id:
+        format: uuid
+        type: string
+        x-go-name: ModeratorID
+      moderator_username:
+        description: Optional moderator info
+        type: string
+        x-go-name: ModeratorUsername
+      note:
+        type: string
+        x-go-name: Note
+      user_id:
+        format: uuid
+        type: string
+        x-go-name: UserID
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  ModeratorNotesListResponse:
+    properties:
+      notes:
+        items:
+          $ref: "#/definitions/ModeratorNoteResponse"
+        type: array
+        x-go-name: Notes
+      pagination:
+        $ref: "#/definitions/PaginationResponse"
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  ModeratorProfile:
+    description: ModeratorProfile extends UserProfile for moderator-specific data
+    properties:
+      created_at:
+        type: string
+        x-go-name: CreatedAt
+      created_by:
+        type: string
+        x-go-name: CreatedBy
+      email:
+        type: string
+        x-go-name: Email
+      full_name:
+        type: string
+        x-go-name: FullName
+      id:
+        type: string
+        x-go-name: ID
+      last_active_at:
+        type: string
+        x-go-name: LastActiveAt
+      permissions:
+        items:
+          type: string
+        type: array
+        x-go-name: Permissions
+      reply_count:
+        format: int64
+        type: integer
+        x-go-name: ReplyCount
+      role:
+        type: string
+        x-go-name: Role
+      status:
+        type: string
+        x-go-name: Status
+      thread_count:
+        format: int64
+        type: integer
+        x-go-name: ThreadCount
+      updated_at:
+        type: string
+        x-go-name: UpdatedAt
+      username:
+        type: string
+        x-go-name: Username
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  NullTime:
+    description: |-
+      NullTime implements the [Scanner] interface so
+      it can be used as a scan destination, similar to [NullString].
+    properties:
+      Time:
+        format: date-time
+        type: string
+      Valid:
+        type: boolean
+    title: NullTime represents a [time.Time] that may be null.
+    type: object
+    x-go-package: database/sql
+  PaginationResponse:
+    description: PaginationResponse defines pagination metadata for list responses
+    properties:
+      limit:
+        format: int64
+        type: integer
+        x-go-name: Limit
+      page:
+        format: int64
+        type: integer
+        x-go-name: Page
+      page_size:
+        format: int64
+        type: integer
+        x-go-name: PageSize
+      total:
+        format: int64
+        type: integer
+        x-go-name: Total
+      total_pages:
+        format: int64
+        type: integer
+        x-go-name: TotalPages
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  Permissions:
+    description: Permissions for moderators (stored as JSON in database)
+    items:
+      type: string
+    type: array
+    x-go-package: github.com/purnama354/sejiwa-api/internal/models
+  RegisterRequest:
+    properties:
+      password:
+        type: string
+        x-go-name: Password
+      username:
+        type: string
+        x-go-name: Username
+    title: RegisterRequest defines the structure for a user registration request.
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  Reply:
+    properties:
+      Author:
+        $ref: "#/definitions/User"
+      AuthorID:
+        format: uuid
+        type: string
+      ChildReplies:
+        items:
+          $ref: "#/definitions/Reply"
+        type: array
+      Content:
+        type: string
+      CreatedAt:
+        format: date-time
+        type: string
+      DeletedAt:
+        $ref: "#/definitions/DeletedAt"
+      ID:
+        format: uuid
+        type: string
+      IsEdited:
+        type: boolean
+      ModerationStatus:
+        enum:
+          - pending
+          - approved
+          - hidden
+          - deleted
+        type: string
+        x-go-enum-desc: |-
+          pending ModerationStatusPending
+          approved ModerationStatusApproved
+          hidden ModerationStatusHidden
+          deleted ModerationStatusDeleted
+      ParentReply:
+        $ref: "#/definitions/Reply"
+      ParentReplyID:
+        format: uuid
+        type: string
+      Thread:
+        $ref: "#/definitions/Thread"
+      ThreadID:
+        format: uuid
+        type: string
+      UpdatedAt:
+        format: date-time
+        type: string
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/models
+  ReplyListResponse:
+    description: ReplyListResponse for paginated reply lists
+    properties:
+      page:
+        format: int64
+        type: integer
+        x-go-name: Page
+      page_size:
+        format: int64
+        type: integer
+        x-go-name: PageSize
+      replies:
+        items:
+          $ref: "#/definitions/ReplyResponse"
+        type: array
+        x-go-name: Replies
+      total:
+        format: int64
+        type: integer
+        x-go-name: Total
+      total_pages:
+        format: int64
+        type: integer
+        x-go-name: TotalPages
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  ReplyResponse:
+    description: ReplyResponse defines the structure for reply responses
+    properties:
+      author_username:
+        type: string
+        x-go-name: AuthorUsername
+      child_replies:
+        items:
+          $ref: "#/definitions/ReplyResponse"
+        type: array
+        x-go-name: ChildReplies
+      content:
+        type: string
+        x-go-name: Content
+      created_at:
+        format: date-time
+        type: string
+        x-go-name: CreatedAt
+      id:
+        type: string
+        x-go-name: ID
+      is_edited:
+        type: boolean
+        x-go-name: IsEdited
+      moderation_status:
+        type: string
+        x-go-name: ModerationStatus
+      parent_reply_id:
+        type: string
+        x-go-name: ParentReplyID
+      thread_id:
+        type: string
+        x-go-name: ThreadID
+      updated_at:
+        format: date-time
+        type: string
+        x-go-name: UpdatedAt
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  Report:
+    properties:
+      ContentID:
+        format: uuid
+        type: string
+      ContentType:
+        enum:
+          - thread
+          - reply
+          - user
+        type: string
+        x-go-enum-desc: |-
+          thread ContentTypeThread
+          reply ContentTypeReply
+          user ContentTypeUser
+      CreatedAt:
+        format: date-time
+        type: string
+      DeletedAt:
+        $ref: "#/definitions/DeletedAt"
+      Description:
+        type: string
+      ID:
+        format: uuid
+        type: string
+      Priority:
+        enum:
+          - low
+          - medium
+          - high
+          - critical
+        type: string
+        x-go-enum-desc: |-
+          low PriorityLow
+          medium PriorityMedium
+          high PriorityHigh
+          critical PriorityCritical
+      Reason:
+        enum:
+          - spam
+          - harassment
+          - hate_speech
+          - inappropriate_content
+          - self_harm
+          - misinformation
+          - other
+        type: string
+        x-go-enum-desc: |-
+          spam ReasonSpam
+          harassment ReasonHarassment
+          hate_speech ReasonHateSpeech
+          inappropriate_content ReasonInappropriate
+          self_harm ReasonSelfHarm
+          misinformation ReasonMisinformation
+          other ReasonOther
+      ReportedUser:
+        $ref: "#/definitions/User"
+      ReportedUserID:
+        format: uuid
+        type: string
+      Reporter:
+        $ref: "#/definitions/User"
+      ReporterID:
+        format: uuid
+        type: string
+      Status:
+        enum:
+          - pending
+          - reviewed
+          - resolved
+        type: string
+        x-go-enum-desc: |-
+          pending ReportStatusPending
+          reviewed ReportStatusReviewed
+          resolved ReportStatusResolved
+      UpdatedAt:
+        format: date-time
+        type: string
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/models
+  ReportListResponse:
+    description: ReportListResponse for paginated report lists
+    properties:
+      page:
+        format: int64
+        type: integer
+        x-go-name: Page
+      page_size:
+        format: int64
+        type: integer
+        x-go-name: PageSize
+      reports:
+        items:
+          $ref: "#/definitions/ModerationReportResponse"
+        type: array
+        x-go-name: Reports
+      total:
+        format: int64
+        type: integer
+        x-go-name: Total
+      total_pages:
+        format: int64
+        type: integer
+        x-go-name: TotalPages
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  ReportResponse:
+    description: ReportResponse defines the structure for report responses
+    properties:
+      content_id:
+        type: string
+        x-go-name: ContentID
+      content_type:
+        type: string
+        x-go-name: ContentType
+      created_at:
+        format: date-time
+        type: string
+        x-go-name: CreatedAt
+      description:
+        type: string
+        x-go-name: Description
+      id:
+        type: string
+        x-go-name: ID
+      priority:
+        type: string
+        x-go-name: Priority
+      reason:
+        type: string
+        x-go-name: Reason
+      reported_user_id:
+        type: string
+        x-go-name: ReportedUserID
+      reporter_id:
+        type: string
+        x-go-name: ReporterID
+      status:
+        type: string
+        x-go-name: Status
+      updated_at:
+        format: date-time
+        type: string
+        x-go-name: UpdatedAt
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  ReportedUserHistory:
+    description: ReportedUserHistory provides context about the reported user
+    properties:
+      account_age_days:
+        format: int64
+        type: integer
+        x-go-name: AccountAgeDays
+      previous_reports_count:
+        format: int64
+        type: integer
+        x-go-name: PreviousReportsCount
+      previous_violations_count:
+        format: int64
+        type: integer
+        x-go-name: PreviousViolationsCount
+      recent_activity_level:
+        type: string
+        x-go-name: RecentActivityLevel
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  SuccessResponse:
+    description: SuccessResponse defines the standard success response structure
+    properties:
+      message:
+        type: string
+        x-go-name: Message
+      success:
+        type: boolean
+        x-go-name: Success
+      timestamp:
+        type: string
+        x-go-name: Timestamp
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  Thread:
+    properties:
+      Author:
+        $ref: "#/definitions/User"
+      AuthorID:
+        format: uuid
+        type: string
+      Category:
+        $ref: "#/definitions/Category"
+      CategoryID:
+        format: uuid
+        type: string
+      Content:
+        type: string
+      CreatedAt:
+        format: date-time
+        type: string
+      DeletedAt:
+        $ref: "#/definitions/DeletedAt"
+      ID:
+        format: uuid
+        type: string
+      IsEdited:
+        type: boolean
+      IsLocked:
+        type: boolean
+      IsPinned:
+        type: boolean
+      LastReplyAt:
+        format: date-time
+        type: string
+      ModerationStatus:
+        enum:
+          - pending
+          - approved
+          - hidden
+          - deleted
+        type: string
+        x-go-enum-desc: |-
+          pending ModerationStatusPending
+          approved ModerationStatusApproved
+          hidden ModerationStatusHidden
+          deleted ModerationStatusDeleted
+      ReplyCount:
+        format: int64
+        type: integer
+      Title:
+        type: string
+      UpdatedAt:
+        format: date-time
+        type: string
+      ViewCount:
+        format: int64
+        type: integer
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/models
+  ThreadListResponse:
+    description: ThreadListResponse for paginated thread lists
+    properties:
+      page:
+        format: int64
+        type: integer
+        x-go-name: Page
+      page_size:
+        format: int64
+        type: integer
+        x-go-name: PageSize
+      threads:
+        items:
+          $ref: "#/definitions/ThreadResponse"
+        type: array
+        x-go-name: Threads
+      total:
+        format: int64
+        type: integer
+        x-go-name: Total
+      total_pages:
+        format: int64
+        type: integer
+        x-go-name: TotalPages
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  ThreadResponse:
+    description: ThreadResponse defines the structure for thread responses
+    properties:
+      author_username:
+        type: string
+        x-go-name: AuthorUsername
+      category_id:
+        type: string
+        x-go-name: CategoryID
+      category_name:
+        type: string
+        x-go-name: CategoryName
+      category_slug:
+        type: string
+        x-go-name: CategorySlug
+      content:
+        type: string
+        x-go-name: Content
+      created_at:
+        format: date-time
+        type: string
+        x-go-name: CreatedAt
+      id:
+        type: string
+        x-go-name: ID
+      is_edited:
+        type: boolean
+        x-go-name: IsEdited
+      is_locked:
+        type: boolean
+        x-go-name: IsLocked
+      is_pinned:
+        type: boolean
+        x-go-name: IsPinned
+      last_reply_at:
+        format: date-time
+        type: string
+        x-go-name: LastReplyAt
+      moderation_status:
+        type: string
+        x-go-name: ModerationStatus
+      reply_count:
+        format: int64
+        type: integer
+        x-go-name: ReplyCount
+      title:
+        type: string
+        x-go-name: Title
+      updated_at:
+        format: date-time
+        type: string
+        x-go-name: UpdatedAt
+      view_count:
+        format: int64
+        type: integer
+        x-go-name: ViewCount
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  UpdateCategoryRequest:
+    properties:
+      description:
+        type: string
+        x-go-name: Description
+      is_locked:
+        type: boolean
+        x-go-name: IsLocked
+      name:
+        type: string
+        x-go-name: Name
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  UpdateReplyRequest:
+    description: UpdateReplyRequest defines the structure for updating a reply
+    properties:
+      content:
+        type: string
+        x-go-name: Content
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  UpdateThreadRequest:
+    description: UpdateThreadRequest defines the structure for updating a thread
+    properties:
+      content:
+        type: string
+        x-go-name: Content
+      title:
+        type: string
+        x-go-name: Title
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  UpdateUserRequest:
+    description: UpdateUserRequest defines the structure for updating user profile
+    properties:
+      username:
+        type: string
+        x-go-name: Username
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  User:
+    properties:
+      CreatedAt:
+        format: date-time
+        type: string
+      CreatedBy:
+        format: uuid
+        type: string
+      DeletedAt:
+        $ref: "#/definitions/DeletedAt"
+      Email:
+        type: string
+      FullName:
+        type: string
+      ID:
+        format: uuid
+        type: string
+      LastActiveAt:
+        format: date-time
+        type: string
+      Password:
+        type: string
+      Permissions:
+        $ref: "#/definitions/Permissions"
+      ReplyCount:
+        format: int64
+        type: integer
+      Role:
+        enum:
+          - user
+          - moderator
+          - admin
+        type: string
+        x-go-enum-desc: |-
+          user RoleUser
+          moderator RoleModerator
+          admin RoleAdmin
+      Status:
+        enum:
+          - active
+          - inactive
+          - suspended
+        type: string
+        x-go-enum-desc: |-
+          active StatusActive
+          inactive StatusInactive
+          suspended StatusSuspended
+      ThreadCount:
+        format: int64
+        type: integer
+      UpdatedAt:
+        format: date-time
+        type: string
+      Username:
+        type: string
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/models
+  UserBanRequest:
+    description: UserBanRequest for banning users
+    properties:
+      ban_duration_days:
+        format: int64
+        type: integer
+        x-go-name: BanDurationDays
+      ban_type:
+        type: string
+        x-go-name: BanType
+      internal_notes:
+        type: string
+        x-go-name: InternalNotes
+      reason:
+        type: string
+        x-go-name: Reason
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  UserProfile:
+    properties:
+      created_at:
+        type: string
+        x-go-name: CreatedAt
+      id:
+        type: string
+        x-go-name: ID
+      last_active_at:
+        type: string
+        x-go-name: LastActiveAt
+      reply_count:
+        format: int64
+        type: integer
+        x-go-name: ReplyCount
+      role:
+        type: string
+        x-go-name: Role
+      status:
+        type: string
+        x-go-name: Status
+      thread_count:
+        format: int64
+        type: integer
+        x-go-name: ThreadCount
+      updated_at:
+        type: string
+        x-go-name: UpdatedAt
+      username:
+        type: string
+        x-go-name: Username
+    title: UserProfile defines the user profile structure in auth responses.
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
+  ValidationError:
+    description: ValidationError defines individual field validation errors
+    properties:
+      code:
+        type: string
+        x-go-name: Code
+      field:
+        type: string
+        x-go-name: Field
+      message:
+        type: string
+        x-go-name: Message
+    type: object
+    x-go-package: github.com/purnama354/sejiwa-api/internal/dto
 info: {}
 paths:
-    /admin/auth/create-admin:
-        post:
-            description: Create an admin account (Admin only)
-            operationId: createAdmin
-            parameters:
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/CreateAdminRequest'
-            responses:
-                "201":
-                    $ref: '#/responses/moderatorProfileResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "403":
-                    $ref: '#/responses/errorResponse'
-                "409":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - admin
-    /admin/auth/create-moderator:
-        post:
-            description: Create a moderator account (Admin only)
-            operationId: createModerator
-            parameters:
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/CreateModeratorRequest'
-            responses:
-                "201":
-                    $ref: '#/responses/moderatorProfileResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "403":
-                    $ref: '#/responses/errorResponse'
-                "409":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - admin
-    /auth/login:
-        post:
-            description: Login and obtain access/refresh tokens
-            operationId: authLogin
-            parameters:
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/LoginRequest'
-            responses:
-                "200":
-                    $ref: '#/responses/authResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "423":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - auth
-    /auth/register:
-        post:
-            description: Register a new user account
-            operationId: authRegister
-            parameters:
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/RegisterRequest'
-            responses:
-                "201":
-                    $ref: '#/responses/authResponse'
-                "409":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - auth
-    /categories:
-        get:
-            description: List categories
-            operationId: listCategories
-            responses:
-                "200":
-                    $ref: '#/responses/categoryListResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - categories
-        post:
-            description: Create category (Admin only)
-            operationId: createCategory
-            parameters:
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/CreateCategoryRequest'
-            responses:
-                "201":
-                    $ref: '#/responses/categoryResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "403":
-                    $ref: '#/responses/errorResponse'
-                "409":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - categories
-    /categories/{id}:
-        delete:
-            description: Delete category (Admin only)
-            operationId: deleteCategory
-            parameters:
-                - description: Category ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-            responses:
-                "200":
-                    $ref: '#/responses/successResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "403":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - categories
-        get:
-            description: Get category by ID
-            operationId: getCategoryByID
-            parameters:
-                - description: Category ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-            responses:
-                "200":
-                    $ref: '#/responses/categoryResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - categories
-        put:
-            description: Update category (Admin only)
-            operationId: updateCategory
-            parameters:
-                - description: Category ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/UpdateCategoryRequest'
-            responses:
-                "200":
-                    $ref: '#/responses/categoryResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "403":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "409":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - categories
-    /categories/{id}/threads:
-        get:
-            description: List threads in a specific category
-            operationId: getThreadsByCategory
-            parameters:
-                - description: Category ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-                - description: Page number
-                  format: int64
-                  in: query
-                  name: page
-                  type: integer
-                  x-go-name: Page
-                - description: Page size
-                  format: int64
-                  in: query
-                  name: pageSize
-                  type: integer
-                  x-go-name: PageSize
-            responses:
-                "200":
-                    $ref: '#/responses/threadListResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - threads
-    /health:
-        get:
-            description: Health check for API and database
-            operationId: healthCheck
-            responses:
-                "200":
-                    $ref: '#/responses/successResponse'
-                "503":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - health
-    /moderation/actions:
-        get:
-            description: List moderation actions (Moderator/Admin)
-            operationId: getModerationActions
-            parameters:
-                - description: Page number
-                  format: int64
-                  in: query
-                  name: page
-                  type: integer
-                  x-go-name: Page
-                - description: Page size
-                  format: int64
-                  in: query
-                  name: pageSize
-                  type: integer
-                  x-go-name: PageSize
-                - description: Filter by moderator ID
-                  in: query
-                  name: moderator_id
-                  type: string
-                  x-go-name: ModeratorID
-                - description: Filter by action type
-                  in: query
-                  name: action
-                  type: string
-                  x-go-name: Action
-                - description: Filter from date (RFC3339)
-                  in: query
-                  name: from_date
-                  type: string
-                  x-go-name: FromDate
-                - description: Filter to date (RFC3339)
-                  in: query
-                  name: to_date
-                  type: string
-                  x-go-name: ToDate
-            responses:
-                "200":
-                    $ref: '#/responses/moderationActionListResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-    /moderation/moderator-notes/{noteId}:
-        delete:
-            description: Delete a moderator note (Moderator/Admin)
-            operationId: deleteModeratorNote
-            parameters:
-                - description: Note ID
-                  in: path
-                  name: noteId
-                  required: true
-                  type: string
-                  x-go-name: NoteID
-            responses:
-                "200":
-                    $ref: '#/responses/successResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "403":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-    /moderation/replies/{id}:
-        post:
-            description: Moderate a reply (Moderator/Admin)
-            operationId: moderateReply
-            parameters:
-                - description: Reply ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-            responses:
-                "200":
-                    $ref: '#/responses/successResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-    /moderation/reports:
-        get:
-            description: List reports for moderation review (Moderator/Admin)
-            operationId: getReportsForModeration
-            parameters:
-                - description: Page number (default 1)
-                  format: int64
-                  in: query
-                  name: page
-                  type: integer
-                  x-go-name: Page
-                - description: Page size (default varies, use pageSize or limit)
-                  format: int64
-                  in: query
-                  name: pageSize
-                  type: integer
-                  x-go-name: PageSize
-                - description: Limit (for some endpoints using 'limit' instead of 'pageSize')
-                  format: int64
-                  in: query
-                  name: limit
-                  type: integer
-                  x-go-name: Limit
-                - description: Filter by status (pending, reviewed, resolved)
-                  in: query
-                  name: status
-                  type: string
-                  x-go-name: Status
-                - description: Filter by priority (low, medium, high, critical)
-                  in: query
-                  name: priority
-                  type: string
-                  x-go-name: Priority
-                - description: Optional category filter
-                  in: query
-                  name: category
-                  type: string
-                  x-go-name: Category
-            responses:
-                "200":
-                    $ref: '#/responses/reportListResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-    /moderation/reports/{id}:
-        get:
-            description: Get report by ID (Moderator/Admin)
-            operationId: getReportByID
-            parameters:
-                - description: Report ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-            responses:
-                "200":
-                    $ref: '#/responses/moderationReportResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-    /moderation/reports/{id}/actions:
-        post:
-            description: Process a report with a moderation action (Moderator/Admin)
-            operationId: processReport
-            parameters:
-                - description: Report ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/ModerationActionRequest'
-            responses:
-                "200":
-                    $ref: '#/responses/moderationActionResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "409":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-    /moderation/stats:
-        get:
-            description: Get moderation statistics (Moderator/Admin)
-            operationId: getModerationStats
-            parameters:
-                - description: Optional moderator ID
-                  in: query
-                  name: moderator_id
-                  type: string
-                  x-go-name: ModeratorID
-            responses:
-                "200":
-                    $ref: '#/responses/moderationStatsResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-    /moderation/threads/{id}:
-        post:
-            description: Moderate a thread (Moderator/Admin)
-            operationId: moderateThread
-            parameters:
-                - description: Thread ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-            responses:
-                "200":
-                    $ref: '#/responses/successResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-    /moderation/users/{id}/ban:
-        post:
-            description: Ban a user (Moderator/Admin)
-            operationId: banUser
-            parameters:
-                - description: User ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/UserBanRequest'
-            responses:
-                "200":
-                    $ref: '#/responses/successResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "409":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-    /moderation/users/{id}/moderator-notes:
-        get:
-            description: List moderator notes for a user (Moderator/Admin)
-            operationId: listModeratorNotes
-            parameters:
-                - description: User ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-                - description: Page number
-                  format: int64
-                  in: query
-                  name: page
-                  type: integer
-                  x-go-name: Page
-                - description: Page size (limit)
-                  format: int64
-                  in: query
-                  name: limit
-                  type: integer
-                  x-go-name: Limit
-            responses:
-                "200":
-                    $ref: '#/responses/moderatorNotesListResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-        post:
-            description: Create a moderator note for a user (Moderator/Admin)
-            operationId: createModeratorNote
-            parameters:
-                - description: User ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/CreateModeratorNoteRequest'
-            responses:
-                "201":
-                    $ref: '#/responses/successResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-    /moderation/users/{id}/unban:
-        post:
-            description: Unban a user (Moderator/Admin)
-            operationId: unbanUser
-            parameters:
-                - description: User ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-            responses:
-                "200":
-                    $ref: '#/responses/successResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-    /replies/{id}:
-        delete:
-            description: Delete reply (Author or Moderator/Admin)
-            operationId: deleteReply
-            parameters:
-                - description: Reply ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-            responses:
-                "200":
-                    $ref: '#/responses/successResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "403":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - replies
-        get:
-            description: Get reply by ID
-            operationId: getReplyByID
-            parameters:
-                - description: Reply ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-            responses:
-                "200":
-                    $ref: '#/responses/replyResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - replies
-        patch:
-            description: Update reply (Author or Moderator/Admin)
-            operationId: updateReply
-            parameters:
-                - description: Reply ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/UpdateReplyRequest'
-            responses:
-                "200":
-                    $ref: '#/responses/replyResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "403":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "409":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - replies
-    /reports:
-        post:
-            description: Submit a content report (Authenticated)
-            operationId: createReport
-            parameters:
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/CreateReportRequest'
-            responses:
-                "201":
-                    $ref: '#/responses/reportResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "409":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-    /reports/me:
-        get:
-            description: List my submitted reports (Authenticated)
-            operationId: getMyReports
-            parameters:
-                - description: Page number (default 1)
-                  format: int64
-                  in: query
-                  name: page
-                  type: integer
-                  x-go-name: Page
-                - description: Page size (default varies, use pageSize or limit)
-                  format: int64
-                  in: query
-                  name: pageSize
-                  type: integer
-                  x-go-name: PageSize
-                - description: Limit (for some endpoints using 'limit' instead of 'pageSize')
-                  format: int64
-                  in: query
-                  name: limit
-                  type: integer
-                  x-go-name: Limit
-                - description: Filter by status (pending, reviewed, resolved)
-                  in: query
-                  name: status
-                  type: string
-                  x-go-name: Status
-                - description: Filter by priority (low, medium, high, critical)
-                  in: query
-                  name: priority
-                  type: string
-                  x-go-name: Priority
-                - description: Optional category filter
-                  in: query
-                  name: category
-                  type: string
-                  x-go-name: Category
-            responses:
-                "200":
-                    $ref: '#/responses/reportListResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - moderation
-    /threads:
-        get:
-            description: List threads
-            operationId: listThreads
-            parameters:
-                - description: Page number (default 1)
-                  format: int64
-                  in: query
-                  name: page
-                  type: integer
-                  x-go-name: Page
-                - description: Page size (default 20, max 100)
-                  format: int64
-                  in: query
-                  name: pageSize
-                  type: integer
-                  x-go-name: PageSize
-            responses:
-                "200":
-                    $ref: '#/responses/threadListResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - threads
-        post:
-            description: Create thread (Authenticated)
-            operationId: createThread
-            parameters:
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/CreateThreadRequest'
-            responses:
-                "201":
-                    $ref: '#/responses/threadResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "409":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - threads
-    /threads/{id}:
-        delete:
-            description: Delete thread (Author or Moderator/Admin)
-            operationId: deleteThread
-            parameters:
-                - description: Thread ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-            responses:
-                "200":
-                    $ref: '#/responses/successResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "403":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - threads
-        get:
-            description: Get thread by ID
-            operationId: getThreadByID
-            parameters:
-                - description: Thread ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-            responses:
-                "200":
-                    $ref: '#/responses/threadResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - threads
-        put:
-            description: Update thread (Author or Moderator/Admin)
-            operationId: updateThread
-            parameters:
-                - description: Thread ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/UpdateThreadRequest'
-            responses:
-                "200":
-                    $ref: '#/responses/threadResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "403":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "409":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - threads
-    /threads/{id}/replies:
-        get:
-            description: List replies for a thread
-            operationId: listThreadReplies
-            parameters:
-                - description: Thread ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-                - description: Page number (default 1)
-                  format: int64
-                  in: query
-                  name: page
-                  type: integer
-                  x-go-name: Page
-                - description: Page size (default 20, max 100)
-                  format: int64
-                  in: query
-                  name: pageSize
-                  type: integer
-                  x-go-name: PageSize
-                - description: Include nested replies
-                  in: query
-                  name: nested
-                  type: boolean
-                  x-go-name: Nested
-            responses:
-                "200":
-                    $ref: '#/responses/replyListResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - replies
-        post:
-            description: Create a reply in a thread (Authenticated)
-            operationId: createThreadReply
-            parameters:
-                - description: Thread ID
-                  in: path
-                  name: id
-                  required: true
-                  type: string
-                  x-go-name: ID
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/CreateReplyRequest'
-            responses:
-                "201":
-                    $ref: '#/responses/replyResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "409":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - replies
-    /threads/pinned:
-        get:
-            description: List pinned threads
-            operationId: pinnedThreads
-            parameters:
-                - description: Page number (default 1)
-                  format: int64
-                  in: query
-                  name: page
-                  type: integer
-                  x-go-name: Page
-                - description: Page size (default 20, max 100)
-                  format: int64
-                  in: query
-                  name: pageSize
-                  type: integer
-                  x-go-name: PageSize
-            responses:
-                "200":
-                    $ref: '#/responses/threadListResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - threads
-    /threads/search:
-        get:
-            description: Search threads by query
-            operationId: searchThreads
-            parameters:
-                - description: Search query
-                  in: query
-                  name: q
-                  required: true
-                  type: string
-                  x-go-name: Q
-                - description: Page number
-                  format: int64
-                  in: query
-                  name: page
-                  type: integer
-                  x-go-name: Page
-                - description: Page size
-                  format: int64
-                  in: query
-                  name: pageSize
-                  type: integer
-                  x-go-name: PageSize
-            responses:
-                "200":
-                    $ref: '#/responses/threadListResponse'
-                "400":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            tags:
-                - threads
-    /users/me:
-        get:
-            description: Get my profile (Authenticated)
-            operationId: getMe
-            responses:
-                "200":
-                    $ref: '#/responses/userProfileResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - users
-        patch:
-            description: Update my profile (Authenticated)
-            operationId: updateMe
-            parameters:
-                - in: body
-                  name: Body
-                  required: true
-                  schema:
-                    $ref: '#/definitions/UpdateUserRequest'
-            responses:
-                "200":
-                    $ref: '#/responses/userProfileResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-                "404":
-                    $ref: '#/responses/errorResponse'
-                "409":
-                    $ref: '#/responses/errorResponse'
-                "422":
-                    $ref: '#/responses/errorResponse'
-                "500":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - users
-    /users/me/role:
-        get:
-            description: Get my role info (Authenticated)
-            operationId: getRoleInfo
-            responses:
-                "200":
-                    $ref: '#/responses/successResponse'
-                "401":
-                    $ref: '#/responses/errorResponse'
-            security:
-                - Bearer:
-                    - '[]'
-            tags:
-                - users
+  /api/v1/users/me/stats:
+    get:
+      summary: Get current user's stats
+      tags: [Users]
+      responses:
+        "200":
+          description: OK
+  /api/v1/users/me/activity:
+    get:
+      summary: Get current user's recent activity
+      tags: [Users]
+      responses:
+        "200":
+          description: OK
+  /api/v1/users/me/categories:
+    get:
+      summary: Get categories related to current user
+      tags: [Users]
+      responses:
+        "200":
+          description: OK
+  /api/v1/users/me/preferences:
+    get:
+      summary: Get current user's preferences
+      tags: [Users]
+      responses:
+        "200":
+          description: OK
+  /api/v1/users/me/preferences/notifications:
+    put:
+      summary: Update notification preferences
+      tags: [Users]
+      responses:
+        "200":
+          description: OK
+  /api/v1/users/me/preferences/privacy:
+    put:
+      summary: Update privacy settings
+      tags: [Users]
+      responses:
+        "200":
+          description: OK
+  /api/v1/users/me/subscriptions:
+    get:
+      summary: List category subscriptions
+      tags: [Users]
+      responses:
+        "200": { description: OK }
+    post:
+      summary: Subscribe to a category
+      tags: [Users]
+      responses:
+        "200": { description: OK }
+    delete:
+      summary: Unsubscribe from a category
+      tags: [Users]
+      responses:
+        "200": { description: OK }
+  /api/v1/users/me/saved-threads:
+    get:
+      summary: List saved threads
+      tags: [Users]
+      responses:
+        "200": { description: OK }
+    post:
+      summary: Save a thread
+      tags: [Users]
+      responses:
+        "200": { description: OK }
+    delete:
+      summary: Unsave a thread
+      tags: [Users]
+      responses:
+        "200": { description: OK }
+  /admin/auth/create-admin:
+    post:
+      description: Create an admin account (Admin only)
+      operationId: createAdmin
+      parameters:
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateAdminRequest"
+      responses:
+        "201":
+          $ref: "#/responses/moderatorProfileResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "403":
+          $ref: "#/responses/errorResponse"
+        "409":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - admin
+  /admin/auth/create-moderator:
+    post:
+      description: Create a moderator account (Admin only)
+      operationId: createModerator
+      parameters:
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateModeratorRequest"
+      responses:
+        "201":
+          $ref: "#/responses/moderatorProfileResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "403":
+          $ref: "#/responses/errorResponse"
+        "409":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - admin
+  /auth/login:
+    post:
+      description: Login and obtain access/refresh tokens
+      operationId: authLogin
+      parameters:
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/LoginRequest"
+      responses:
+        "200":
+          $ref: "#/responses/authResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "423":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      tags:
+        - auth
+  /auth/register:
+    post:
+      description: Register a new user account
+      operationId: authRegister
+      parameters:
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/RegisterRequest"
+      responses:
+        "201":
+          $ref: "#/responses/authResponse"
+        "409":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      tags:
+        - auth
+  /categories:
+    get:
+      description: List categories
+      operationId: listCategories
+      responses:
+        "200":
+          $ref: "#/responses/categoryListResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      tags:
+        - categories
+    post:
+      description: Create category (Admin only)
+      operationId: createCategory
+      parameters:
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateCategoryRequest"
+      responses:
+        "201":
+          $ref: "#/responses/categoryResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "403":
+          $ref: "#/responses/errorResponse"
+        "409":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - categories
+  /categories/{id}:
+    delete:
+      description: Delete category (Admin only)
+      operationId: deleteCategory
+      parameters:
+        - description: Category ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          $ref: "#/responses/successResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "403":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - categories
+    get:
+      description: Get category by ID
+      operationId: getCategoryByID
+      parameters:
+        - description: Category ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          $ref: "#/responses/categoryResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      tags:
+        - categories
+    put:
+      description: Update category (Admin only)
+      operationId: updateCategory
+      parameters:
+        - description: Category ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/UpdateCategoryRequest"
+      responses:
+        "200":
+          $ref: "#/responses/categoryResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "403":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "409":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - categories
+  /categories/{id}/threads:
+    get:
+      description: List threads in a specific category
+      operationId: getThreadsByCategory
+      parameters:
+        - description: Category ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+        - description: Page number
+          format: int64
+          in: query
+          name: page
+          type: integer
+          x-go-name: Page
+        - description: Page size
+          format: int64
+          in: query
+          name: pageSize
+          type: integer
+          x-go-name: PageSize
+      responses:
+        "200":
+          $ref: "#/responses/threadListResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      tags:
+        - threads
+  /health:
+    get:
+      description: Health check for API and database
+      operationId: healthCheck
+      responses:
+        "200":
+          $ref: "#/responses/successResponse"
+        "503":
+          $ref: "#/responses/errorResponse"
+      tags:
+        - health
+  /moderation/actions:
+    get:
+      description: List moderation actions (Moderator/Admin)
+      operationId: getModerationActions
+      parameters:
+        - description: Page number
+          format: int64
+          in: query
+          name: page
+          type: integer
+          x-go-name: Page
+        - description: Page size
+          format: int64
+          in: query
+          name: pageSize
+          type: integer
+          x-go-name: PageSize
+        - description: Filter by moderator ID
+          in: query
+          name: moderator_id
+          type: string
+          x-go-name: ModeratorID
+        - description: Filter by action type
+          in: query
+          name: action
+          type: string
+          x-go-name: Action
+        - description: Filter from date (RFC3339)
+          in: query
+          name: from_date
+          type: string
+          x-go-name: FromDate
+        - description: Filter to date (RFC3339)
+          in: query
+          name: to_date
+          type: string
+          x-go-name: ToDate
+      responses:
+        "200":
+          $ref: "#/responses/moderationActionListResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+  /moderation/moderator-notes/{noteId}:
+    delete:
+      description: Delete a moderator note (Moderator/Admin)
+      operationId: deleteModeratorNote
+      parameters:
+        - description: Note ID
+          in: path
+          name: noteId
+          required: true
+          type: string
+          x-go-name: NoteID
+      responses:
+        "200":
+          $ref: "#/responses/successResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "403":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+  /moderation/replies/{id}:
+    post:
+      description: Moderate a reply (Moderator/Admin)
+      operationId: moderateReply
+      parameters:
+        - description: Reply ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          $ref: "#/responses/successResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+  /moderation/reports:
+    get:
+      description: List reports for moderation review (Moderator/Admin)
+      operationId: getReportsForModeration
+      parameters:
+        - description: Page number (default 1)
+          format: int64
+          in: query
+          name: page
+          type: integer
+          x-go-name: Page
+        - description: Page size (default varies, use pageSize or limit)
+          format: int64
+          in: query
+          name: pageSize
+          type: integer
+          x-go-name: PageSize
+        - description: Limit (for some endpoints using 'limit' instead of 'pageSize')
+          format: int64
+          in: query
+          name: limit
+          type: integer
+          x-go-name: Limit
+        - description: Filter by status (pending, reviewed, resolved)
+          in: query
+          name: status
+          type: string
+          x-go-name: Status
+        - description: Filter by priority (low, medium, high, critical)
+          in: query
+          name: priority
+          type: string
+          x-go-name: Priority
+        - description: Optional category filter
+          in: query
+          name: category
+          type: string
+          x-go-name: Category
+      responses:
+        "200":
+          $ref: "#/responses/reportListResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+  /moderation/reports/{id}:
+    get:
+      description: Get report by ID (Moderator/Admin)
+      operationId: getReportByID
+      parameters:
+        - description: Report ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          $ref: "#/responses/moderationReportResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+  /moderation/reports/{id}/actions:
+    post:
+      description: Process a report with a moderation action (Moderator/Admin)
+      operationId: processReport
+      parameters:
+        - description: Report ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/ModerationActionRequest"
+      responses:
+        "200":
+          $ref: "#/responses/moderationActionResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "409":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+  /moderation/stats:
+    get:
+      description: Get moderation statistics (Moderator/Admin)
+      operationId: getModerationStats
+      parameters:
+        - description: Optional moderator ID
+          in: query
+          name: moderator_id
+          type: string
+          x-go-name: ModeratorID
+      responses:
+        "200":
+          $ref: "#/responses/moderationStatsResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+  /moderation/threads/{id}:
+    post:
+      description: Moderate a thread (Moderator/Admin)
+      operationId: moderateThread
+      parameters:
+        - description: Thread ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          $ref: "#/responses/successResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+  /moderation/users/{id}/ban:
+    post:
+      description: Ban a user (Moderator/Admin)
+      operationId: banUser
+      parameters:
+        - description: User ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/UserBanRequest"
+      responses:
+        "200":
+          $ref: "#/responses/successResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "409":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+  /moderation/users/{id}/moderator-notes:
+    get:
+      description: List moderator notes for a user (Moderator/Admin)
+      operationId: listModeratorNotes
+      parameters:
+        - description: User ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+        - description: Page number
+          format: int64
+          in: query
+          name: page
+          type: integer
+          x-go-name: Page
+        - description: Page size (limit)
+          format: int64
+          in: query
+          name: limit
+          type: integer
+          x-go-name: Limit
+      responses:
+        "200":
+          $ref: "#/responses/moderatorNotesListResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+    post:
+      description: Create a moderator note for a user (Moderator/Admin)
+      operationId: createModeratorNote
+      parameters:
+        - description: User ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateModeratorNoteRequest"
+      responses:
+        "201":
+          $ref: "#/responses/successResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+  /moderation/users/{id}/unban:
+    post:
+      description: Unban a user (Moderator/Admin)
+      operationId: unbanUser
+      parameters:
+        - description: User ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          $ref: "#/responses/successResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+  /replies/{id}:
+    delete:
+      description: Delete reply (Author or Moderator/Admin)
+      operationId: deleteReply
+      parameters:
+        - description: Reply ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          $ref: "#/responses/successResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "403":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - replies
+    get:
+      description: Get reply by ID
+      operationId: getReplyByID
+      parameters:
+        - description: Reply ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          $ref: "#/responses/replyResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      tags:
+        - replies
+    patch:
+      description: Update reply (Author or Moderator/Admin)
+      operationId: updateReply
+      parameters:
+        - description: Reply ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/UpdateReplyRequest"
+      responses:
+        "200":
+          $ref: "#/responses/replyResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "403":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "409":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - replies
+  /reports:
+    post:
+      description: Submit a content report (Authenticated)
+      operationId: createReport
+      parameters:
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateReportRequest"
+      responses:
+        "201":
+          $ref: "#/responses/reportResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "409":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+  /reports/me:
+    get:
+      description: List my submitted reports (Authenticated)
+      operationId: getMyReports
+      parameters:
+        - description: Page number (default 1)
+          format: int64
+          in: query
+          name: page
+          type: integer
+          x-go-name: Page
+        - description: Page size (default varies, use pageSize or limit)
+          format: int64
+          in: query
+          name: pageSize
+          type: integer
+          x-go-name: PageSize
+        - description: Limit (for some endpoints using 'limit' instead of 'pageSize')
+          format: int64
+          in: query
+          name: limit
+          type: integer
+          x-go-name: Limit
+        - description: Filter by status (pending, reviewed, resolved)
+          in: query
+          name: status
+          type: string
+          x-go-name: Status
+        - description: Filter by priority (low, medium, high, critical)
+          in: query
+          name: priority
+          type: string
+          x-go-name: Priority
+        - description: Optional category filter
+          in: query
+          name: category
+          type: string
+          x-go-name: Category
+      responses:
+        "200":
+          $ref: "#/responses/reportListResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - moderation
+  /threads:
+    get:
+      description: List threads
+      operationId: listThreads
+      parameters:
+        - description: Page number (default 1)
+          format: int64
+          in: query
+          name: page
+          type: integer
+          x-go-name: Page
+        - description: Page size (default 20, max 100)
+          format: int64
+          in: query
+          name: pageSize
+          type: integer
+          x-go-name: PageSize
+      responses:
+        "200":
+          $ref: "#/responses/threadListResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      tags:
+        - threads
+    post:
+      description: Create thread (Authenticated)
+      operationId: createThread
+      parameters:
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateThreadRequest"
+      responses:
+        "201":
+          $ref: "#/responses/threadResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "409":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - threads
+  /threads/{id}:
+    delete:
+      description: Delete thread (Author or Moderator/Admin)
+      operationId: deleteThread
+      parameters:
+        - description: Thread ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          $ref: "#/responses/successResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "403":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - threads
+    get:
+      description: Get thread by ID
+      operationId: getThreadByID
+      parameters:
+        - description: Thread ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          $ref: "#/responses/threadResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      tags:
+        - threads
+    put:
+      description: Update thread (Author or Moderator/Admin)
+      operationId: updateThread
+      parameters:
+        - description: Thread ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/UpdateThreadRequest"
+      responses:
+        "200":
+          $ref: "#/responses/threadResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "403":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "409":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - threads
+  /threads/{id}/replies:
+    get:
+      description: List replies for a thread
+      operationId: listThreadReplies
+      parameters:
+        - description: Thread ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+        - description: Page number (default 1)
+          format: int64
+          in: query
+          name: page
+          type: integer
+          x-go-name: Page
+        - description: Page size (default 20, max 100)
+          format: int64
+          in: query
+          name: pageSize
+          type: integer
+          x-go-name: PageSize
+        - description: Include nested replies
+          in: query
+          name: nested
+          type: boolean
+          x-go-name: Nested
+      responses:
+        "200":
+          $ref: "#/responses/replyListResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      tags:
+        - replies
+    post:
+      description: Create a reply in a thread (Authenticated)
+      operationId: createThreadReply
+      parameters:
+        - description: Thread ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/CreateReplyRequest"
+      responses:
+        "201":
+          $ref: "#/responses/replyResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "409":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - replies
+  /threads/pinned:
+    get:
+      description: List pinned threads
+      operationId: pinnedThreads
+      parameters:
+        - description: Page number (default 1)
+          format: int64
+          in: query
+          name: page
+          type: integer
+          x-go-name: Page
+        - description: Page size (default 20, max 100)
+          format: int64
+          in: query
+          name: pageSize
+          type: integer
+          x-go-name: PageSize
+      responses:
+        "200":
+          $ref: "#/responses/threadListResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      tags:
+        - threads
+  /threads/search:
+    get:
+      description: Search threads by query
+      operationId: searchThreads
+      parameters:
+        - description: Search query
+          in: query
+          name: q
+          required: true
+          type: string
+          x-go-name: Q
+        - description: Page number
+          format: int64
+          in: query
+          name: page
+          type: integer
+          x-go-name: Page
+        - description: Page size
+          format: int64
+          in: query
+          name: pageSize
+          type: integer
+          x-go-name: PageSize
+      responses:
+        "200":
+          $ref: "#/responses/threadListResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      tags:
+        - threads
+  /users/me:
+    get:
+      description: Get my profile (Authenticated)
+      operationId: getMe
+      responses:
+        "200":
+          $ref: "#/responses/userProfileResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - users
+    patch:
+      description: Update my profile (Authenticated)
+      operationId: updateMe
+      parameters:
+        - in: body
+          name: Body
+          required: true
+          schema:
+            $ref: "#/definitions/UpdateUserRequest"
+      responses:
+        "200":
+          $ref: "#/responses/userProfileResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "409":
+          $ref: "#/responses/errorResponse"
+        "422":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - users
+  /users/me/role:
+    get:
+      description: Get my role info (Authenticated)
+      operationId: getRoleInfo
+      responses:
+        "200":
+          $ref: "#/responses/successResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+      security:
+        - Bearer:
+            - "[]"
+      tags:
+        - users
 responses:
-    authResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/AuthResponse'
-    categoryListResponse:
-        description: ""
-        schema:
-            items:
-                $ref: '#/definitions/CategoryResponse'
-            type: array
-    categoryResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/CategoryResponse'
-    errorResponse:
-        description: Generic error envelope
-        schema:
-            $ref: '#/definitions/ErrorResponse'
-    moderationActionListResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/ModerationActionListResponse'
-    moderationActionResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/ModerationActionResponse'
-    moderationReportResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/ModerationReportResponse'
-    moderationStatsResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/ModerationStatsResponse'
-    moderatorNotesListResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/ModeratorNotesListResponse'
-    moderatorProfileResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/ModeratorProfile'
-    replyListResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/ReplyListResponse'
-    replyResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/ReplyResponse'
-    reportListResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/ReportListResponse'
-    reportResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/ReportResponse'
-    successResponse:
-        description: Generic success envelope
-        schema:
-            $ref: '#/definitions/SuccessResponse'
-    threadListResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/ThreadListResponse'
-    threadResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/ThreadResponse'
-    userProfileResponse:
-        description: ""
-        schema:
-            $ref: '#/definitions/UserProfile'
+  authResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/AuthResponse"
+  categoryListResponse:
+    description: ""
+    schema:
+      items:
+        $ref: "#/definitions/CategoryResponse"
+      type: array
+  categoryResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/CategoryResponse"
+  errorResponse:
+    description: Generic error envelope
+    schema:
+      $ref: "#/definitions/ErrorResponse"
+  moderationActionListResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/ModerationActionListResponse"
+  moderationActionResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/ModerationActionResponse"
+  moderationReportResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/ModerationReportResponse"
+  moderationStatsResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/ModerationStatsResponse"
+  moderatorNotesListResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/ModeratorNotesListResponse"
+  moderatorProfileResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/ModeratorProfile"
+  replyListResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/ReplyListResponse"
+  replyResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/ReplyResponse"
+  reportListResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/ReportListResponse"
+  reportResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/ReportResponse"
+  successResponse:
+    description: Generic success envelope
+    schema:
+      $ref: "#/definitions/SuccessResponse"
+  threadListResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/ThreadListResponse"
+  threadResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/ThreadResponse"
+  userProfileResponse:
+    description: ""
+    schema:
+      $ref: "#/definitions/UserProfile"
 swagger: "2.0"

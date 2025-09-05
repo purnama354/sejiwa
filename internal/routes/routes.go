@@ -192,6 +192,16 @@ func RegisterRoutes(
 			userRoutes.PUT("/me/preferences/notifications", userHandler.UpdateNotificationPreferences)
 			userRoutes.PUT("/me/preferences/privacy", userHandler.UpdatePrivacySettings)
 
+			// Subscriptions
+			userRoutes.GET("/me/subscriptions", userHandler.GetMyCategories)
+			userRoutes.POST("/me/subscriptions", userHandler.SubscribeCategory)
+			userRoutes.DELETE("/me/subscriptions", userHandler.UnsubscribeCategory)
+
+			// Saved threads
+			userRoutes.GET("/me/saved-threads", userHandler.ListSavedThreads)
+			userRoutes.POST("/me/saved-threads", userHandler.SaveThread)
+			userRoutes.DELETE("/me/saved-threads", userHandler.UnsaveThread)
+
 			// Test endpoint for any authenticated user
 			userRoutes.GET("/test", func(c *gin.Context) {
 				userID, _ := c.Get(middleware.ContextUserIDKey)

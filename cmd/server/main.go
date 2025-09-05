@@ -51,12 +51,14 @@ func main() {
 	threadRepo := repository.NewThreadRepository(db)
 	replyRepo := repository.NewReplyRepository(db)
 	reportRepo := repository.NewReportRepository(db)
+	subscriptionRepo := repository.NewSubscriptionRepository(db)
+	savedThreadRepo := repository.NewSavedThreadRepository(db)
 	moderationRepo := repository.NewModerationActionRepository(db) // Add this line
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo, cfg.JWTSecret)
 	adminService := services.NewAdminService(userRepo)
-	userService := services.NewUserService(userRepo, prefRepo, threadRepo, replyRepo, reportRepo)
+	userService := services.NewUserService(userRepo, prefRepo, threadRepo, replyRepo, reportRepo, subscriptionRepo, savedThreadRepo)
 	categoryService := services.NewCategoryService(categoryRepo)
 	threadService := services.NewThreadService(threadRepo, categoryRepo, userRepo)
 	replyService := services.NewReplyService(replyRepo, threadRepo, userRepo)

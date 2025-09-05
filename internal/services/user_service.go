@@ -27,6 +27,11 @@ type UserService interface {
 	GetMyStats(userID uuid.UUID) (*dto.UserStatsResponse, error)
 	GetMyActivity(userID uuid.UUID) (*dto.UserActivityResponse, error)
 	GetMyCategories(userID uuid.UUID) ([]dto.CategorySubscription, error)
+	SubscribeCategory(userID, categoryID uuid.UUID) error
+	UnsubscribeCategory(userID, categoryID uuid.UUID) error
+	ListSavedThreads(userID uuid.UUID, offset, limit int) ([]dto.ThreadPreview, int64, error)
+	SaveThread(userID, threadID uuid.UUID) error
+	UnsaveThread(userID, threadID uuid.UUID) error
 }
 
 type userService struct {
@@ -35,16 +40,20 @@ type userService struct {
 	threadRepo repository.ThreadRepository
 	replyRepo  repository.ReplyRepository
 	reportRepo repository.ReportRepository
+	subRepo    repository.SubscriptionRepository
+	savedRepo  repository.SavedThreadRepository
 }
 
 // NewUserService creates a new instance of UserService
-func NewUserService(userRepo repository.UserRepository, prefRepo repository.PreferencesRepository, threadRepo repository.ThreadRepository, replyRepo repository.ReplyRepository, reportRepo repository.ReportRepository) UserService {
+func NewUserService(userRepo repository.UserRepository, prefRepo repository.PreferencesRepository, threadRepo repository.ThreadRepository, replyRepo repository.ReplyRepository, reportRepo repository.ReportRepository, subRepo repository.SubscriptionRepository, savedRepo repository.SavedThreadRepository) UserService {
 	return &userService{
 	userRepo: userRepo,
 	prefRepo: prefRepo,
 		threadRepo: threadRepo,
 		replyRepo: replyRepo,
 		reportRepo: reportRepo,
+	subRepo: subRepo,
+	savedRepo: savedRepo,
 	}
 }
 
@@ -288,24 +297,56 @@ func (s *userService) GetMyActivity(userID uuid.UUID) (*dto.UserActivityResponse
 
 // GetMyCategories returns unique categories from user's threads (approximation of subscriptions)
 func (s *userService) GetMyCategories(userID uuid.UUID) ([]dto.CategorySubscription, error) {
-	threads, _, err := s.threadRepo.FindByAuthor(userID, 0, 50)
-	if err != nil {
-		return nil, err
+	subs, err := s.subRepo.ListByUser(userID)
+	if err != nil { return nil, err }
+	out := make([]dto.CategorySubscription, 0, len(subs))
+	for _, ssub := range subs {
+		out = append(out, dto.CategorySubscription{
+			ID: ssub.Category.ID.String(),
+			Name: ssub.Category.Name,
+			Slug: ssub.Category.Slug,
+			ThreadCount: ssub.Category.ThreadCount,
+			Description: ssub.Category.Description,
+		})
 	}
-	seen := map[string]bool{}
-	var subs []dto.CategorySubscription
-	for _, t := range threads {
-		key := t.Category.ID.String()
-		if !seen[key] {
-			seen[key] = true
-			subs = append(subs, dto.CategorySubscription{
-				ID:          t.Category.ID.String(),
-				Name:        t.Category.Name,
-				Slug:        t.Category.Slug,
-				ThreadCount: t.Category.ThreadCount,
-				Description: t.Category.Description,
-			})
-		}
+	return out, nil
+}
+
+func (s *userService) SubscribeCategory(userID, categoryID uuid.UUID) error {
+	return s.subRepo.Subscribe(userID, categoryID)
+}
+
+func (s *userService) UnsubscribeCategory(userID, categoryID uuid.UUID) error {
+	return s.subRepo.Unsubscribe(userID, categoryID)
+}
+
+func (s *userService) ListSavedThreads(userID uuid.UUID, offset, limit int) ([]dto.ThreadPreview, int64, error) {
+	saved, total, err := s.savedRepo.ListByUser(userID, offset, limit)
+	if err != nil { return nil, 0, err }
+	previews := make([]dto.ThreadPreview, 0, len(saved))
+	for _, st := range saved {
+		t := st.Thread
+		preview := t.Content
+		if len(preview) > 140 { preview = preview[:140] }
+		previews = append(previews, dto.ThreadPreview{
+			ID: t.ID.String(),
+			Title: t.Title,
+			Category: t.Category.Name,
+			CategorySlug: t.Category.Slug,
+			Replies: t.ReplyCount,
+			CreatedAt: t.CreatedAt.Format(time.RFC3339),
+			Preview: preview,
+			HasNew: false,
+			IsLocked: t.IsLocked,
+		})
 	}
-	return subs, nil
+	return previews, total, nil
+}
+
+func (s *userService) SaveThread(userID, threadID uuid.UUID) error {
+	return s.savedRepo.Save(userID, threadID)
+}
+
+func (s *userService) UnsaveThread(userID, threadID uuid.UUID) error {
+	return s.savedRepo.Unsave(userID, threadID)
 }
