@@ -1,5 +1,5 @@
-import { Outlet, Link } from "react-router-dom"
-import { useState } from "react"
+import { Outlet, Link, useLocation } from "react-router-dom"
+import { useEffect, useRef, useState } from "react"
 import { useAuthStore, type AuthState } from "@/store/auth"
 import LogoutButton from "@/components/logout-button"
 import { Button } from "@/components/ui/button"
@@ -105,6 +105,35 @@ type MobileNavProps = {
 
 function MobileNav({ isAuthed, userRole, username }: MobileNavProps) {
   const [open, setOpen] = useState(false)
+  const location = useLocation()
+  const menuRef = useRef<HTMLDivElement | null>(null)
+
+  // Close on route change
+  useEffect(() => {
+    setOpen(false)
+  }, [location.pathname])
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", onClick)
+    return () => document.removeEventListener("mousedown", onClick)
+  }, [open])
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false)
+    }
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [open])
   return (
     <div className="ml-auto sm:hidden relative">
       <Button
@@ -117,7 +146,13 @@ function MobileNav({ isAuthed, userRole, username }: MobileNavProps) {
         <Menu className="w-5 h-5" />
       </Button>
       {open && (
-        <div className="absolute right-0 mt-2 w-56 rounded-lg border bg-background shadow-lg p-2 z-50">
+        <>
+          {/* Overlay */}
+          <div className="fixed inset-0 bg-black/20" />
+          <div
+            ref={menuRef}
+            className="absolute right-0 mt-2 w-56 rounded-lg border bg-background shadow-lg p-2 z-50"
+          >
           {isAuthed ? (
             <div className="flex flex-col">
               <Link
@@ -186,7 +221,8 @@ function MobileNav({ isAuthed, userRole, username }: MobileNavProps) {
               </Link>
             </div>
           )}
-        </div>
+          </div>
+        </>
       )}
     </div>
   )
