@@ -157,25 +157,25 @@ export default function AdminPage() {
         ) : (
           /* User List View */
           <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-4">
-        <div className="relative flex-1 min-w-0 w-full">
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-4">
+              <div className="relative flex-1 min-w-0 w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Search username…"
-          className="w-full rounded-lg border border-slate-200 bg-white/80 pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-slate-200 bg-white/80 pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
-        <div className="relative w-full sm:w-44">
+              <div className="relative w-full sm:w-44">
                 <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <select
                   value={status}
                   onChange={(e) =>
                     setStatus(e.target.value as "" | UserProfile["status"])
                   }
-          className="appearance-none w-full rounded-lg border border-slate-200 bg-white/80 pl-9 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="appearance-none w-full rounded-lg border border-slate-200 bg-white/80 pl-9 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 >
                   <option value="">All status</option>
                   <option value="active">Active</option>
@@ -271,17 +271,28 @@ export default function AdminPage() {
                     <table className="w-full text-sm table-fixed">
                       <thead>
                         <tr className="text-left text-slate-500 border-b border-slate-200">
-                          <th className="py-3 px-3 w-1/4 font-medium">Username</th>
+                          <th className="py-3 px-3 w-1/4 font-medium">
+                            Username
+                          </th>
                           <th className="py-3 px-3 w-20 font-medium">Role</th>
                           <th className="py-3 px-3 w-20 font-medium">Status</th>
-                          <th className="py-3 px-3 w-16 font-medium text-center">Threads</th>
-                          <th className="py-3 px-3 w-16 font-medium text-center">Replies</th>
-                          <th className="py-3 px-3 w-32 font-medium text-right">Actions</th>
+                          <th className="py-3 px-3 w-16 font-medium text-center">
+                            Threads
+                          </th>
+                          <th className="py-3 px-3 w-16 font-medium text-center">
+                            Replies
+                          </th>
+                          <th className="py-3 px-3 w-32 font-medium text-right">
+                            Actions
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {items.map((u) => (
-                          <tr key={u.id} className="border-b border-slate-100 hover:bg-slate-50/50">
+                          <tr
+                            key={u.id}
+                            className="border-b border-slate-100 hover:bg-slate-50/50"
+                          >
                             <td className="py-3 px-3 font-medium text-slate-900 truncate">
                               {u.username}
                             </td>
@@ -291,8 +302,12 @@ export default function AdminPage() {
                             <td className="py-3 px-3">
                               <StatusBadge status={u.status} />
                             </td>
-                            <td className="py-3 px-3 text-center text-slate-600">{u.thread_count}</td>
-                            <td className="py-3 px-3 text-center text-slate-600">{u.reply_count}</td>
+                            <td className="py-3 px-3 text-center text-slate-600">
+                              {u.thread_count}
+                            </td>
+                            <td className="py-3 px-3 text-center text-slate-600">
+                              {u.reply_count}
+                            </td>
                             <td className="py-3 px-3">
                               <div className="flex gap-1 justify-end">
                                 {u.status !== "suspended" && (

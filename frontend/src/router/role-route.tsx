@@ -13,6 +13,7 @@ export default function RoleRoute({
   const location = useLocation()
   const accessToken = useAuthStore((s: AuthState) => s.accessToken)
   const role = useAuthStore((s: AuthState) => s.user?.role)
+  const lastAuthChangeAt = useAuthStore((s: AuthState) => s.lastAuthChangeAt)
   const { toast } = useToast()
 
   if (!accessToken)
@@ -23,12 +24,16 @@ export default function RoleRoute({
     // Compute redirect target
     const target =
       computeRedirect(role as Allowed | undefined, allow) ?? "/dashboard"
-    // Notify user
-    toast({
-      title: "Not authorized",
-      description: "You don't have access to that section.",
-      variant: "warning",
-    })
+    // Notify user unless this is immediately after an auth change (role switch or logout/login)
+    const now = Date.now()
+    const withinGrace = !!lastAuthChangeAt && now - lastAuthChangeAt < 1500
+    if (!withinGrace) {
+      toast({
+        title: "Not authorized",
+        description: "You don't have access to that section.",
+        variant: "warning",
+      })
+    }
     return <Navigate to={target} replace />
   }
 

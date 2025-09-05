@@ -9,6 +9,7 @@ export type AuthState = {
   accessToken: string | null
   refreshToken: string | null
   isAuthenticated: boolean
+  lastAuthChangeAt: number | null
   setSession: (auth: AuthResponse) => void
   clearSession: () => void
   login: (username: string, password: string) => Promise<void>
@@ -19,6 +20,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: storage.getUser(),
   accessToken: storage.getAccessToken(),
   refreshToken: storage.getRefreshToken(),
+  lastAuthChangeAt: null,
   get isAuthenticated() {
     return !!get().accessToken
   },
@@ -32,6 +34,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       accessToken: auth.access_token,
       refreshToken: auth.refresh_token,
       user: auth.user,
+      lastAuthChangeAt: Date.now(),
     }))
   },
   clearSession: () => {
@@ -44,6 +47,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       accessToken: null,
       refreshToken: null,
       user: null,
+      lastAuthChangeAt: Date.now(),
     }))
   },
   login: async (username, password) => {
