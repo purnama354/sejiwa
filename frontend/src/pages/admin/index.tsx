@@ -157,25 +157,25 @@ export default function AdminPage() {
         ) : (
           /* User List View */
           <div className="space-y-4">
-            {/* Filters */}
-            <div className="flex flex-wrap items-center gap-3 rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-4">
-              <div className="relative flex-1 min-w-56">
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-4">
+        <div className="relative flex-1 min-w-0 w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Search username…"
-                  className="w-full rounded-lg border border-slate-200 bg-white/80 pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="w-full rounded-lg border border-slate-200 bg-white/80 pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
-              <div className="relative">
+        <div className="relative w-full sm:w-44">
                 <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <select
                   value={status}
                   onChange={(e) =>
                     setStatus(e.target.value as "" | UserProfile["status"])
                   }
-                  className="appearance-none w-44 rounded-lg border border-slate-200 bg-white/80 pl-9 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="appearance-none w-full rounded-lg border border-slate-200 bg-white/80 pl-9 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 >
                   <option value="">All status</option>
                   <option value="active">Active</option>
@@ -199,85 +199,154 @@ export default function AdminPage() {
                   </div>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm table-fixed">
-                    <thead>
-                      <tr className="text-left text-slate-500 border-b border-slate-200">
-                        <th className="py-3 px-3 w-1/4 font-medium">Username</th>
-                        <th className="py-3 px-3 w-20 font-medium">Role</th>
-                        <th className="py-3 px-3 w-20 font-medium">Status</th>
-                        <th className="py-3 px-3 w-16 font-medium text-center">Threads</th>
-                        <th className="py-3 px-3 w-16 font-medium text-center">Replies</th>
-                        <th className="py-3 px-3 w-32 font-medium text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {items.map((u) => (
-                        <tr key={u.id} className="border-b border-slate-100 hover:bg-slate-50/50">
-                          <td className="py-3 px-3 font-medium text-slate-900 truncate">
-                            {u.username}
-                          </td>
-                          <td className="py-3 px-3">
-                            <RoleBadge role={u.role} />
-                          </td>
-                          <td className="py-3 px-3">
-                            <StatusBadge status={u.status} />
-                          </td>
-                          <td className="py-3 px-3 text-center text-slate-600">{u.thread_count}</td>
-                          <td className="py-3 px-3 text-center text-slate-600">{u.reply_count}</td>
-                          <td className="py-3 px-3">
-                            <div className="flex gap-1 justify-end">
-                              {u.status !== "suspended" && (
-                                <button
-                                  className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50 transition-colors"
-                                  title="Ban user"
-                                  onClick={() => {
-                                    setSelectedUser(u)
-                                    setShowBanModal(true)
-                                  }}
-                                >
-                                  <Ban className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                              {u.status === "suspended" && (
-                                <button
-                                  className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50 transition-colors"
-                                  title="Unban user"
-                                  onClick={() => {
-                                    setSelectedUser(u)
-                                    setShowUnbanModal(true)
-                                  }}
-                                >
-                                  <RotateCcw className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                              {active !== "admins" && u.role !== "admin" && (
-                                <button
-                                  className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50 transition-colors"
-                                  title="Promote"
-                                  onClick={() => {
-                                    setSelectedUser(u)
-                                    setShowPromoteModal(true)
-                                  }}
-                                >
-                                  <Crown className="w-3.5 h-3.5" />
-                                </button>
-                              )}
+                <>
+                  {/* Mobile list */}
+                  <div className="md:hidden space-y-3">
+                    {items.map((u) => (
+                      <div
+                        key={u.id}
+                        className="rounded-xl border border-slate-200 bg-white/80 p-3"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="font-medium text-slate-900">
+                              {u.username}
                             </div>
-                          </td>
+                            <div className="mt-1 flex items-center gap-2">
+                              <RoleBadge role={u.role} />
+                              <StatusBadge status={u.status} />
+                            </div>
+                          </div>
+                          <div className="flex gap-1 shrink-0">
+                            {u.status !== "suspended" && (
+                              <button
+                                className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50 transition-colors"
+                                title="Ban user"
+                                onClick={() => {
+                                  setSelectedUser(u)
+                                  setShowBanModal(true)
+                                }}
+                              >
+                                <Ban className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            {u.status === "suspended" && (
+                              <button
+                                className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50 transition-colors"
+                                title="Unban user"
+                                onClick={() => {
+                                  setSelectedUser(u)
+                                  setShowUnbanModal(true)
+                                }}
+                              >
+                                <RotateCcw className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            {active !== "admins" && u.role !== "admin" && (
+                              <button
+                                className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50 transition-colors"
+                                title="Promote"
+                                onClick={() => {
+                                  setSelectedUser(u)
+                                  setShowPromoteModal(true)
+                                }}
+                              >
+                                <Crown className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <div className="mt-3 flex items-center justify-between text-xs text-slate-600">
+                          <div className="flex gap-4">
+                            <span>Threads {u.thread_count}</span>
+                            <span>Replies {u.reply_count}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop table */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full text-sm table-fixed">
+                      <thead>
+                        <tr className="text-left text-slate-500 border-b border-slate-200">
+                          <th className="py-3 px-3 w-1/4 font-medium">Username</th>
+                          <th className="py-3 px-3 w-20 font-medium">Role</th>
+                          <th className="py-3 px-3 w-20 font-medium">Status</th>
+                          <th className="py-3 px-3 w-16 font-medium text-center">Threads</th>
+                          <th className="py-3 px-3 w-16 font-medium text-center">Replies</th>
+                          <th className="py-3 px-3 w-32 font-medium text-right">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {items.map((u) => (
+                          <tr key={u.id} className="border-b border-slate-100 hover:bg-slate-50/50">
+                            <td className="py-3 px-3 font-medium text-slate-900 truncate">
+                              {u.username}
+                            </td>
+                            <td className="py-3 px-3">
+                              <RoleBadge role={u.role} />
+                            </td>
+                            <td className="py-3 px-3">
+                              <StatusBadge status={u.status} />
+                            </td>
+                            <td className="py-3 px-3 text-center text-slate-600">{u.thread_count}</td>
+                            <td className="py-3 px-3 text-center text-slate-600">{u.reply_count}</td>
+                            <td className="py-3 px-3">
+                              <div className="flex gap-1 justify-end">
+                                {u.status !== "suspended" && (
+                                  <button
+                                    className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50 transition-colors"
+                                    title="Ban user"
+                                    onClick={() => {
+                                      setSelectedUser(u)
+                                      setShowBanModal(true)
+                                    }}
+                                  >
+                                    <Ban className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                                {u.status === "suspended" && (
+                                  <button
+                                    className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50 transition-colors"
+                                    title="Unban user"
+                                    onClick={() => {
+                                      setSelectedUser(u)
+                                      setShowUnbanModal(true)
+                                    }}
+                                  >
+                                    <RotateCcw className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                                {active !== "admins" && u.role !== "admin" && (
+                                  <button
+                                    className="px-2 py-1.5 text-xs border rounded hover:bg-slate-50 transition-colors"
+                                    title="Promote"
+                                    onClick={() => {
+                                      setSelectedUser(u)
+                                      setShowPromoteModal(true)
+                                    }}
+                                  >
+                                    <Crown className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
             {/* Pagination */}
-            <div className="flex items-center justify-between px-1">
-              <div className="text-xs text-slate-500">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-1">
+              <div className="text-xs text-slate-500 w-full sm:w-auto text-center sm:text-left">
                 Page {page} of {totalPages} • {total} total
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
                 <button
                   className="px-3 py-1.5 text-sm border rounded disabled:opacity-50"
                   disabled={page <= 1 || isLoading || isRefetching}
