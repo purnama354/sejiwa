@@ -99,7 +99,10 @@ export default function SubscriptionButton({
           ?.status
         const code = (e as { response?: { data?: { code?: string } } })
           ?.response?.data?.code
-  if ((status === 400 && code === "PASSWORD_REQUIRED") || status === 403) {
+        if (
+          (status === 400 && code === "PASSWORD_REQUIRED") ||
+          status === 403
+        ) {
           setShowJoin(true)
         } else if (status === 401 && code === "INVALID_PASSWORD") {
           toast({
@@ -161,7 +164,11 @@ export default function SubscriptionButton({
           </>
         ) : (
           <>
-            {isPrivate ? <Lock className="w-4 h-4" /> : <Heart className="w-4 h-4" />}
+            {isPrivate ? (
+              <Lock className="w-4 h-4" />
+            ) : (
+              <Heart className="w-4 h-4" />
+            )}
             {isPrivate ? "Join" : "Subscribe"}
           </>
         )}

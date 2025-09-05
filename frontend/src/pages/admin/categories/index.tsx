@@ -7,7 +7,17 @@ import {
   deleteCategory,
 } from "@/services/categories"
 import type { Category, CreateCategoryRequest } from "@/types/api"
-import { Plus, Edit3, Trash2, Lock, Save, X, Folder, Hash, Shield } from "lucide-react"
+import {
+  Plus,
+  Edit3,
+  Trash2,
+  Lock,
+  Save,
+  X,
+  Folder,
+  Hash,
+  Shield,
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 export default function AdminCategories() {
@@ -219,7 +229,7 @@ function CategoryCard({
     name: category.name,
     description: category.description,
     is_locked: category.is_locked,
-  is_private: category.is_private,
+    is_private: category.is_private,
   })
 
   const handleSave = () => {
@@ -231,8 +241,8 @@ function CategoryCard({
     setEditData({
       name: category.name,
       description: category.description,
-  is_locked: category.is_locked,
-  is_private: category.is_private,
+      is_locked: category.is_locked,
+      is_private: category.is_private,
     })
     setIsEditing(false)
   }

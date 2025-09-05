@@ -621,11 +621,17 @@ function ExploreCategories() {
                   )
                 ) : (
                   <Button asChild size="sm" variant="outline">
-                    <Link to={c.id ? `/categories/${c.id}` : "/login"}>View threads</Link>
+                    <Link to={c.id ? `/categories/${c.id}` : "/login"}>
+                      View threads
+                    </Link>
                   </Button>
                 )}
                 <Button asChild size="sm" variant="ghost">
-                  <Link to={`/preview/${c.slug || c.name?.toLowerCase() || "category"}`}>
+                  <Link
+                    to={`/preview/${
+                      c.slug || c.name?.toLowerCase() || "category"
+                    }`}
+                  >
                     Preview
                   </Link>
                 </Button>

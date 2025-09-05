@@ -14,7 +14,12 @@ type Props = {
   categoryName?: string
 }
 
-export default function JoinCategoryModal({ isOpen, onClose, categoryId, categoryName }: Props) {
+export default function JoinCategoryModal({
+  isOpen,
+  onClose,
+  categoryId,
+  categoryName,
+}: Props) {
   const [password, setPassword] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const { toast } = useToast()
@@ -36,17 +41,35 @@ export default function JoinCategoryModal({ isOpen, onClose, categoryId, categor
       })
       qc.invalidateQueries({ queryKey: ["user-categories"] })
       qc.invalidateQueries({ queryKey: ["user-stats"] })
-      toast({ title: "Joined", description: `You're now following ${categoryName ?? "this category"}.`, variant: "success" })
+      toast({
+        title: "Joined",
+        description: `You're now following ${categoryName ?? "this category"}.`,
+        variant: "success",
+      })
       onClose()
     } catch (err) {
-      const status = (err as { response?: { status?: number } })?.response?.status
-      const code = (err as { response?: { data?: { code?: string } } })?.response?.data?.code
+      const status = (err as { response?: { status?: number } })?.response
+        ?.status
+      const code = (err as { response?: { data?: { code?: string } } })
+        ?.response?.data?.code
       if (status === 400 && code === "PASSWORD_REQUIRED") {
-        toast({ title: "Password required", description: "Please enter the category password.", variant: "warning" })
+        toast({
+          title: "Password required",
+          description: "Please enter the category password.",
+          variant: "warning",
+        })
       } else if (status === 401 && code === "INVALID_PASSWORD") {
-        toast({ title: "Invalid password", description: "Please try again.", variant: "error" })
+        toast({
+          title: "Invalid password",
+          description: "Please try again.",
+          variant: "error",
+        })
       } else {
-        toast({ title: "Failed to join", description: "Please try again.", variant: "error" })
+        toast({
+          title: "Failed to join",
+          description: "Please try again.",
+          variant: "error",
+        })
       }
     } finally {
       setSubmitting(false)
@@ -61,13 +84,20 @@ export default function JoinCategoryModal({ isOpen, onClose, categoryId, categor
       size="sm"
       footer={
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={onClose} disabled={submitting}>Cancel</Button>
-          <Button onClick={onSubmit} disabled={submitting}>{submitting ? "Joining..." : "Join"}</Button>
+          <Button variant="ghost" onClick={onClose} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button onClick={onSubmit} disabled={submitting}>
+            {submitting ? "Joining..." : "Join"}
+          </Button>
         </div>
       }
     >
       <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">If this category is password-protected, enter the password below. Leave it blank if not required.</p>
+        <p className="text-sm text-muted-foreground">
+          If this category is password-protected, enter the password below.
+          Leave it blank if not required.
+        </p>
         <div className="grid gap-1.5">
           <Label htmlFor="join-password">Password (optional)</Label>
           <Input
