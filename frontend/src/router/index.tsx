@@ -18,6 +18,7 @@ const ModeratorDashboard = lazy(() => import("@/pages/moderation/dashboard"))
 const AdminSettings = lazy(() => import("@/pages/admin/settings"))
 const PrivacySettings = lazy(() => import("@/pages/profile/privacy"))
 const NotificationSettings = lazy(() => import("@/pages/profile/notifications"))
+const SavedThreadsPage = lazy(() => import("@/pages/profile/saved"))
 
 const router = createBrowserRouter([
   {
@@ -65,6 +66,16 @@ const router = createBrowserRouter([
       {
         path: "profile",
         children: [
+          {
+            path: "saved",
+            element: (
+              <RoleRoute allow={["user", "moderator", "admin"]}>
+                <Fallback>
+                  <SavedThreadsPage />
+                </Fallback>
+              </RoleRoute>
+            ),
+          },
           {
             path: "privacy",
             element: (

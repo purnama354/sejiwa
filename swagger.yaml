@@ -1,4 +1,192 @@
 definitions:
+  # User Dashboard DTOs
+  UserStatsResponse:
+    type: object
+    properties:
+      threads_created:
+        type: integer
+        description: Number of threads created by user
+      replies_posted:
+        type: integer
+        description: Number of replies posted by user
+      threads_liked:
+        type: integer
+        description: Number of threads liked by user
+      threads_saved:
+        type: integer
+        description: Number of threads saved by user
+      active_days:
+        type: integer
+        description: Number of days user has been active
+      streak_days:
+        type: integer
+        description: Current consecutive active days
+      categories_joined:
+        type: integer
+        description: Number of categories user has joined
+      report_count:
+        type: integer
+        description: Number of reports submitted by user
+      karma_points:
+        type: integer
+        description: User's karma points
+
+  ThreadPreview:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      title:
+        type: string
+      category:
+        type: string
+      category_slug:
+        type: string
+      replies:
+        type: integer
+      created_at:
+        type: string
+        format: date-time
+      preview:
+        type: string
+      has_new_replies:
+        type: boolean
+      is_locked:
+        type: boolean
+
+  ReplyPreview:
+    type: object
+    properties:
+      thread_id:
+        type: string
+        format: uuid
+      thread_title:
+        type: string
+      category:
+        type: string
+      category_slug:
+        type: string
+      replied_at:
+        type: string
+        format: date-time
+      preview:
+        type: string
+
+  UserActivityResponse:
+    type: object
+    properties:
+      threads:
+        type: array
+        items:
+          $ref: "#/definitions/ThreadPreview"
+      recent_replies:
+        type: array
+        items:
+          $ref: "#/definitions/ReplyPreview"
+      saved_threads:
+        type: array
+        items:
+          $ref: "#/definitions/ThreadPreview"
+
+  CategorySubscription:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+      slug:
+        type: string
+      thread_count:
+        type: integer
+      description:
+        type: string
+
+  NotificationPreferences:
+    type: object
+    properties:
+      thread_replies:
+        type: boolean
+      mentions:
+        type: boolean
+      category_updates:
+        type: boolean
+      community_announcements:
+        type: boolean
+
+  PrivacySettings:
+    type: object
+    properties:
+      show_active_status:
+        type: boolean
+      allow_direct_messages:
+        type: boolean
+      content_visibility:
+        type: string
+        enum: [all, categories, none]
+
+  UserPreferencesResponse:
+    type: object
+    properties:
+      notifications:
+        $ref: "#/definitions/NotificationPreferences"
+      privacy:
+        $ref: "#/definitions/PrivacySettings"
+
+  # Request DTOs
+  UpdateNotificationPreferencesRequest:
+    type: object
+    properties:
+      thread_replies:
+        type: boolean
+      mentions:
+        type: boolean
+      category_updates:
+        type: boolean
+      community_announcements:
+        type: boolean
+
+  UpdatePrivacySettingsRequest:
+    type: object
+    properties:
+      show_active_status:
+        type: boolean
+      allow_direct_messages:
+        type: boolean
+      content_visibility:
+        type: string
+        enum: [all, categories, none]
+
+  SubscriptionRequest:
+    type: object
+    required:
+      - category_id
+    properties:
+      category_id:
+        type: string
+        format: uuid
+
+  SaveThreadRequest:
+    type: object
+    required:
+      - thread_id
+    properties:
+      thread_id:
+        type: string
+        format: uuid
+
+  SavedThreadsResponse:
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/ThreadPreview"
+      total:
+        type: integer
+
   AnonymousAuthor:
     description: AnonymousAuthor represents the anonymous author information
     properties:
@@ -1252,7 +1440,10 @@ definitions:
         x-go-name: Message
     type: object
     x-go-package: github.com/purnama354/sejiwa-api/internal/dto
-info: {}
+info:
+  title: Sejiwa API
+  description: Mental health discussion platform API
+  version: "1.0.0"
 paths:
   /api/v1/users/me/stats:
     get:
@@ -1299,35 +1490,153 @@ paths:
   /api/v1/users/me/subscriptions:
     get:
       summary: List category subscriptions
+      description: Get all categories the authenticated user is subscribed to
       tags: [Users]
+      security:
+        - BearerAuth: []
       responses:
-        "200": { description: OK }
+        "200":
+          description: List of subscribed categories
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CategorySubscription"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
     post:
       summary: Subscribe to a category
+      description: Subscribe the authenticated user to a specific category
       tags: [Users]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/SubscribeRequest"
       responses:
-        "200": { description: OK }
+        "200":
+          $ref: "#/responses/successResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "409":
+          description: Already subscribed to this category
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
     delete:
       summary: Unsubscribe from a category
+      description: Unsubscribe the authenticated user from a specific category
       tags: [Users]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/UnsubscribeRequest"
       responses:
-        "200": { description: OK }
+        "200":
+          $ref: "#/responses/successResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
   /api/v1/users/me/saved-threads:
     get:
       summary: List saved threads
+      description: Get paginated list of threads saved by the authenticated user
       tags: [Users]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          type: integer
+          minimum: 1
+          default: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+          description: Number of items per page
       responses:
-        "200": { description: OK }
+        "200":
+          description: Paginated list of saved threads
+          schema:
+            $ref: "#/definitions/SavedThreadsResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
     post:
       summary: Save a thread
+      description: Save a specific thread for the authenticated user
       tags: [Users]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/SaveThreadRequest"
       responses:
-        "200": { description: OK }
+        "200":
+          $ref: "#/responses/successResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "409":
+          description: Thread already saved
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
     delete:
       summary: Unsave a thread
+      description: Remove a thread from saved threads for the authenticated user
       tags: [Users]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/UnsaveThreadRequest"
       responses:
-        "200": { description: OK }
+        "200":
+          $ref: "#/responses/successResponse"
+        "400":
+          $ref: "#/responses/errorResponse"
+        "401":
+          $ref: "#/responses/errorResponse"
+        "404":
+          $ref: "#/responses/errorResponse"
+        "500":
+          $ref: "#/responses/errorResponse"
   /admin/auth/create-admin:
     post:
       description: Create an admin account (Admin only)
@@ -2559,4 +2868,10 @@ responses:
     description: ""
     schema:
       $ref: "#/definitions/UserProfile"
+securityDefinitions:
+  BearerAuth:
+    type: apiKey
+    in: header
+    name: Authorization
+    description: "JWT token in the format 'Bearer {token}'"
 swagger: "2.0"

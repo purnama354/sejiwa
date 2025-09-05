@@ -86,6 +86,12 @@ type UserListResponse struct {
 	TotalPages int           `json:"totalPages"`
 }
 
+// SavedThreadsResponse for saved threads with pagination
+type SavedThreadsResponse struct {
+	Threads    []ThreadPreview    `json:"threads"`
+	Pagination PaginationResponse `json:"pagination"`
+}
+
 // NewErrorResponse creates a new error response
 func NewErrorResponse(error, code string, details []ValidationError) ErrorResponse {
 	return ErrorResponse{

@@ -73,7 +73,24 @@ type UpdateNotificationPreferencesRequest struct {
 }
 
 type UpdatePrivacySettingsRequest struct {
-	ShowActiveStatus    *bool  `json:"show_active_status"`
-	AllowDirectMessages *bool  `json:"allow_direct_messages"`
+	ShowActiveStatus    *bool   `json:"show_active_status"`
+	AllowDirectMessages *bool   `json:"allow_direct_messages"`
 	ContentVisibility   *string `json:"content_visibility"`
+}
+
+// Subscription and saved thread requests
+type SubscribeRequest struct {
+	CategoryID string `json:"category_id" binding:"required,uuid"`
+}
+
+type UnsubscribeRequest struct {
+	CategoryID string `json:"category_id" binding:"required,uuid"`
+}
+
+type SaveThreadRequest struct {
+	ThreadID string `json:"thread_id" binding:"required,uuid"`
+}
+
+type UnsaveThreadRequest struct {
+	ThreadID string `json:"thread_id" binding:"required,uuid"`
 }
