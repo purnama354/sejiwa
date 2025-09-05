@@ -183,6 +183,14 @@ func RegisterRoutes(
 			userRoutes.GET("/me", userHandler.GetProfile)
 			userRoutes.PATCH("/me", userHandler.UpdateProfile)
 			userRoutes.GET("/me/role", userHandler.GetRoleInfo)
+			userRoutes.GET("/me/stats", userHandler.GetMyStats)
+			userRoutes.GET("/me/activity", userHandler.GetMyActivity)
+			userRoutes.GET("/me/categories", userHandler.GetMyCategories)
+
+			// Preferences
+			userRoutes.GET("/me/preferences", userHandler.GetPreferences)
+			userRoutes.PUT("/me/preferences/notifications", userHandler.UpdateNotificationPreferences)
+			userRoutes.PUT("/me/preferences/privacy", userHandler.UpdatePrivacySettings)
 
 			// Test endpoint for any authenticated user
 			userRoutes.GET("/test", func(c *gin.Context) {

@@ -63,3 +63,17 @@ type CreateModeratorRequest struct {
 type UpdateUserRequest struct {
 	Username *string `json:"username,omitempty" binding:"omitempty,min=3,max=30,alphanum_underscore_hyphen"`
 }
+
+// Preferences update requests
+type UpdateNotificationPreferencesRequest struct {
+	ThreadReplies          *bool `json:"thread_replies"`
+	Mentions               *bool `json:"mentions"`
+	CategoryUpdates        *bool `json:"category_updates"`
+	CommunityAnnouncements *bool `json:"community_announcements"`
+}
+
+type UpdatePrivacySettingsRequest struct {
+	ShowActiveStatus    *bool  `json:"show_active_status"`
+	AllowDirectMessages *bool  `json:"allow_direct_messages"`
+	ContentVisibility   *string `json:"content_visibility"`
+}

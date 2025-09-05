@@ -163,3 +163,126 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 
 	c.JSON(http.StatusOK, profile)
 }
+
+// GetPreferences returns user's notification and privacy preferences
+func (h *UserHandler) GetPreferences(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	pref, err := h.userService.GetPreferences(userID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to get preferences", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	// map to DTOs for frontend expectations
+	resp := gin.H{
+		"notifications": gin.H{
+			"thread_replies":           pref.NotifyThreadReplies,
+			"mentions":                 pref.NotifyMentions,
+			"category_updates":         pref.NotifyCategoryUpdates,
+			"community_announcements":  pref.NotifyAnnouncements,
+		},
+		"privacy": gin.H{
+			"show_active_status":   pref.ShowActiveStatus,
+			"allow_direct_messages": pref.AllowDirectMessages,
+			"content_visibility":    string(pref.ContentVisibility),
+		},
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+// UpdateNotificationPreferences updates notification preferences
+func (h *UserHandler) UpdateNotificationPreferences(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	var req dto.UpdateNotificationPreferencesRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
+		return
+	}
+	pref, err := h.userService.UpdateNotificationPreferences(userID.(uuid.UUID), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to update notification preferences", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"thread_replies":          pref.NotifyThreadReplies,
+		"mentions":                pref.NotifyMentions,
+		"category_updates":        pref.NotifyCategoryUpdates,
+		"community_announcements": pref.NotifyAnnouncements,
+	})
+}
+
+// UpdatePrivacySettings updates privacy settings
+func (h *UserHandler) UpdatePrivacySettings(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	var req dto.UpdatePrivacySettingsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
+		return
+	}
+	pref, err := h.userService.UpdatePrivacySettings(userID.(uuid.UUID), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to update privacy settings", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"show_active_status":   pref.ShowActiveStatus,
+		"allow_direct_messages": pref.AllowDirectMessages,
+		"content_visibility":    string(pref.ContentVisibility),
+	})
+}
+
+// GetMyStats returns aggregated stats for the authenticated user
+func (h *UserHandler) GetMyStats(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	stats, err := h.userService.GetMyStats(userID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to get stats", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, stats)
+}
+
+// GetMyActivity returns recent threads and replies by the user
+func (h *UserHandler) GetMyActivity(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	activity, err := h.userService.GetMyActivity(userID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to get activity", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, activity)
+}
+
+// GetMyCategories returns categories related to the user's activity
+func (h *UserHandler) GetMyCategories(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	cats, err := h.userService.GetMyCategories(userID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to get categories", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, cats)
+}
