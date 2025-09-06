@@ -1,11 +1,6 @@
 import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import {
-  listCategories,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-} from "@/services/categories"
+import { listAdminCategories, createCategory, updateCategory, deleteCategory } from "@/services/categories"
 import type {
   Category,
   CreateCategoryRequest,
@@ -32,7 +27,7 @@ export default function AdminCategories() {
     isError,
   } = useQuery({
     queryKey: ["categories", { admin: true }],
-    queryFn: () => listCategories({ admin: true }),
+    queryFn: () => listAdminCategories(),
   })
 
   const [showCreateForm, setShowCreateForm] = useState(false)

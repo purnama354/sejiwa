@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
+import type { Category } from "@/types/api"
 import { getModerationStats } from "@/services/moderation"
-import { listCategories } from "@/services/categories"
+import { listAdminCategories } from "@/services/categories"
 import { getUsers } from "@/services/users"
 import {
   Users,
@@ -27,9 +28,9 @@ export default function AdminDashboard() {
     queryFn: () => getModerationStats(),
   })
 
-  const { data: categories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: listCategories,
+  const { data: categories = [] } = useQuery<Category[]>({
+    queryKey: ["categories", { admin: true }],
+    queryFn: listAdminCategories,
   })
 
   const { data: allUsers } = useQuery({

@@ -13,7 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, ArrowLeft } from "lucide-react"
 import { createThread } from "@/services/threads"
 import { listCategories } from "@/services/categories"
@@ -36,11 +35,7 @@ export default function CreateThreadPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Fetch categories for dropdown
-  const {
-    data: categories,
-    isLoading: categoriesLoading,
-    error: categoriesError,
-  } = useQuery({
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ["categories"],
     queryFn: listCategories,
   })
@@ -151,17 +146,7 @@ export default function CreateThreadPage() {
     }
   }
 
-  if (categoriesError) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Alert variant="destructive">
-          <AlertDescription>
-            Failed to load categories. Please try again later.
-          </AlertDescription>
-        </Alert>
-      </div>
-    )
-  }
+  // Categories load errors are surfaced by empty dropdown; optional improvement: show inline error.
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">

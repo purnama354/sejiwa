@@ -13,6 +13,7 @@ interface SubscriptionButtonProps {
   isSubscribed?: boolean
   variant?: "default" | "compact"
   isPrivate?: boolean
+  hasPassword?: boolean
 }
 
 export default function SubscriptionButton({
@@ -53,13 +54,6 @@ export default function SubscriptionButton({
         description: `You're now following ${categoryName}.`,
       })
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to subscribe. Please try again.",
-        variant: "error",
-      })
-    },
   })
 
   const unsubscribeMutation = useMutation({
@@ -92,6 +86,11 @@ export default function SubscriptionButton({
     if (isSubscribed) {
       unsubscribeMutation.mutate()
     } else {
+      // For private categories, prompt password first for better UX
+      if (isPrivate) {
+        setShowJoin(true)
+        return
+      }
       try {
         await subscribeMutation.mutateAsync(undefined)
       } catch (e) {
@@ -108,6 +107,12 @@ export default function SubscriptionButton({
           toast({
             title: "Invalid password",
             description: "Please try again.",
+            variant: "error",
+          })
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to subscribe. Please try again.",
             variant: "error",
           })
         }

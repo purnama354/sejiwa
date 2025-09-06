@@ -174,7 +174,7 @@ export default function ProfileSettingsPage() {
                   <Badge
                     variant={
                       profile.role === "admin"
-                        ? "destructive"
+                        ? "danger"
                         : profile.role === "moderator"
                         ? "secondary"
                         : "default"
