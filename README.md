@@ -1,50 +1,233 @@
-# Sejiwa: Anonymous Talk Space
+# Sejiwa - Mental Health Discussion Platform
 
-> **Sejiwa** (Indonesian for 'one soul' or 'kindred spirit') evokes a sense of unity and mutual understanding among users who may share similar experiences.
->
-> **Anonymous Talk Space** clearly communicates the app's core purpose: a safe and private venue for sharing thoughts and feelings.
+## 🌱 Project Overview
 
-## App Description
+**Sejiwa** is a comprehensive mental health discussion platform designed to provide anonymous, moderated, and safe spaces for individuals to share their experiences, seek support, and engage in meaningful conversations about mental wellness. The platform prioritizes user safety, anonymity, and community support through sophisticated moderation tools and privacy-first design.
 
-**Sejiwa: Anonymous Talk Space** is a web-based platform dedicated to providing a secure and supportive environment for individuals to share their experiences, challenges, and feelings related to mental health or psychological issues in a completely anonymous manner. The app is designed to be a place where anyone can find understanding, support, and connection with peers without the fear of judgment or exposure. With a strict moderation system and a strong focus on privacy, Sejiwa aims to be a beacon of hope and community for those in need.
+## 🎯 Mission & Aims
 
-## How Sejiwa Works: The Application Flow
+### Core Mission
 
-Sejiwa operates on a modern architecture, separating a fast frontend (`Next.js`) from an efficient backend (`Go` with `Gin`), supported by a robust `PostgreSQL` database, and secure session management (`NextAuth.js`).
+- **Anonymous Support**: Enable users to share vulnerabilities without fear of judgment through anonymous usernames
+- **Safe Space**: Maintain a healthy community environment through active moderation and reporting systems
+- **Mental Health Focus**: Provide specialized categories for anxiety, depression, relationships, and other mental health topics
+- **Community Building**: Foster genuine human connections while protecting user privacy
 
-### 1. Embarking on Your Journey: Registration & Anonymity
+### Key Objectives
 
-- **Quick & Secure Registration:** Users can sign up by creating an anonymous username and password. The app will not request any personal identifiable information such as real names, emails, or phone numbers, ensuring absolute privacy from the start.
-- **Secure Login:** After registering, users can log in using their anonymous username and password. This authentication process is handled by the Go backend, which issues a secure token (JWT) that is then managed by `NextAuth.js` on the frontend.
+- Reduce stigma around mental health discussions
+- Provide accessible peer support for mental wellness
+- Create moderated spaces that prioritize user safety
+- Enable anonymous sharing for vulnerable populations
+- Build community resilience through shared experiences
 
-### 2. Exploring & Sharing: The Main Forum
+## 🏗️ Architecture & How It Works
 
-- **Main Dashboard:** Upon logging in, users are directed to a dashboard displaying the latest or most popular discussion threads.
-- **Topic Categories:** Threads are organized into various relevant categories (e.g., "Anxiety & Stress," "Depression," "Relationships," "Self-Improvement," "ADHD," etc.). This helps users easily find discussions most relevant to their needs.
-- **Creating New Threads:** Users can initiate new discussions by creating a thread. They'll write a title and the content of their thread, then select an appropriate category. Their anonymous username will automatically be associated with the thread.
-- **Interacting within Threads:** Users can read threads and replies from other users. They can also write their own replies to share experiences, offer support, or ask questions. Every reply will also display the user's anonymous username.
-- **Search Functionality:** Users can search for specific threads or posts using keywords to find information or particular discussions.
+### System Architecture
 
-### 3. Ensuring Community Safety & Quality: The Strict Moderation System
+Sejiwa follows a **Repository-Service-Handler pattern** with clear separation of concerns:
 
-This is the cornerstone of Sejiwa, crucial for maintaining a safe and supportive environment:
+```
+Frontend (React/TypeScript) ↔ REST API (Go/Gin) ↔ PostgreSQL Database
+                                     ↓
+                              Redis (Rate Limiting & Caching)
+```
 
-- **Content Reporting:** Every user has the ability to report any post or comment they believe violates community guidelines (e.g., hate speech, harmful content, self-promotion, or spam). They can select the reason for the report from a provided list.
-- **Moderation Queue:** Each incoming report instantly appears on a separate moderator dashboard. Moderators are trained individuals with access to this system.
-- **Moderator Review & Action:**
-  - Moderators review each report and the reported content.
-  - They can choose to hide or delete violating content.
-  - Moderators can also issue warnings to infringing users or, in cases of repeated or severe violations, ban user accounts (temporarily or permanently) from the platform.
-  - All moderation actions are logged for an audit trail.
-- **Automated Filtering System (Optional & Advanced):** In the future, Sejiwa can implement an AI/NLP-powered system (such as integration with Perspective API) that automatically flags or even filters highly toxic content before it's displayed, routing it to moderators for further review. This helps reduce the manual workload for moderators and improves response time to negative content.
+### Core Workflow
 
-### 4. Privacy & Data Security
+1. **User Registration**: Anonymous usernames only (no PII collected)
+2. **Category Browsing**: Users discover mental health discussion topics
+3. **Thread Creation**: Users create discussion threads in specific categories
+4. **Community Interaction**: Reply to threads, save content, engage in discussions
+5. **Content Moderation**: Comprehensive reporting and moderation system
+6. **Privacy Protection**: All interactions remain anonymous with soft-delete policies
 
-- **True Anonymity:** The system design ensures that no personally identifiable user data is stored or requested.
-- **Data Encryption:** User passwords will be encrypted using industry-leading security techniques in the Go backend before being stored in the `PostgreSQL` database.
-- **Secure Communication:** All communication between the `Next.js` frontend and the `Go` backend occurs over encrypted connections (HTTPS) to protect data in transit.
-- **Clear Privacy Policy:** The app will feature a transparent privacy policy, explaining how anonymous data is handled and protected.
+### Key Features
 
-### 5. Additional Support
+#### 🔐 Privacy & Anonymity
 
-- **External Resources:** Sejiwa will provide clear and easily accessible links to professional mental health support resources (e.g., crisis hotlines, counseling services) to ensure users can seek further assistance if needed. The app serves as a community support space, not a substitute for professional therapy.
+- **Anonymous Usernames**: No real names or personal information required
+- **Privacy-First Design**: Users identified only by chosen usernames
+- **Soft Deletes**: Content hidden rather than permanently deleted
+- **Secure Authentication**: JWT-based auth with refresh tokens
+
+#### 🛡️ Advanced Moderation System
+
+- **Multi-Level Reporting**: Users can report harmful content with categorized reasons
+- **Priority-Based Queue**: Automatic priority assignment (Low/Medium/High/Critical)
+- **Comprehensive Actions**: Warn, hide, delete, temporary/permanent bans
+- **Moderator Tools**: Internal notes, audit trails, user history tracking
+- **Role-Based Access**: User/Moderator/Admin with granular permissions
+
+#### 💬 Discussion Features
+
+- **Categorized Threads**: Organized by mental health topics
+- **Nested Replies**: Full conversation threading
+- **Content Saving**: Users can bookmark important discussions
+- **View Tracking**: Thread popularity and engagement metrics
+- **Rich Content**: Support for formatted text discussions
+
+#### 📊 User Wellness Tracking
+
+- **Activity Stats**: Thread creation, replies, engagement metrics
+- **Wellness Dashboard**: Daily streaks, karma points, active days
+- **Category Subscriptions**: Follow preferred discussion topics
+- **Personal Analytics**: Track user's community engagement
+
+## 🛠️ Technology Stack
+
+### Backend (API Server)
+
+- **Language**: Go 1.24.1
+- **Framework**: Gin (HTTP router and middleware)
+- **Database**: PostgreSQL with GORM ORM
+- **Authentication**: JWT tokens with refresh mechanism
+- **Security**: bcrypt password hashing, CORS, rate limiting
+- **Validation**: go-playground/validator with custom rules
+
+### Database & Storage
+
+- **Primary Database**: PostgreSQL
+- **ORM**: GORM with migrations
+- **Cache/Sessions**: Redis (via ulule/limiter)
+- **Database Design**: UUID primary keys, soft deletes, audit fields
+
+### Security & Infrastructure
+
+- **Rate Limiting**: ulule/limiter with Redis backend
+- **Password Security**: bcrypt hashing
+- **CORS**: gin-contrib/cors for cross-origin requests
+- **Environment Config**: godotenv + envconfig for configuration management
+- **Input Validation**: Comprehensive request validation with custom validators
+
+### Frontend (Web Application)
+
+- **Framework**: React 19.1.1 with TypeScript
+- **Build Tool**: Vite 7.1.2
+- **Routing**: React Router DOM 7.8.2
+- **State Management**: Zustand 5.0.8 for global state
+- **Data Fetching**: TanStack React Query 5.85.5
+- **HTTP Client**: Axios 1.11.0
+
+### UI/UX Framework
+
+- **Styling**: Tailwind CSS 4.1.12 with custom design system
+- **Components**: Radix UI primitives (@radix-ui/react-\*)
+- **Icons**: Lucide React 0.542.0
+- **Forms**: React Hook Form 7.62.0 with Zod validation
+- **Notifications**: Sonner 2.0.7 for toast messages
+- **Animations**: Custom Tailwind animations (tw-animate-css)
+
+### Development & Quality
+
+- **Package Manager**: Bun (frontend)
+- **Linting**: ESLint 9.33.0 with TypeScript support
+- **Testing**: Testify (Go), DATA-DOG/go-sqlmock for database testing
+- **Type Safety**: Full TypeScript coverage with strict configuration
+
+### API & Documentation
+
+- **API Standard**: RESTful API with OpenAPI/Swagger documentation
+- **Documentation**: Comprehensive Swagger 2.0 specification (2900+ lines)
+- **Validation**: Request/response DTOs with validation tags
+- **Error Handling**: Structured error responses with specific error codes
+
+## 📁 Project Structure
+
+### Backend Structure
+
+```
+cmd/server/          # Application entry point
+internal/
+├── config/          # Environment configuration
+├── database/        # DB connection, migrations, seeds
+├── dto/             # Request/response data structures
+├── handlers/        # HTTP request handlers
+├── middleware/      # HTTP middleware (auth, CORS, rate limiting)
+├── models/          # Domain entities
+├── repository/      # Data access layer
+├── routes/          # Route definitions
+├── services/        # Business logic layer
+└── utils/           # Common utilities
+```
+
+### Frontend Structure
+
+```
+src/
+├── components/      # Reusable UI components
+├── pages/           # Application pages/routes
+├── services/        # API service functions
+├── store/           # Global state management
+├── types/           # TypeScript type definitions
+├── lib/             # Utility libraries
+└── hooks/           # Custom React hooks
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Go 1.24.1+
+- Node.js 18+ (for frontend)
+- PostgreSQL 13+
+- Redis (for rate limiting)
+
+### Backend Setup
+
+```bash
+# Install dependencies
+go mod download
+
+# Setup environment
+cp .env.example .env
+# Configure database URL and other settings
+
+# Run migrations and seed data
+./scripts/migrate.sh
+./scripts/seed.sh
+
+# Start server
+go run cmd/server/main.go
+```
+
+### Frontend Setup
+
+```bash
+cd frontend
+bun install
+bun run dev
+```
+
+## 🔒 Security Features
+
+- **Rate Limiting**: 5 requests/minute on auth endpoints
+- **Account Lockout**: Protection against brute force attacks
+- **JWT Security**: Secure token handling with refresh mechanism
+- **Input Validation**: Comprehensive validation on all endpoints
+- **Content Moderation**: Multi-layer content safety system
+- **Privacy Protection**: No PII collection, anonymous by design
+
+## 📈 Moderation & Content Safety
+
+The platform includes a sophisticated moderation system designed specifically for mental health communities:
+
+- **Automated Priority Assignment**: Self-harm reports get critical priority
+- **Comprehensive Reporting**: Spam, harassment, hate speech, inappropriate content, misinformation
+- **Moderation Actions**: Dismiss, warn, hide content, delete, temporary/permanent bans
+- **Audit Trail**: Complete history of moderation actions with internal notes
+- **Escalation System**: Priority-based queue for efficient moderation
+
+## 🌟 Unique Mental Health Focus
+
+Sejiwa is specifically designed for mental health discussions with:
+
+- **Anonymity Protection**: Safe space for vulnerable sharing
+- **Category Focus**: Anxiety, depression, relationships, and wellness topics
+- **Wellness Tracking**: Personal progress and engagement metrics
+- **Crisis-Aware Moderation**: Special handling for self-harm content
+- **Community Guidelines**: Mental health-specific rules and protections
+
+---
+
+_Sejiwa represents a commitment to creating safe, anonymous, and supportive spaces for mental health discussions, built with modern technology and a deep understanding of community needs._

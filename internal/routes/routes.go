@@ -75,7 +75,8 @@ func RegisterRoutes(
 			threadRoutes.GET("", threadHandler.GetAll)
 			threadRoutes.GET("/search", threadHandler.Search)
 			threadRoutes.GET("/pinned", threadHandler.GetPinned)
-			threadRoutes.GET("/:id", threadHandler.GetByID)
+			// Use optional auth so authors/mods/admins are recognized for private threads
+			threadRoutes.GET("/:id", middleware.OptionalAuthMiddleware(cfg.JWTSecret), threadHandler.GetByID)
 
 			// Authenticated routes
 			threadRoutes.POST("", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Create)

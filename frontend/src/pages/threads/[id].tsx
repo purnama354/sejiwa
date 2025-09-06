@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -54,11 +54,27 @@ export default function ThreadDetails() {
   const [isPrivateDraft, setIsPrivateDraft] = useState<boolean | null>(null)
   const [newPassword, setNewPassword] = useState("")
 
+  // Load saved thread password (for refresh/navigation) if any
+  useEffect(() => {
+    if (id) {
+      const saved = sessionStorage.getItem(`thread_pwd_${id}`)
+      if (saved) setThreadPassword(saved)
+    }
+  }, [id])
+
   const { data: thread, isLoading: threadLoading } = useQuery({
-    queryKey: ["thread", id],
+    // Include password in key so a successful unlock keeps data isolated
+    queryKey: [
+      "thread",
+      id,
+      threadPassword ? `pwd:${threadPassword}` : "nopwd",
+    ],
     queryFn: async () => {
       try {
-        const { data } = await api.get(`/threads/${id}`)
+        const qs = threadPassword
+          ? `?password=${encodeURIComponent(threadPassword)}`
+          : ""
+        const { data } = await api.get(`/threads/${id}${qs}`)
         setIs403(false)
         // Store category info for potential 403 handling
         if (data.category) {
@@ -94,6 +110,9 @@ export default function ThreadDetails() {
       }
     },
     enabled: !!id,
+    // Reduce unnecessary quick refetch that could drop access and cause bounce
+    refetchOnWindowFocus: false,
+    staleTime: 60_000,
   })
 
   // Fetch moderators for assignment (admins/mods only)
@@ -280,12 +299,21 @@ export default function ThreadDetails() {
                         )}`
                       )
 
+                      // Persist password for this thread during the session
+                      try {
+                        sessionStorage.setItem(
+                          `thread_pwd_${id}`,
+                          threadPassword
+                        )
+                      } catch {
+                        // ignore sessionStorage errors (e.g., blocked)
+                      }
+
                       // Update the query cache with the new data
                       queryClient.setQueryData(["thread", id], response.data)
 
-                      // Clear the 403 state
+                      // Clear the 403 state but keep password in state for subsequent refetches
                       setIs403(false)
-                      setThreadPassword("")
 
                       toast.success("Thread unlocked successfully!")
                     } catch (error) {
