@@ -16,7 +16,7 @@ import api from "@/lib/api"
 import PrivateCategoryCTA from "@/components/private-category-cta"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import SaveThreadButton from "@/components/save-thread-button"
-import { createReply, getThread, updateThread } from "@/services/threads"
+import { createReply, updateThread } from "@/services/threads"
 import type { CreateReplyRequest, UpdateThreadRequest } from "@/types/api"
 import { toast } from "sonner"
 import { useAuthStore } from "@/store/auth"
@@ -246,37 +246,89 @@ export default function ThreadDetails() {
           </div>
         )}
         {is403 && !categoryId && (
-          <div className="max-w-xl mx-auto mb-8 bg-white/90 border border-slate-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-2">
-              This thread is private
-            </h3>
-            <p className="text-slate-600 mb-3">
-              Enter the thread password to view it.
-            </p>
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault()
-                if (!id) return
-                try {
-                  const data = await getThread(id, { password: threadPassword })
-                  // Force invalidate query cache
-                  window.location.reload()
-                  return data
-                } catch {
-                  toast.error("Invalid password")
-                }
-              }}
-              className="flex gap-2"
-            >
-              <input
-                type="password"
-                value={threadPassword}
-                onChange={(e) => setThreadPassword(e.target.value)}
-                placeholder="Thread password"
-                className="border border-slate-300 rounded px-3 py-2 flex-1"
-              />
-              <Button type="submit">Unlock</Button>
-            </form>
+          <div className="max-w-xl mx-auto mb-8">
+            <Card className="shadow-xl border-0 bg-white/95 backdrop-blur-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-orange-500/5" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-400/10 to-orange-500/10 rounded-full blur-xl" />
+
+              <CardContent className="p-6 relative">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+                    <Lock className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">
+                      This thread is private
+                    </h3>
+                    <p className="text-slate-600">
+                      Enter the thread password to view its content and
+                      participate in the discussion.
+                    </p>
+                  </div>
+                </div>
+
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault()
+                    if (!id || !threadPassword.trim()) return
+
+                    try {
+                      // Update the query to include the password
+                      const response = await api.get(
+                        `/threads/${id}?password=${encodeURIComponent(
+                          threadPassword
+                        )}`
+                      )
+
+                      // Update the query cache with the new data
+                      queryClient.setQueryData(["thread", id], response.data)
+
+                      // Clear the 403 state
+                      setIs403(false)
+                      setThreadPassword("")
+
+                      toast.success("Thread unlocked successfully!")
+                    } catch (error) {
+                      const status = (
+                        error as { response?: { status?: number } }
+                      )?.response?.status
+                      if (status === 403) {
+                        toast.error("Invalid password")
+                      } else {
+                        toast.error("Failed to unlock thread")
+                      }
+                    }
+                  }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <Label
+                      htmlFor="thread-password"
+                      className="text-sm font-medium text-slate-700"
+                    >
+                      Thread Password
+                    </Label>
+                    <Input
+                      id="thread-password"
+                      type="password"
+                      value={threadPassword}
+                      onChange={(e) => setThreadPassword(e.target.value)}
+                      placeholder="Enter the thread password"
+                      className="mt-1 bg-white/80 backdrop-blur-sm"
+                      required
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all duration-300"
+                    disabled={!threadPassword.trim()}
+                  >
+                    <Lock className="w-4 h-4 mr-2" />
+                    Unlock Thread
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
           </div>
         )}
 

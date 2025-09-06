@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, ArrowLeft } from "lucide-react"
+import { Loader2, ArrowLeft, Lock, MessageSquare, Sparkles } from "lucide-react"
 import { createThread } from "@/services/threads"
 import { listCategories } from "@/services/categories"
 import type { CreateThreadRequest, Category } from "@/types/api"
@@ -118,6 +118,15 @@ export default function CreateThreadPage() {
       newErrors.category_id = "Please select a category"
     }
 
+    if (
+      formData.is_private &&
+      formData.password &&
+      formData.password.length > 0 &&
+      formData.password.length < 4
+    ) {
+      newErrors.password = "Password must be at least 4 characters"
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       return
@@ -130,9 +139,11 @@ export default function CreateThreadPage() {
     }
     if (formData.is_private) {
       payload.is_private = true
+      // Only include password if it's provided and meets minimum length
       if (formData.password && formData.password.length >= 4) {
         payload.password = formData.password
       }
+      // Don't include password field at all if it's empty or too short
     }
     createThreadMutation.mutate(payload)
   }
@@ -151,47 +162,63 @@ export default function CreateThreadPage() {
   // Categories load errors are surfaced by empty dropdown; optional improvement: show inline error.
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Header with consistent styling */}
+      <div className="bg-white/95 backdrop-blur-sm border-b border-slate-200/60 shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate(-1)}
-              className="text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              className="text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
             <div className="h-4 w-px bg-slate-300"></div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              Create New Thread
-            </h1>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                <MessageSquare className="w-4 h-4 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                Create New Thread
+              </h1>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <Card className="shadow-xl border-0 bg-white/95 backdrop-blur-sm">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold text-slate-900">
-              Share Your Thoughts
-            </CardTitle>
-            <p className="text-slate-600 mt-2">
+        <Card className="shadow-xl border-0 bg-white/95 backdrop-blur-sm relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-indigo-500/10 rounded-full blur-2xl" />
+
+          <CardHeader className="text-center relative">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <CardTitle className="text-3xl font-bold text-slate-900">
+                Share Your Thoughts
+              </CardTitle>
+            </div>
+            <p className="text-slate-600 text-lg">
               Start a meaningful discussion with the community
             </p>
           </CardHeader>
 
-          <CardContent>
+          <CardContent className="relative">
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Category Selection */}
               <div className="space-y-3">
                 <Label
                   htmlFor="category"
-                  className="text-base font-semibold text-slate-900"
+                  className="text-base font-semibold text-slate-900 flex items-center gap-2"
                 >
+                  <div className="w-5 h-5 rounded bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center">
+                    <span className="text-white text-xs">1</span>
+                  </div>
                   Choose a Category
                 </Label>
                 <Select
@@ -201,7 +228,7 @@ export default function CreateThreadPage() {
                   }
                   disabled={categoriesLoading}
                 >
-                  <SelectTrigger className="h-12 text-base border-slate-300 focus:border-blue-500 focus:ring-blue-500">
+                  <SelectTrigger className="h-12 text-base border-slate-300 focus:border-blue-500 focus:ring-blue-500 bg-white/80 backdrop-blur-sm">
                     <SelectValue placeholder="Select the most relevant category for your thread" />
                   </SelectTrigger>
                   <SelectContent>
@@ -227,8 +254,8 @@ export default function CreateThreadPage() {
                   </SelectContent>
                 </Select>
                 {errors.category_id && (
-                  <p className="text-red-600 text-sm flex items-center gap-1">
-                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                  <p className="text-red-600 text-sm flex items-center gap-2">
+                    <div className="w-1 h-1 bg-red-600 rounded-full"></div>
                     {errors.category_id}
                   </p>
                 )}
@@ -238,8 +265,11 @@ export default function CreateThreadPage() {
               <div className="space-y-3">
                 <Label
                   htmlFor="title"
-                  className="text-base font-semibold text-slate-900"
+                  className="text-base font-semibold text-slate-900 flex items-center gap-2"
                 >
+                  <div className="w-5 h-5 rounded bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center">
+                    <span className="text-white text-xs">2</span>
+                  </div>
                   Thread Title
                 </Label>
                 <Input
@@ -248,7 +278,7 @@ export default function CreateThreadPage() {
                   onChange={(e) => handleInputChange("title", e.target.value)}
                   placeholder="Write a clear, descriptive title for your thread..."
                   maxLength={255}
-                  className={`h-12 text-base transition-all duration-200 ${
+                  className={`h-12 text-base transition-all duration-200 bg-white/80 backdrop-blur-sm ${
                     errors.title
                       ? "border-red-500 focus:border-red-500"
                       : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
@@ -257,8 +287,8 @@ export default function CreateThreadPage() {
                 <div className="flex justify-between text-sm">
                   <span>
                     {errors.title && (
-                      <span className="text-red-600 flex items-center gap-1">
-                        <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                      <span className="text-red-600 flex items-center gap-2">
+                        <div className="w-1 h-1 bg-red-600 rounded-full"></div>
                         {errors.title}
                       </span>
                     )}
@@ -279,8 +309,11 @@ export default function CreateThreadPage() {
               <div className="space-y-3">
                 <Label
                   htmlFor="content"
-                  className="text-base font-semibold text-slate-900"
+                  className="text-base font-semibold text-slate-900 flex items-center gap-2"
                 >
+                  <div className="w-5 h-5 rounded bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
+                    <span className="text-white text-xs">3</span>
+                  </div>
                   Thread Content
                 </Label>
                 <Textarea
@@ -298,7 +331,7 @@ You can include:
 • Topics you'd like to discuss with the community"
                   rows={12}
                   maxLength={10000}
-                  className={`text-base transition-all duration-200 ${
+                  className={`text-base transition-all duration-200 bg-white/80 backdrop-blur-sm ${
                     errors.content
                       ? "border-red-500 focus:border-red-500"
                       : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
@@ -307,8 +340,8 @@ You can include:
                 <div className="flex justify-between text-sm">
                   <span>
                     {errors.content && (
-                      <span className="text-red-600 flex items-center gap-1">
-                        <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                      <span className="text-red-600 flex items-center gap-2">
+                        <div className="w-1 h-1 bg-red-600 rounded-full"></div>
                         {errors.content}
                       </span>
                     )}
@@ -326,56 +359,82 @@ You can include:
               </div>
 
               {/* Privacy options */}
-              <div className="space-y-3">
-                <Label className="text-base font-semibold text-slate-900">
-                  Privacy
-                </Label>
-                <div className="flex items-center gap-3">
-                  <input
-                    id="is_private"
-                    type="checkbox"
-                    checked={!!formData.is_private}
-                    onChange={(e) =>
-                      setFormData((p) => ({
-                        ...p,
-                        is_private: e.target.checked,
-                      }))
-                    }
-                    className="h-4 w-4"
-                  />
-                  <Label htmlFor="is_private" className="text-slate-700">
-                    Make this thread private (requires password to view)
-                  </Label>
-                </div>
-                {formData.is_private && (
-                  <div>
-                    <Label htmlFor="thread_password">
-                      Thread password (optional)
-                    </Label>
-                    <Input
-                      id="thread_password"
-                      type="password"
-                      value={formData.password || ""}
-                      onChange={(e) =>
-                        handleInputChange("password", e.target.value)
-                      }
-                      placeholder="Set a password (min 4 chars)"
-                      className="h-12 text-base"
-                    />
-                    <p className="text-sm text-slate-500 mt-1">
-                      If provided, viewers must enter this password to access
-                      the thread.
-                    </p>
+              <div className="space-y-4">
+                <Label className="text-base font-semibold text-slate-900 flex items-center gap-2">
+                  <div className="w-5 h-5 rounded bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center">
+                    <span className="text-white text-xs">4</span>
                   </div>
-                )}
+                  Privacy Settings
+                </Label>
+                <div className="bg-slate-50/80 backdrop-blur-sm rounded-xl p-4 border border-slate-200/60">
+                  <div className="flex items-start gap-3">
+                    <input
+                      id="is_private"
+                      type="checkbox"
+                      checked={!!formData.is_private}
+                      onChange={(e) =>
+                        setFormData((p) => ({
+                          ...p,
+                          is_private: e.target.checked,
+                          password: e.target.checked ? p.password : "",
+                        }))
+                      }
+                      className="h-4 w-4 mt-1 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                    />
+                    <div className="flex-1">
+                      <Label
+                        htmlFor="is_private"
+                        className="text-slate-700 font-medium cursor-pointer"
+                      >
+                        Make this thread private
+                      </Label>
+                      <p className="text-sm text-slate-600 mt-1">
+                        Private threads require a password to view and are only
+                        accessible to users who know the password.
+                      </p>
+                    </div>
+                  </div>
+
+                  {formData.is_private && (
+                    <div className="mt-4 pt-4 border-t border-slate-200/60">
+                      <Label
+                        htmlFor="thread_password"
+                        className="text-sm font-medium text-slate-700 flex items-center gap-2"
+                      >
+                        <Lock className="w-4 h-4" />
+                        Thread Password
+                      </Label>
+                      <Input
+                        id="thread_password"
+                        type="password"
+                        value={formData.password || ""}
+                        onChange={(e) =>
+                          handleInputChange("password", e.target.value)
+                        }
+                        placeholder="Enter a secure password (minimum 4 characters)"
+                        className="mt-2 h-10 text-sm bg-white/80 backdrop-blur-sm"
+                      />
+                      {errors.password && (
+                        <p className="text-red-600 text-sm flex items-center gap-2 mt-2">
+                          <div className="w-1 h-1 bg-red-600 rounded-full"></div>
+                          {errors.password}
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-500 mt-2">
+                        Choose a strong password that you can share with trusted
+                        users who should have access to this thread.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Submit Buttons */}
-              <div className="flex gap-4 pt-6 border-t border-slate-200">
+              <div className="flex gap-4 pt-6 border-t border-slate-200/60">
                 <Button
                   type="submit"
                   disabled={createThreadMutation.isPending || categoriesLoading}
-                  className="flex-1 h-12 text-base bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300"
+                  className="flex-1 h-12 text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-slate-300 disabled:to-slate-400 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   {createThreadMutation.isPending && (
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -389,24 +448,45 @@ You can include:
                   variant="outline"
                   onClick={() => navigate(-1)}
                   disabled={createThreadMutation.isPending}
-                  className="h-12 text-base border-slate-300 hover:bg-slate-50"
+                  className="h-12 text-base border-slate-300 hover:bg-slate-50/80 backdrop-blur-sm transition-all duration-300"
                 >
                   Cancel
                 </Button>
               </div>
 
               {/* Helper text */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
-                <h4 className="font-semibold mb-2">Tips for a great thread:</h4>
-                <ul className="space-y-1 text-blue-700">
-                  <li>• Be clear and specific in your title</li>
-                  <li>• Provide context and background information</li>
-                  <li>• Be respectful and considerate of others</li>
-                  <li>
-                    • Use appropriate categories to help others find your
-                    content
-                  </li>
-                </ul>
+              <div className="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm border border-blue-200/60 rounded-xl p-6 text-sm">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Sparkles className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-3 text-blue-900">
+                      Tips for a great thread:
+                    </h4>
+                    <ul className="space-y-2 text-blue-800">
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <span>Be clear and specific in your title</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <span>Provide context and background information</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <span>Be respectful and considerate of others</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <span>
+                          Use appropriate categories to help others find your
+                          content
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </form>
           </CardContent>
