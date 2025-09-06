@@ -35,7 +35,9 @@ export default function CreateThreadPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Fetch categories for dropdown
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<
+    Category[]
+  >({
     queryKey: ["categories"],
     queryFn: listCategories,
   })

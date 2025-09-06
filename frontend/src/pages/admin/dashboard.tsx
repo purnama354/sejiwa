@@ -21,7 +21,7 @@ import { useNavigate } from "react-router-dom"
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
-  
+
   // Fetch various stats
   const { data: stats } = useQuery({
     queryKey: ["moderation-stats"],
@@ -143,7 +143,9 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 p-6 sm:p-8 text-white">
         <div className="relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Admin Control Panel</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+            Admin Control Panel
+          </h1>
           <p className="text-blue-100 text-base sm:text-lg">
             Monitor, manage, and maintain your community platform.
           </p>
@@ -169,8 +171,10 @@ export default function AdminDashboard() {
               className="group relative overflow-hidden rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
               onClick={() => {
                 if (stat.label === "Total Users") navigate("/admin/users")
-                if (stat.label === "Active Moderators") navigate("/admin/users?tab=moderators")
-                if (stat.label === "Total Categories") navigate("/admin/categories")
+                if (stat.label === "Active Moderators")
+                  navigate("/admin/users?tab=moderators")
+                if (stat.label === "Total Categories")
+                  navigate("/admin/categories")
               }}
             >
               <div className="flex items-center justify-between">
@@ -210,12 +214,18 @@ export default function AdminDashboard() {
               className="rounded-xl bg-white/70 backdrop-blur-sm border border-slate-200/60 p-4 sm:p-6 shadow-lg"
             >
               <div className="flex items-center gap-3 sm:gap-4">
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg ${stat.bgColor} flex items-center justify-center flex-shrink-0`}>
+                <div
+                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg ${stat.bgColor} flex items-center justify-center flex-shrink-0`}
+                >
                   <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${stat.color}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xl sm:text-2xl font-bold text-slate-900">{stat.value}</p>
-                  <p className="text-sm font-medium text-slate-600">{stat.label}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-slate-900">
+                    {stat.value}
+                  </p>
+                  <p className="text-sm font-medium text-slate-600">
+                    {stat.label}
+                  </p>
                 </div>
               </div>
             </div>
@@ -262,9 +272,15 @@ export default function AdminDashboard() {
                       <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-slate-900 font-medium text-sm sm:text-base">{item.action}</p>
-                      <p className="text-slate-600 text-xs sm:text-sm mt-1">{item.detail}</p>
-                      <p className="text-slate-400 text-xs mt-1 sm:mt-2">{item.time}</p>
+                      <p className="text-slate-900 font-medium text-sm sm:text-base">
+                        {item.action}
+                      </p>
+                      <p className="text-slate-600 text-xs sm:text-sm mt-1">
+                        {item.detail}
+                      </p>
+                      <p className="text-slate-400 text-xs mt-1 sm:mt-2">
+                        {item.time}
+                      </p>
                     </div>
                   </div>
                 )
@@ -301,7 +317,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </button>
-              
+
               <button
                 className="w-full text-left p-4 rounded-lg hover:bg-slate-50/80 transition-colors border border-slate-200/60 group"
                 onClick={() => navigate("/admin/users?tab=create-moderator")}

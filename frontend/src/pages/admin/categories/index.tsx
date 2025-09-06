@@ -1,6 +1,11 @@
 import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { listAdminCategories, createCategory, updateCategory, deleteCategory } from "@/services/categories"
+import {
+  listAdminCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+} from "@/services/categories"
 import type {
   Category,
   CreateCategoryRequest,

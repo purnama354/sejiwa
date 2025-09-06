@@ -28,7 +28,11 @@ export default function CategoriesPage() {
   const [sortBy, setSortBy] = useState<SortOption>("popular")
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
 
-  const { data: categories = [], isLoading, error } = useQuery<Category[]>({
+  const {
+    data: categories = [],
+    isLoading,
+    error,
+  } = useQuery<Category[]>({
     queryKey: ["categories"],
     queryFn: listCategories,
   })
@@ -206,7 +210,7 @@ export default function CategoriesPage() {
             {/* Grid View */}
             {viewMode === "grid" && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredAndSortedCategories?.map((category: Category) => (
+                {filteredAndSortedCategories?.map((category: Category) => (
                   <Card
                     key={category.id}
                     className="shadow-lg border-0 bg-white/90 backdrop-blur-sm hover:shadow-xl transition-all group"
