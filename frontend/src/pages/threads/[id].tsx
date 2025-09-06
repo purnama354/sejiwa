@@ -16,7 +16,7 @@ import api from "@/lib/api"
 import PrivateCategoryCTA from "@/components/private-category-cta"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import SaveThreadButton from "@/components/save-thread-button"
-import { createReply } from "@/services/threads"
+import { createReply, getThread } from "@/services/threads"
 import type { CreateReplyRequest } from "@/types/api"
 import { toast } from "sonner"
 type ReplyItem = {
@@ -37,6 +37,7 @@ export default function ThreadDetails() {
   const [showReplyForm, setShowReplyForm] = useState(false)
   const [replyContent, setReplyContent] = useState("")
   const [replyError, setReplyError] = useState("")
+  const [threadPassword, setThreadPassword] = useState("")
 
   const { data: thread, isLoading: threadLoading } = useQuery({
     queryKey: ["thread", id],
@@ -56,7 +57,10 @@ export default function ThreadDetails() {
         const code = (error as { response?: { data?: { code?: string } } })
           ?.response?.data?.code
 
-        if (status === 403 && code === "CATEGORY_PRIVATE") {
+        if (
+          status === 403 &&
+          (code === "CATEGORY_PRIVATE" || code === "THREAD_PRIVATE")
+        ) {
           // Try to get category info from the error response if possible
           const categoryIdMatch = (
             error as { response?: { data?: { message?: string } } }
@@ -193,6 +197,40 @@ export default function ThreadDetails() {
               categoryId={categoryId}
               categoryName={categoryName || "this category"}
             />
+          </div>
+        )}
+        {is403 && !categoryId && (
+          <div className="max-w-xl mx-auto mb-8 bg-white/90 border border-slate-200 rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-2">
+              This thread is private
+            </h3>
+            <p className="text-slate-600 mb-3">
+              Enter the thread password to view it.
+            </p>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault()
+                if (!id) return
+                try {
+                  const data = await getThread(id, { password: threadPassword })
+                  // Force invalidate query cache
+                  window.location.reload()
+                  return data
+                } catch {
+                  toast.error("Invalid password")
+                }
+              }}
+              className="flex gap-2"
+            >
+              <input
+                type="password"
+                value={threadPassword}
+                onChange={(e) => setThreadPassword(e.target.value)}
+                placeholder="Thread password"
+                className="border border-slate-300 rounded px-3 py-2 flex-1"
+              />
+              <Button type="submit">Unlock</Button>
+            </form>
           </div>
         )}
 

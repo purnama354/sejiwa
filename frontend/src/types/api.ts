@@ -194,6 +194,9 @@ export type Thread = {
   view_count: number
   is_pinned: boolean
   is_locked: boolean
+  is_private: boolean
+  assigned_moderator_id?: string
+  assigned_moderator_username?: string
   moderation_status: string
   is_edited: boolean
   created_at: string | Date
@@ -213,11 +216,17 @@ export type CreateThreadRequest = {
   title: string
   content: string
   category_id: string
+  is_private?: boolean
+  password?: string
+  assigned_moderator_id?: string
 }
 
 export type UpdateThreadRequest = {
   title?: string
   content?: string
+  is_private?: boolean
+  set_password?: string
+  assigned_moderator_id?: string
 }
 
 // Reply DTOs

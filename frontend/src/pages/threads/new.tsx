@@ -29,6 +29,8 @@ export default function CreateThreadPage() {
     title: "",
     content: "",
     category_id: preselectedCategoryId || "",
+    is_private: false,
+    password: "",
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -124,7 +126,18 @@ export default function CreateThreadPage() {
       return
     }
 
-    createThreadMutation.mutate(formData)
+    const payload: CreateThreadRequest = {
+      title: formData.title,
+      content: formData.content,
+      category_id: formData.category_id,
+    }
+    if (formData.is_private) {
+      payload.is_private = true
+      if (formData.password && formData.password.length >= 4) {
+        payload.password = formData.password
+      }
+    }
+    createThreadMutation.mutate(payload)
   }
 
   const handleInputChange = (
@@ -323,6 +336,51 @@ You can include:
                     {formData.content.length}/10,000
                   </span>
                 </div>
+              </div>
+
+              {/* Privacy options */}
+              <div className="space-y-3">
+                <Label className="text-base font-semibold text-slate-900">
+                  Privacy
+                </Label>
+                <div className="flex items-center gap-3">
+                  <input
+                    id="is_private"
+                    type="checkbox"
+                    checked={!!formData.is_private}
+                    onChange={(e) =>
+                      setFormData((p) => ({
+                        ...p,
+                        is_private: e.target.checked,
+                      }))
+                    }
+                    className="h-4 w-4"
+                  />
+                  <Label htmlFor="is_private" className="text-slate-700">
+                    Make this thread private (requires password to view)
+                  </Label>
+                </div>
+                {formData.is_private && (
+                  <div>
+                    <Label htmlFor="thread_password">
+                      Thread password (optional)
+                    </Label>
+                    <Input
+                      id="thread_password"
+                      type="password"
+                      value={formData.password || ""}
+                      onChange={(e) =>
+                        handleInputChange("password", e.target.value)
+                      }
+                      placeholder="Set a password (min 4 chars)"
+                      className="h-12 text-base"
+                    />
+                    <p className="text-sm text-slate-500 mt-1">
+                      If provided, viewers must enter this password to access
+                      the thread.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Submit Buttons */}

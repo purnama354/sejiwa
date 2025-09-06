@@ -50,7 +50,12 @@ func (h *ThreadHandler) Create(c *gin.Context) {
 		return
 	}
 
-	thread, err := h.threadService.Create(req, userID.(uuid.UUID))
+	roleVal, _ := c.Get(middleware.ContextUserRoleKey)
+	userRole := models.RoleUser
+	if roleVal != nil {
+		userRole = roleVal.(models.UserRole)
+	}
+	thread, err := h.threadService.Create(req, userID.(uuid.UUID), userRole)
 	if err != nil {
 		switch {
 		case errors.Is(err, services.ErrCategoryNotFound):
@@ -67,7 +72,7 @@ func (h *ThreadHandler) Create(c *gin.Context) {
 
 	// Get thread with details for response
 	uid := userID.(uuid.UUID)
-	threadWithDetails, err := h.threadService.GetByID(thread.ID, &uid, nil)
+	threadWithDetails, err := h.threadService.GetByID(thread.ID, &uid, &userRole, nil)
 	if err != nil {
 		// Thread was created but we couldn't fetch details, return basic success
 		c.JSON(http.StatusCreated, gin.H{
@@ -113,10 +118,19 @@ func (h *ThreadHandler) GetByID(c *gin.Context) {
 		userRole = &parsedRole
 	}
 
-	thread, err := h.threadService.GetByID(id, userID, userRole)
+	// Optional password for private thread access
+	var pwd *string
+	if p := c.Query("password"); p != "" {
+		pwd = &p
+	}
+	thread, err := h.threadService.GetByID(id, userID, userRole, pwd)
 	if err != nil {
 		if errors.Is(err, services.ErrThreadNotFound) {
 			c.JSON(http.StatusNotFound, dto.NewErrorResponse("Thread not found", "THREAD_NOT_FOUND", nil))
+			return
+		}
+		if errors.Is(err, services.ErrThreadPrivate) {
+			c.JSON(http.StatusForbidden, dto.NewErrorResponse("Thread is private. Provide valid password or permission.", "THREAD_PRIVATE", nil))
 			return
 		}
 		if errors.Is(err, services.ErrCategoryPrivate) {
@@ -230,7 +244,7 @@ func (h *ThreadHandler) Update(c *gin.Context) {
 	// Get updated thread with details
 	uid := userID.(uuid.UUID)
 	role := userRole.(models.UserRole)
-	updatedThread, err := h.threadService.GetByID(thread.ID, &uid, &role)
+	updatedThread, err := h.threadService.GetByID(thread.ID, &uid, &role, nil)
 	if err != nil {
 		// Return basic response if we can't fetch details
 		c.JSON(http.StatusOK, gin.H{
@@ -358,17 +372,32 @@ func (h *ThreadHandler) getPaginationParams(c *gin.Context) (int, int) {
 // toThreadResponse converts a Thread model to ThreadResponse DTO
 func (h *ThreadHandler) toThreadResponse(thread *models.Thread) dto.ThreadResponse {
 	return dto.ThreadResponse{
-		ID:               thread.ID.String(),
-		Title:            thread.Title,
-		Content:          thread.Content,
-		AuthorUsername:   thread.Author.Username,
-		CategoryID:       thread.CategoryID.String(),
-		CategoryName:     thread.Category.Name,
-		CategorySlug:     thread.Category.Slug,
-		ReplyCount:       thread.ReplyCount,
-		ViewCount:        thread.ViewCount,
-		IsPinned:         thread.IsPinned,
-		IsLocked:         thread.IsLocked,
+		ID:             thread.ID.String(),
+		Title:          thread.Title,
+		Content:        thread.Content,
+		AuthorUsername: thread.Author.Username,
+		CategoryID:     thread.CategoryID.String(),
+		CategoryName:   thread.Category.Name,
+		CategorySlug:   thread.Category.Slug,
+		ReplyCount:     thread.ReplyCount,
+		ViewCount:      thread.ViewCount,
+		IsPinned:       thread.IsPinned,
+		IsLocked:       thread.IsLocked,
+		IsPrivate:      thread.IsPrivate,
+		AssignedModeratorID: func() *string {
+			if thread.AssignedModeratorID != nil {
+				s := thread.AssignedModeratorID.String()
+				return &s
+			}
+			return nil
+		}(),
+		AssignedModeratorUsername: func() *string {
+			if thread.AssignedModerator != nil {
+				s := thread.AssignedModerator.Username
+				return &s
+			}
+			return nil
+		}(),
 		ModerationStatus: string(thread.ModerationStatus),
 		IsEdited:         thread.IsEdited,
 		CreatedAt:        thread.CreatedAt,

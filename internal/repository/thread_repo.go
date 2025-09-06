@@ -52,7 +52,7 @@ func (r *threadRepository) FindByID(id uuid.UUID) (*models.Thread, error) {
 // FindByIDWithDetails retrieves a thread with author and category details
 func (r *threadRepository) FindByIDWithDetails(id uuid.UUID) (*models.Thread, error) {
 	var thread models.Thread
-	err := r.db.Preload("Author").Preload("Category").Where("id = ?", id).First(&thread).Error
+	err := r.db.Preload("Author").Preload("Category").Preload("AssignedModerator").Where("id = ?", id).First(&thread).Error
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (r *threadRepository) FindAll(offset, limit int) ([]models.Thread, int64, e
 	}
 
 	// Get threads with preloaded relationships
-	err := r.db.Preload("Author").Preload("Category").
+	err := r.db.Preload("Author").Preload("Category").Preload("AssignedModerator").
 		Where("moderation_status != ?", models.ModerationStatusDeleted).
 		Order("is_pinned DESC, created_at DESC").
 		Offset(offset).Limit(limit).
@@ -102,7 +102,7 @@ func (r *threadRepository) FindByCategory(categoryID uuid.UUID, offset, limit in
 	}
 
 	// Get threads
-	err := r.db.Preload("Author").Preload("Category").
+	err := r.db.Preload("Author").Preload("Category").Preload("AssignedModerator").
 		Where("category_id = ? AND moderation_status != ?", categoryID, models.ModerationStatusDeleted).
 		Order("is_pinned DESC, created_at DESC").
 		Offset(offset).Limit(limit).
@@ -124,7 +124,7 @@ func (r *threadRepository) FindByAuthor(authorID uuid.UUID, offset, limit int) (
 	}
 
 	// Get threads
-	err := r.db.Preload("Author").Preload("Category").
+	err := r.db.Preload("Author").Preload("Category").Preload("AssignedModerator").
 		Where("author_id = ? AND moderation_status != ?", authorID, models.ModerationStatusDeleted).
 		Order("created_at DESC").
 		Offset(offset).Limit(limit).
@@ -149,7 +149,7 @@ func (r *threadRepository) Search(query string, offset, limit int) ([]models.Thr
 	}
 
 	// Get threads
-	err := r.db.Preload("Author").Preload("Category").
+	err := r.db.Preload("Author").Preload("Category").Preload("AssignedModerator").
 		Where("(title ILIKE ? OR content ILIKE ?) AND moderation_status != ?",
 			searchQuery, searchQuery, models.ModerationStatusDeleted).
 		Order("created_at DESC").
@@ -203,7 +203,7 @@ func (r *threadRepository) FindPinned(offset, limit int) ([]models.Thread, int64
 	}
 
 	// Get threads
-	err := r.db.Preload("Author").Preload("Category").
+	err := r.db.Preload("Author").Preload("Category").Preload("AssignedModerator").
 		Where("is_pinned = ? AND moderation_status != ?", true, models.ModerationStatusDeleted).
 		Order("created_at DESC").
 		Offset(offset).Limit(limit).

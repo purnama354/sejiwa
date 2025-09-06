@@ -15,8 +15,10 @@ export async function createThread(data: CreateThreadRequest) {
   return res.data
 }
 
-export async function getThread(id: string) {
-  const res = await api.get<Thread>(`/threads/${id}`)
+export async function getThread(id: string, opts?: { password?: string }) {
+  const params: Record<string, string> = {}
+  if (opts?.password) params.password = opts.password
+  const res = await api.get<Thread>(`/threads/${id}`, { params })
   return res.data
 }
 
