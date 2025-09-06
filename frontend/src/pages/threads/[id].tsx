@@ -12,7 +12,6 @@ import {
   Loader2,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import api from "@/lib/api"
 import PrivateCategoryCTA from "@/components/private-category-cta"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -170,230 +169,366 @@ export default function ThreadDetails() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Back button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate(-1)}
-        className="mb-6 text-slate-600 hover:text-slate-900"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back
-      </Button>
-
-      {/* Show CTA for private categories with 403 */}
-      {is403 && categoryId && (
-        <div className="mb-6">
-          <PrivateCategoryCTA
-            categoryId={categoryId}
-            categoryName={categoryName || "this category"}
-          />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Header with navigation */}
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to discussions
+          </Button>
         </div>
-      )}
+      </div>
 
-      {/* Thread content */}
-      {!is403 && thread && (
-        <>
-          <div className="mb-6">
-            <div className="flex items-start justify-between gap-4 mb-3">
-              <h1 className="text-2xl font-bold">{thread.title}</h1>
-              <SaveThreadButton
-                threadId={thread.id}
-                threadTitle={thread.title}
-                variant="compact"
-                isSaved={thread.is_saved}
-              />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600 mb-6">
-              {thread.category && (
-                <Badge
-                  variant="secondary"
-                  className="cursor-pointer hover:bg-slate-200"
-                  onClick={() => navigate(`/categories/${thread.category.id}`)}
-                >
-                  {thread.category.name}
-                </Badge>
-              )}
-              <div className="flex items-center gap-1">
-                <User className="w-3 h-3" />
-                {thread.author_username}
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {new Date(thread.created_at).toLocaleString()}
-              </div>
-              {thread.is_locked && (
-                <Badge
-                  variant="outline"
-                  className="text-amber-700 border-amber-200 bg-amber-50"
-                >
-                  <Lock className="w-3 h-3 mr-1" />
-                  Locked
-                </Badge>
-              )}
-              {thread.is_edited && (
-                <span className="text-xs text-slate-500">(edited)</span>
-              )}
-            </div>
-
-            <div className="prose prose-slate max-w-none border-b pb-6">
-              <div className="whitespace-pre-wrap">{thread.content}</div>
-            </div>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Show CTA for private categories with 403 */}
+        {is403 && categoryId && (
+          <div className="mb-8">
+            <PrivateCategoryCTA
+              categoryId={categoryId}
+              categoryName={categoryName || "this category"}
+            />
           </div>
+        )}
 
-          {/* Replies */}
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <MessageCircle className="w-5 h-5" />
-              Replies
-              {!repliesLoading && replies?.total > 0 && (
-                <span className="text-sm text-slate-600">
-                  ({replies.total})
-                </span>
-              )}
-            </h2>
+        {/* Thread content */}
+        {!is403 && thread && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Thread Card */}
+              <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <h1 className="text-3xl font-bold text-slate-900 leading-tight mb-4">
+                        {thread.title}
+                      </h1>
 
-            {repliesLoading ? (
-              <div className="animate-pulse space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-24 bg-slate-200 rounded w-full"
-                  ></div>
-                ))}
-              </div>
-            ) : replies?.replies && replies.replies.length > 0 ? (
-              <>
-                <div className="space-y-4 mb-6">
-                  {replies.replies.map((reply: ReplyItem) => (
-                    <Card key={reply.id} className="bg-white/80">
-                      <CardHeader className="pb-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="font-medium">
-                              {reply.author_username}
-                            </span>
-                            <span className="text-slate-500">
-                              {new Date(reply.created_at).toLocaleString()}
-                            </span>
-                            {reply.is_edited && (
-                              <span className="text-xs text-slate-500">
-                                (edited)
-                              </span>
-                            )}
-                          </div>
+                      {/* Thread metadata */}
+                      <div className="flex flex-wrap items-center gap-3 text-sm">
+                        {thread.category && (
+                          <Badge
+                            variant="secondary"
+                            className="cursor-pointer hover:bg-blue-100 transition-colors bg-blue-50 text-blue-700 border-blue-200"
+                            onClick={() =>
+                              navigate(`/categories/${thread.category.id}`)
+                            }
+                          >
+                            {thread.category.name}
+                          </Badge>
+                        )}
+
+                        <div className="flex items-center gap-1 text-slate-600">
+                          <User className="w-4 h-4" />
+                          <span className="font-medium">
+                            {thread.author_username}
+                          </span>
                         </div>
-                      </CardHeader>
-                      <CardContent className="pt-2">
-                        <div className="whitespace-pre-wrap">
-                          {reply.content}
+
+                        <div className="flex items-center gap-1 text-slate-500">
+                          <Clock className="w-4 h-4" />
+                          {new Date(thread.created_at).toLocaleString()}
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
 
-                {/* Reply button when there are existing replies */}
-                {!thread.is_locked && !showReplyForm && (
-                  <div className="text-center">
-                    <Button onClick={() => setShowReplyForm(true)}>
-                      Add Reply
-                    </Button>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-8 bg-slate-50 rounded-lg border border-slate-200">
-                <MessageCircle className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-                <p className="text-slate-600">No replies yet</p>
-                {!thread.is_locked && !showReplyForm && (
-                  <Button
-                    className="mt-4"
-                    onClick={() => setShowReplyForm(true)}
-                  >
-                    Be the first to reply
-                  </Button>
-                )}
-              </div>
-            )}
+                        {thread.is_locked && (
+                          <Badge
+                            variant="outline"
+                            className="text-amber-700 border-amber-300 bg-amber-50"
+                          >
+                            <Lock className="w-3 h-3 mr-1" />
+                            Locked
+                          </Badge>
+                        )}
 
-            {/* Reply Form */}
-            {showReplyForm && !thread.is_locked && (
-              <Card className="mt-6">
-                <CardHeader>
-                  <h3 className="text-lg font-semibold">Add Reply</h3>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleReplySubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="reply-content">Your Reply</Label>
-                      <Textarea
-                        id="reply-content"
-                        value={replyContent}
-                        onChange={(
-                          e: React.ChangeEvent<HTMLTextAreaElement>
-                        ) => {
-                          setReplyContent(e.target.value)
-                          if (replyError) setReplyError("")
-                        }}
-                        placeholder="Share your thoughts..."
-                        rows={4}
-                        maxLength={5000}
-                        className={replyError ? "border-red-500" : ""}
-                      />
-                      <div className="flex justify-between text-sm text-gray-500">
-                        <span>
-                          {replyError && (
-                            <span className="text-red-600">{replyError}</span>
-                          )}
-                        </span>
-                        <span>{replyContent.length}/5,000</span>
+                        {thread.is_edited && (
+                          <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                            edited
+                          </span>
+                        )}
                       </div>
                     </div>
 
-                    <div className="flex gap-3">
-                      <Button
-                        type="submit"
-                        disabled={
-                          createReplyMutation.isPending || !replyContent.trim()
-                        }
-                        className="flex-1"
-                      >
-                        {createReplyMutation.isPending && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        Post Reply
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          setShowReplyForm(false)
-                          setReplyContent("")
-                          setReplyError("")
-                        }}
-                        disabled={createReplyMutation.isPending}
-                      >
-                        Cancel
-                      </Button>
+                    <SaveThreadButton
+                      threadId={thread.id}
+                      threadTitle={thread.title}
+                      variant="compact"
+                      isSaved={thread.is_saved}
+                    />
+                  </div>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="prose prose-slate max-w-none">
+                    <div className="whitespace-pre-wrap text-slate-700 leading-relaxed">
+                      {thread.content}
                     </div>
-                  </form>
+                  </div>
                 </CardContent>
               </Card>
-            )}
 
-            {/* Show locked message if thread is locked */}
-            {thread.is_locked && (
-              <div className="text-center py-4 text-slate-600 bg-slate-50 rounded-lg border border-slate-200 mt-6">
-                <Lock className="w-5 h-5 mx-auto mb-2" />
-                <p>This thread is locked and not accepting new replies.</p>
-              </div>
-            )}
+              {/* Replies Section */}
+              <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold flex items-center gap-3">
+                      <MessageCircle className="w-6 h-6 text-blue-600" />
+                      Replies
+                      {!repliesLoading && replies?.total > 0 && (
+                        <Badge variant="secondary" className="ml-2">
+                          {replies.total}
+                        </Badge>
+                      )}
+                    </h2>
+
+                    {!thread.is_locked &&
+                      !showReplyForm &&
+                      replies?.replies &&
+                      replies.replies.length > 0 && (
+                        <Button
+                          onClick={() => setShowReplyForm(true)}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          Add Reply
+                        </Button>
+                      )}
+                  </div>
+                </CardHeader>
+
+                <CardContent>
+                  {repliesLoading ? (
+                    <div className="animate-pulse space-y-6">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="flex space-x-4">
+                          <div className="w-10 h-10 bg-slate-200 rounded-full"></div>
+                          <div className="flex-1">
+                            <div className="h-4 bg-slate-200 rounded w-1/3 mb-2"></div>
+                            <div className="h-16 bg-slate-200 rounded"></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : replies?.replies && replies.replies.length > 0 ? (
+                    <div className="space-y-6">
+                      {replies.replies.map((reply: ReplyItem) => (
+                        <div key={reply.id} className="flex space-x-4 group">
+                          {/* Avatar placeholder */}
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                            {reply.author_username.charAt(0).toUpperCase()}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="bg-slate-50 rounded-lg p-4 group-hover:bg-slate-100 transition-colors">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="font-semibold text-slate-900">
+                                  {reply.author_username}
+                                </span>
+                                <span className="text-slate-500 text-sm">
+                                  {new Date(reply.created_at).toLocaleString()}
+                                </span>
+                                {reply.is_edited && (
+                                  <span className="text-xs text-slate-500 bg-slate-200 px-2 py-1 rounded">
+                                    edited
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+                                {reply.content}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <MessageCircle className="w-8 h-8 text-blue-600" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                        No replies yet
+                      </h3>
+                      <p className="text-slate-600 mb-6">
+                        Be the first to share your thoughts on this thread
+                      </p>
+                      {!thread.is_locked && !showReplyForm && (
+                        <Button
+                          onClick={() => setShowReplyForm(true)}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          Start the conversation
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Reply Form */}
+                  {showReplyForm && !thread.is_locked && (
+                    <div className="mt-8 pt-6 border-t border-slate-200">
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <MessageCircle className="w-5 h-5 text-blue-600" />
+                        Add Your Reply
+                      </h3>
+                      <form onSubmit={handleReplySubmit} className="space-y-4">
+                        <div className="space-y-2">
+                          <Textarea
+                            id="reply-content"
+                            value={replyContent}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLTextAreaElement>
+                            ) => {
+                              setReplyContent(e.target.value)
+                              if (replyError) setReplyError("")
+                            }}
+                            placeholder="Share your thoughts, ask questions, or provide feedback..."
+                            rows={4}
+                            maxLength={5000}
+                            className={`transition-all duration-200 ${
+                              replyError
+                                ? "border-red-500 focus:border-red-500"
+                                : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                            }`}
+                          />
+                          <div className="flex justify-between text-sm">
+                            <span>
+                              {replyError && (
+                                <span className="text-red-600 flex items-center gap-1">
+                                  <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                                  {replyError}
+                                </span>
+                              )}
+                            </span>
+                            <span
+                              className={`${
+                                replyContent.length > 4500
+                                  ? "text-orange-600"
+                                  : "text-slate-500"
+                              }`}
+                            >
+                              {replyContent.length}/5,000
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <Button
+                            type="submit"
+                            disabled={
+                              createReplyMutation.isPending ||
+                              !replyContent.trim()
+                            }
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300"
+                          >
+                            {createReplyMutation.isPending && (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )}
+                            Post Reply
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setShowReplyForm(false)
+                              setReplyContent("")
+                              setReplyError("")
+                            }}
+                            disabled={createReplyMutation.isPending}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
+
+                  {/* Locked thread message */}
+                  {thread.is_locked && (
+                    <div className="mt-8 pt-6 border-t border-slate-200">
+                      <div className="text-center py-6 bg-amber-50 rounded-lg border border-amber-200">
+                        <Lock className="w-6 h-6 text-amber-600 mx-auto mb-2" />
+                        <p className="text-amber-800 font-medium">
+                          This thread is locked
+                        </p>
+                        <p className="text-amber-700 text-sm">
+                          No new replies can be added at this time.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Thread Stats */}
+              <Card className="shadow-md border-0 bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <h3 className="font-semibold text-slate-900">Thread Stats</h3>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Replies</span>
+                    <Badge variant="secondary">{thread.reply_count || 0}</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Views</span>
+                    <Badge variant="secondary">{thread.view_count || 0}</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Created</span>
+                    <span className="text-sm text-slate-700">
+                      {new Date(thread.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  {thread.last_reply_at && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600">Last Reply</span>
+                      <span className="text-sm text-slate-700">
+                        {new Date(thread.last_reply_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card className="shadow-md border-0 bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <h3 className="font-semibold text-slate-900">
+                    Quick Actions
+                  </h3>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      navigate(`/categories/${thread.category?.id}`)
+                    }
+                    className="w-full justify-start"
+                  >
+                    View Category
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate("/threads/new")}
+                    className="w-full justify-start"
+                  >
+                    Create New Thread
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   )
 }

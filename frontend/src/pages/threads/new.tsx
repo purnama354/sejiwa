@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2 } from "lucide-react"
+import { Loader2, ArrowLeft } from "lucide-react"
 import { createThread } from "@/services/threads"
 import { listCategories } from "@/services/categories"
 import type { CreateThreadRequest, Category } from "@/types/api"
@@ -151,116 +151,222 @@ export default function CreateThreadPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <Card>
-        <CardHeader>
-          <CardTitle>Create New Thread</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Category Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Select
-                value={formData.category_id}
-                onValueChange={(value: string) =>
-                  handleInputChange("category_id", value)
-                }
-                disabled={categoriesLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categoriesLoading ? (
-                    <SelectItem value="" disabled>
-                      Loading categories...
-                    </SelectItem>
-                  ) : (
-                    categories?.map((category: Category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                        {category.is_private && " 🔒"}
-                        {category.is_locked && " 🚫"}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Header */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(-1)}
+              className="text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <div className="h-4 w-px bg-slate-300"></div>
+            <h1 className="text-2xl font-bold text-slate-900">
+              Create New Thread
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <Card className="shadow-xl border-0 bg-white/95 backdrop-blur-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl font-bold text-slate-900">
+              Share Your Thoughts
+            </CardTitle>
+            <p className="text-slate-600 mt-2">
+              Start a meaningful discussion with the community
+            </p>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Category Selection */}
+              <div className="space-y-3">
+                <Label
+                  htmlFor="category"
+                  className="text-base font-semibold text-slate-900"
+                >
+                  Choose a Category
+                </Label>
+                <Select
+                  value={formData.category_id}
+                  onValueChange={(value: string) =>
+                    handleInputChange("category_id", value)
+                  }
+                  disabled={categoriesLoading}
+                >
+                  <SelectTrigger className="h-12 text-base border-slate-300 focus:border-blue-500 focus:ring-blue-500">
+                    <SelectValue placeholder="Select the most relevant category for your thread" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoriesLoading ? (
+                      <SelectItem value="loading" disabled>
+                        Loading categories...
                       </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-              {errors.category_id && (
-                <p className="text-sm text-red-600">{errors.category_id}</p>
-              )}
-            </div>
-
-            {/* Title Input */}
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                placeholder="Enter thread title..."
-                maxLength={255}
-                className={errors.title ? "border-red-500" : ""}
-              />
-              <div className="flex justify-between text-sm text-gray-500">
-                <span>
-                  {errors.title && (
-                    <span className="text-red-600">{errors.title}</span>
-                  )}
-                </span>
-                <span>{formData.title.length}/255</span>
-              </div>
-            </div>
-
-            {/* Content Textarea */}
-            <div className="space-y-2">
-              <Label htmlFor="content">Content</Label>
-              <Textarea
-                id="content"
-                value={formData.content}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  handleInputChange("content", e.target.value)
-                }
-                placeholder="Share your thoughts..."
-                rows={8}
-                maxLength={10000}
-                className={errors.content ? "border-red-500" : ""}
-              />
-              <div className="flex justify-between text-sm text-gray-500">
-                <span>
-                  {errors.content && (
-                    <span className="text-red-600">{errors.content}</span>
-                  )}
-                </span>
-                <span>{formData.content.length}/10,000</span>
-              </div>
-            </div>
-
-            {/* Submit Buttons */}
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="submit"
-                disabled={createThreadMutation.isPending || categoriesLoading}
-                className="flex-1"
-              >
-                {createThreadMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      categories?.map((category: Category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          <div className="flex items-center gap-2">
+                            <span>{category.name}</span>
+                            {category.is_private && (
+                              <span className="text-blue-600">🔒</span>
+                            )}
+                            {category.is_locked && (
+                              <span className="text-amber-600">🚫</span>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                {errors.category_id && (
+                  <p className="text-red-600 text-sm flex items-center gap-1">
+                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                    {errors.category_id}
+                  </p>
                 )}
-                Create Thread
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate(-1)}
-                disabled={createThreadMutation.isPending}
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+              </div>
+
+              {/* Title Input */}
+              <div className="space-y-3">
+                <Label
+                  htmlFor="title"
+                  className="text-base font-semibold text-slate-900"
+                >
+                  Thread Title
+                </Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  placeholder="Write a clear, descriptive title for your thread..."
+                  maxLength={255}
+                  className={`h-12 text-base transition-all duration-200 ${
+                    errors.title
+                      ? "border-red-500 focus:border-red-500"
+                      : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                  }`}
+                />
+                <div className="flex justify-between text-sm">
+                  <span>
+                    {errors.title && (
+                      <span className="text-red-600 flex items-center gap-1">
+                        <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                        {errors.title}
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    className={`${
+                      formData.title.length > 200
+                        ? "text-orange-600"
+                        : "text-slate-500"
+                    }`}
+                  >
+                    {formData.title.length}/255
+                  </span>
+                </div>
+              </div>
+
+              {/* Content Textarea */}
+              <div className="space-y-3">
+                <Label
+                  htmlFor="content"
+                  className="text-base font-semibold text-slate-900"
+                >
+                  Thread Content
+                </Label>
+                <Textarea
+                  id="content"
+                  value={formData.content}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    handleInputChange("content", e.target.value)
+                  }
+                  placeholder="Share your thoughts, experiences, questions, or start a discussion...
+
+You can include:
+• Personal experiences or stories
+• Questions you'd like answered
+• Resources or tips you'd like to share
+• Topics you'd like to discuss with the community"
+                  rows={12}
+                  maxLength={10000}
+                  className={`text-base transition-all duration-200 ${
+                    errors.content
+                      ? "border-red-500 focus:border-red-500"
+                      : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                  }`}
+                />
+                <div className="flex justify-between text-sm">
+                  <span>
+                    {errors.content && (
+                      <span className="text-red-600 flex items-center gap-1">
+                        <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                        {errors.content}
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    className={`${
+                      formData.content.length > 9000
+                        ? "text-orange-600"
+                        : "text-slate-500"
+                    }`}
+                  >
+                    {formData.content.length}/10,000
+                  </span>
+                </div>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex gap-4 pt-6 border-t border-slate-200">
+                <Button
+                  type="submit"
+                  disabled={createThreadMutation.isPending || categoriesLoading}
+                  className="flex-1 h-12 text-base bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300"
+                >
+                  {createThreadMutation.isPending && (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  )}
+                  {createThreadMutation.isPending
+                    ? "Creating Thread..."
+                    : "Create Thread"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate(-1)}
+                  disabled={createThreadMutation.isPending}
+                  className="h-12 text-base border-slate-300 hover:bg-slate-50"
+                >
+                  Cancel
+                </Button>
+              </div>
+
+              {/* Helper text */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+                <h4 className="font-semibold mb-2">Tips for a great thread:</h4>
+                <ul className="space-y-1 text-blue-700">
+                  <li>• Be clear and specific in your title</li>
+                  <li>• Provide context and background information</li>
+                  <li>• Be respectful and considerate of others</li>
+                  <li>
+                    • Use appropriate categories to help others find your
+                    content
+                  </li>
+                </ul>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
