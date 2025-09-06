@@ -1,5 +1,17 @@
 import api from "@/lib/api"
 
+// Types for user profile
+export type UserProfile = {
+  id: string
+  username: string
+  role: "user" | "moderator" | "admin"
+  status: "active" | "inactive" | "banned"
+  created_at: string
+  last_active_at: string
+  thread_count?: number
+  reply_count?: number
+}
+
 // Types for user dashboard
 export type UserStats = {
   threads_created: number
@@ -46,6 +58,21 @@ export type CategorySubscription = {
   slug: string
   thread_count: number
   description: string
+}
+
+// Get user profile
+export async function getUserProfile(): Promise<UserProfile> {
+  const { data } = await api.get("/users/me/profile")
+  return data
+}
+
+// Update user profile (password change)
+export async function updateUserProfile(updates: {
+  current_password?: string
+  new_password?: string
+}): Promise<UserProfile> {
+  const { data } = await api.put("/users/me/profile", updates)
+  return data
 }
 
 // Get user statistics

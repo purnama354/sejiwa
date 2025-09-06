@@ -19,6 +19,8 @@ const AdminSettings = lazy(() => import("@/pages/admin/settings"))
 const PrivacySettings = lazy(() => import("@/pages/profile/privacy"))
 const NotificationSettings = lazy(() => import("@/pages/profile/notifications"))
 const SavedThreadsPage = lazy(() => import("@/pages/profile/saved"))
+const ProfileSettingsPage = lazy(() => import("@/pages/profile/settings"))
+const CategoriesPage = lazy(() => import("@/pages/categories"))
 const CategoryDetailsPage = lazy(() => import("@/pages/categories/[id]"))
 const ThreadDetailsPage = lazy(() => import("@/pages/threads/[id]"))
 const CreateThreadPage = lazy(() => import("@/pages/threads/new"))
@@ -67,6 +69,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "categories",
+        element: (
+          <Fallback>
+            <CategoriesPage />
+          </Fallback>
+        ),
+      },
+      {
         path: "categories/:id",
         element: (
           <Fallback>
@@ -101,6 +111,16 @@ const router = createBrowserRouter([
               <RoleRoute allow={["user", "moderator", "admin"]}>
                 <Fallback>
                   <SavedThreadsPage />
+                </Fallback>
+              </RoleRoute>
+            ),
+          },
+          {
+            path: "settings",
+            element: (
+              <RoleRoute allow={["user", "moderator", "admin"]}>
+                <Fallback>
+                  <ProfileSettingsPage />
                 </Fallback>
               </RoleRoute>
             ),
