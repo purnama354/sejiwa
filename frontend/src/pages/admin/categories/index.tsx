@@ -31,8 +31,8 @@ export default function AdminCategories() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["categories"],
-    queryFn: listCategories,
+    queryKey: ["categories", { admin: true }],
+    queryFn: () => listCategories({ admin: true }),
   })
 
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -53,12 +53,14 @@ export default function AdminCategories() {
   const updateMut = useMutation({
     mutationFn: ({ id, ...data }: { id: string } & Partial<Category>) =>
       updateCategory(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ["categories", { admin: true }] }),
   })
 
   const deleteMut = useMutation({
     mutationFn: deleteCategory,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ["categories", { admin: true }] }),
   })
 
   const handleCreate = () => {
@@ -247,11 +249,11 @@ function CategoryCard({
       is_private: editData.is_private,
     }
 
-    // Handle password operations
+    // Handle password operations -> backend expects set_password (empty string clears)
     if (editData.clearPassword) {
-      updateData.clear_password = true
+      updateData.set_password = ""
     } else if (editData.password) {
-      updateData.password = editData.password
+      updateData.set_password = editData.password
     }
 
     onUpdate(updateData)

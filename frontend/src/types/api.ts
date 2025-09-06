@@ -172,8 +172,7 @@ export type UpdateCategoryRequest = {
   description?: string
   is_locked?: boolean
   is_private?: boolean
-  password?: string
-  clear_password?: boolean
+  set_password?: string
 }
 
 export type SubscribeRequest = {

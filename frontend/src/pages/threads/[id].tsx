@@ -16,9 +16,20 @@ import api from "@/lib/api"
 import PrivateCategoryCTA from "@/components/private-category-cta"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import SaveThreadButton from "@/components/save-thread-button"
-import { createReply, getThread } from "@/services/threads"
-import type { CreateReplyRequest } from "@/types/api"
+import { createReply, getThread, updateThread } from "@/services/threads"
+import type { CreateReplyRequest, UpdateThreadRequest } from "@/types/api"
 import { toast } from "sonner"
+import { useAuthStore } from "@/store/auth"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { getUsers } from "@/services/users"
 type ReplyItem = {
   id: string
   author_username: string
@@ -31,6 +42,7 @@ export default function ThreadDetails() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const currentUser = useAuthStore((s) => s.user)
   const [is403, setIs403] = useState(false)
   const [categoryId, setCategoryId] = useState<string | null>(null)
   const [categoryName, setCategoryName] = useState<string | null>(null)
@@ -38,6 +50,9 @@ export default function ThreadDetails() {
   const [replyContent, setReplyContent] = useState("")
   const [replyError, setReplyError] = useState("")
   const [threadPassword, setThreadPassword] = useState("")
+  const [selectedModeratorId, setSelectedModeratorId] = useState<string>("")
+  const [isPrivateDraft, setIsPrivateDraft] = useState<boolean | null>(null)
+  const [newPassword, setNewPassword] = useState("")
 
   const { data: thread, isLoading: threadLoading } = useQuery({
     queryKey: ["thread", id],
@@ -50,6 +65,11 @@ export default function ThreadDetails() {
           setCategoryId(data.category.id)
           setCategoryName(data.category.name)
         }
+        // initialize drafts dependent on thread
+        setSelectedModeratorId(data.assigned_moderator_id || "none")
+        setIsPrivateDraft(
+          typeof data.is_private === "boolean" ? data.is_private : null
+        )
         return data
       } catch (error) {
         const status = (error as { response?: { status?: number } })?.response
@@ -74,6 +94,17 @@ export default function ThreadDetails() {
       }
     },
     enabled: !!id,
+  })
+
+  // Fetch moderators for assignment (admins/mods only)
+  const canAssignModerator = currentUser?.role === "admin"
+  const { data: moderators } = useQuery({
+    queryKey: ["moderators"],
+    queryFn: async () => {
+      const res = await getUsers({ role: "moderator", pageSize: 100 })
+      return res.items
+    },
+    enabled: !!canAssignModerator,
   })
 
   const { data: replies, isLoading: repliesLoading } = useQuery({
@@ -141,6 +172,21 @@ export default function ThreadDetails() {
 
     createReplyMutation.mutate({ content: replyContent.trim() })
   }
+
+  // Mutations for thread management
+  const updateThreadMutation = useMutation({
+    mutationFn: (payload: UpdateThreadRequest) => updateThread(id!, payload),
+    onSuccess: () => {
+      toast.success("Thread updated")
+      queryClient.invalidateQueries({ queryKey: ["thread", id] })
+    },
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Failed to update thread"
+      toast.error(msg)
+    },
+  })
 
   if (threadLoading) {
     return (
@@ -532,6 +578,23 @@ export default function ThreadDetails() {
                       </span>
                     </div>
                   )}
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Assigned Moderator</span>
+                    <span className="text-sm text-slate-700">
+                      {thread.assigned_moderator_username || "None"}
+                    </span>
+                  </div>
+                  {thread.is_private && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600">Privacy</span>
+                      <Badge
+                        variant="outline"
+                        className="text-blue-700 border-blue-300 bg-blue-50"
+                      >
+                        Private
+                      </Badge>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -563,6 +626,140 @@ export default function ThreadDetails() {
                   </Button>
                 </CardContent>
               </Card>
+
+              {/* Moderation & Privacy Controls */}
+              {(canAssignModerator ||
+                currentUser?.username === thread.author_username) && (
+                <Card className="shadow-md border-0 bg-white/80 backdrop-blur-sm">
+                  <CardHeader>
+                    <h3 className="font-semibold text-slate-900">
+                      Manage Thread
+                    </h3>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    {canAssignModerator && (
+                      <div className="space-y-2">
+                        <Label htmlFor="assign-mod">Assigned Moderator</Label>
+                        <Select
+                          value={selectedModeratorId}
+                          onValueChange={(val) => setSelectedModeratorId(val)}
+                        >
+                          <SelectTrigger id="assign-mod">
+                            <SelectValue placeholder="Select moderator" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">None</SelectItem>
+                            {moderators?.map((m) => (
+                              <SelectItem key={m.id} value={m.id}>
+                                {m.username}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              updateThreadMutation.mutate({
+                                assigned_moderator_id:
+                                  selectedModeratorId === "none"
+                                    ? ""
+                                    : selectedModeratorId,
+                              })
+                            }
+                            disabled={updateThreadMutation.isPending}
+                          >
+                            {updateThreadMutation.isPending && (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )}
+                            Save Assignment
+                          </Button>
+                          {thread.assigned_moderator_id && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                updateThreadMutation.mutate({
+                                  assigned_moderator_id: "",
+                                })
+                              }
+                              disabled={updateThreadMutation.isPending}
+                            >
+                              Clear
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Privacy Controls */}
+                    <div className="space-y-2">
+                      <Label>Privacy</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          id="is-private"
+                          type="checkbox"
+                          checked={
+                            (isPrivateDraft ?? thread.is_private) || false
+                          }
+                          onChange={(e) => setIsPrivateDraft(e.target.checked)}
+                        />
+                        <label
+                          htmlFor="is-private"
+                          className="text-sm text-slate-700"
+                        >
+                          Make this thread private
+                        </label>
+                      </div>
+                      <div className="text-xs text-slate-500">
+                        Private threads require a password unless viewed by the
+                        author or staff.
+                      </div>
+                      <div className="space-y-2 pt-2">
+                        <Label htmlFor="new-password">
+                          Set/Change Password
+                        </Label>
+                        <Input
+                          id="new-password"
+                          type="password"
+                          placeholder="Enter new password (leave blank to keep)"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              updateThreadMutation.mutate({
+                                is_private: isPrivateDraft ?? thread.is_private,
+                                ...(newPassword
+                                  ? { set_password: newPassword }
+                                  : {}),
+                              })
+                            }
+                            disabled={updateThreadMutation.isPending}
+                          >
+                            {updateThreadMutation.isPending && (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )}
+                            Save Privacy
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              updateThreadMutation.mutate({ set_password: "" })
+                            }
+                            disabled={updateThreadMutation.isPending}
+                          >
+                            Clear Password
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         )}

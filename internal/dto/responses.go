@@ -45,6 +45,7 @@ type CategoryResponse struct {
 	ThreadCount int       `json:"thread_count"`
 	IsLocked    bool      `json:"is_locked"`
 	IsPrivate   bool      `json:"is_private"`
+	HasPassword bool      `json:"has_password"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }

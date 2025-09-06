@@ -183,7 +183,8 @@ func (s *threadService) GetByID(id uuid.UUID, userID *uuid.UUID, userRole *model
 		// Admin/Moderator or author can always access
 		elevated := userRole != nil && (*userRole == models.RoleAdmin || *userRole == models.RoleModerator)
 		isAuthor := userID != nil && *userID == thread.AuthorID
-		if !elevated && !isAuthor {
+		isAssignedMod := userID != nil && thread.AssignedModeratorID != nil && *userID == *thread.AssignedModeratorID
+		if !elevated && !isAuthor && !isAssignedMod {
 			// If password set, require correct password; if no password but IsPrivate true, deny unless assigned moderator
 			if thread.Password != nil {
 				if password == nil || !utils.CheckPasswordHash(deref(password), *thread.Password) {

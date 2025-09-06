@@ -120,6 +120,9 @@ func RegisterRoutes(
 			// Users listing for admin panel
 			adminRoutes.GET("/users", adminHandler.ListUsers)
 
+			// Categories management list for admin (includes locked/private categories)
+			adminRoutes.GET("/categories", categoryHandler.GetAll)
+
 			// Test endpoint for admin access
 			adminRoutes.GET("/test", func(c *gin.Context) {
 				userID, _ := c.Get(middleware.ContextUserIDKey)

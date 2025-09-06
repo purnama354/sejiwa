@@ -5,8 +5,9 @@ import type {
   UpdateCategoryRequest,
 } from "@/types/api"
 
-export async function listCategories() {
-  const res = await api.get<Category[]>(`/categories`)
+export async function listCategories({ admin }: { admin?: boolean } = {}) {
+  const url = admin ? `/admin/categories` : `/categories`
+  const res = await api.get<Category[]>(url)
   return res.data
 }
 

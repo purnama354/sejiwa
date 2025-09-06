@@ -62,6 +62,8 @@ func (h *ThreadHandler) Create(c *gin.Context) {
 			c.JSON(http.StatusNotFound, dto.NewErrorResponse("Category not found", "CATEGORY_NOT_FOUND", nil))
 		case errors.Is(err, services.ErrCategoryLocked):
 			c.JSON(http.StatusConflict, dto.NewErrorResponse("Category is locked for new threads", "CATEGORY_LOCKED", nil))
+		case errors.Is(err, services.ErrCategoryPrivate):
+			c.JSON(http.StatusForbidden, dto.NewErrorResponse("Category is private. Join to create threads.", "CATEGORY_PRIVATE", nil))
 		case err.Error() == "INVALID_CATEGORY_ID":
 			c.JSON(http.StatusBadRequest, dto.NewErrorResponse("Invalid category ID format", "INVALID_CATEGORY_ID", nil))
 		default:

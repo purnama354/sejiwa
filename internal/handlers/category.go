@@ -142,6 +142,7 @@ func toCategoryResponse(c *models.Category) dto.CategoryResponse {
 		ThreadCount: c.ThreadCount,
 		IsLocked:    c.IsLocked,
 		IsPrivate:   c.IsPrivate,
+		HasPassword: c.Password != nil && *c.Password != "",
 		CreatedAt:   c.CreatedAt,
 		UpdatedAt:   c.UpdatedAt,
 	}
