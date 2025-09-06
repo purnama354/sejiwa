@@ -14,6 +14,7 @@ import {
   Grid3X3,
   List,
   Clock,
+  Folder,
 } from "lucide-react"
 import { listCategories } from "@/services/categories"
 import SubscriptionButton from "@/components/subscription-button"
@@ -213,18 +214,26 @@ export default function CategoriesPage() {
                 {filteredAndSortedCategories?.map((category: Category) => (
                   <Card
                     key={category.id}
-                    className="shadow-lg border-0 bg-white/90 backdrop-blur-sm hover:shadow-xl transition-all group"
+                    className="group relative overflow-hidden shadow-lg border-0 bg-white/90 backdrop-blur-sm hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
                   >
-                    <CardHeader>
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-400/10 to-indigo-500/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    
+                    <CardHeader className="relative">
                       <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                            {category.name}
-                          </h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow duration-300">
+                              <Folder className="w-4 h-4 text-white" />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                              {category.name}
+                            </h3>
+                          </div>
                           {category.is_private && (
                             <Badge
                               variant="secondary"
-                              className="text-blue-700 bg-blue-100"
+                              className="text-blue-700 bg-gradient-to-r from-blue-100 to-indigo-100 border border-blue-200/50 shadow-sm"
                             >
                               <Lock className="w-3 h-3 mr-1" />
                               Private
@@ -233,24 +242,24 @@ export default function CategoriesPage() {
                           {category.is_locked && (
                             <Badge
                               variant="outline"
-                              className="text-amber-700 border-amber-300 bg-amber-50"
+                              className="text-amber-700 border-amber-300 bg-gradient-to-r from-amber-50 to-yellow-50 shadow-sm"
                             >
                               Locked
                             </Badge>
                           )}
                         </div>
                       </div>
-                      <p className="text-slate-600 leading-relaxed">
+                      <p className="text-slate-600 leading-relaxed line-clamp-3">
                         {category.description}
                       </p>
                     </CardHeader>
 
-                    <CardContent>
+                    <CardContent className="relative">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-4 text-sm text-slate-500">
-                          <div className="flex items-center gap-1">
-                            <MessageSquare className="w-4 h-4" />
-                            <span>{category.thread_count || 0} threads</span>
+                          <div className="flex items-center gap-1 px-2 py-1 bg-slate-100/80 rounded-lg">
+                            <MessageSquare className="w-4 h-4 text-blue-600" />
+                            <span className="font-medium">{category.thread_count || 0}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="w-4 h-4" />
@@ -276,7 +285,7 @@ export default function CategoriesPage() {
                             onClick={() =>
                               navigate(`/categories/${category.id}`)
                             }
-                            className="flex-1 bg-blue-600 hover:bg-blue-700"
+                            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-300"
                           >
                             <Users className="w-4 h-4 mr-2" />
                             Browse Threads
@@ -295,19 +304,25 @@ export default function CategoriesPage() {
                 {filteredAndSortedCategories?.map((category: Category) => (
                   <Card
                     key={category.id}
-                    className="shadow-md border-0 bg-white/90 backdrop-blur-sm hover:shadow-lg transition-all group"
+                    className="group relative overflow-hidden shadow-md border-0 bg-white/90 backdrop-blur-sm hover:shadow-xl hover:scale-[1.01] transition-all duration-300"
                   >
-                    <CardContent className="p-6">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/3 via-indigo-500/3 to-purple-500/3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/8 to-indigo-500/8 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    
+                    <CardContent className="relative p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
+                              <Folder className="w-5 h-5 text-white" />
+                            </div>
                             <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
                               {category.name}
                             </h3>
                             {category.is_private && (
                               <Badge
                                 variant="secondary"
-                                className="text-blue-700 bg-blue-100"
+                                className="text-blue-700 bg-gradient-to-r from-blue-100 to-indigo-100 border border-blue-200/50 shadow-sm"
                               >
                                 <Lock className="w-3 h-3 mr-1" />
                                 Private
@@ -316,19 +331,19 @@ export default function CategoriesPage() {
                             {category.is_locked && (
                               <Badge
                                 variant="outline"
-                                className="text-amber-700 border-amber-300 bg-amber-50"
+                                className="text-amber-700 border-amber-300 bg-gradient-to-r from-amber-50 to-yellow-50 shadow-sm"
                               >
                                 Locked
                               </Badge>
                             )}
                           </div>
-                          <p className="text-slate-600 mb-3 max-w-2xl">
+                          <p className="text-slate-600 mb-4 max-w-2xl leading-relaxed">
                             {category.description}
                           </p>
                           <div className="flex items-center gap-6 text-sm text-slate-500">
-                            <div className="flex items-center gap-1">
-                              <MessageSquare className="w-4 h-4" />
-                              <span>{category.thread_count || 0} threads</span>
+                            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100/80 rounded-lg">
+                              <MessageSquare className="w-4 h-4 text-blue-600" />
+                              <span className="font-medium">{category.thread_count || 0} threads</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="w-4 h-4" />
@@ -355,7 +370,7 @@ export default function CategoriesPage() {
                               onClick={() =>
                                 navigate(`/categories/${category.id}`)
                               }
-                              className="bg-blue-600 hover:bg-blue-700"
+                              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-300"
                             >
                               <Users className="w-4 h-4 mr-2" />
                               Browse Threads

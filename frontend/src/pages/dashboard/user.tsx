@@ -203,19 +203,25 @@ export default function UserDashboard() {
                 {categories.map((cat) => (
                   <button
                     key={cat.id}
-                    className="w-full text-left p-4 rounded-lg hover:bg-slate-50/80 transition-colors border border-slate-200/60 group"
+                    className="group w-full text-left p-4 rounded-xl bg-gradient-to-r from-white/80 to-slate-50/80 border border-slate-200/60 hover:border-blue-300/60 hover:shadow-lg transition-all duration-300 relative overflow-hidden"
                     onClick={() => navigate(`/categories/${cat.slug}`)}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900 truncate">
-                          {cat.name}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1 truncate">
-                          {cat.description}
-                        </p>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="relative flex items-center justify-between">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow duration-300 flex-shrink-0">
+                          <Folder className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors truncate">
+                            {cat.name}
+                          </p>
+                          <p className="text-xs text-slate-600 mt-1 truncate leading-relaxed">
+                            {cat.description}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-shrink-0 ml-3 px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-600">
+                      <div className="flex-shrink-0 ml-3 px-2.5 py-1 text-xs font-medium rounded-full bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 border border-slate-200/50 shadow-sm">
                         {cat.thread_count}
                       </div>
                     </div>
@@ -250,31 +256,33 @@ export default function UserDashboard() {
                 Quick Actions
               </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {quickActions.map((action) => {
                 const Icon = action.icon
                 return (
                   <button
                     key={action.label}
-                    className="w-full text-left p-4 rounded-lg hover:bg-slate-50/80 transition-colors border border-slate-200/60 group"
+                    className="group w-full text-left p-4 rounded-xl bg-gradient-to-r from-white/80 to-slate-50/80 border border-slate-200/60 hover:border-blue-300/60 hover:shadow-lg transition-all duration-300 relative overflow-hidden"
                     onClick={action.action}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-400/10 to-indigo-500/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="relative flex items-center gap-3">
                       <div
-                        className={`w-10 h-10 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}
+                        className={`w-10 h-10 rounded-xl bg-gradient-to-r ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-md group-hover:shadow-lg`}
                       >
                         <Icon className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="font-medium text-slate-700 block">
+                        <span className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors block">
                           {action.label}
                         </span>
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-slate-600 leading-relaxed">
                           {action.description}
                         </span>
                       </div>
                       {action.badge && action.badge > 0 && (
-                        <div className="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
+                        <div className="px-2.5 py-1 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 text-xs font-medium border border-blue-200/50 shadow-sm">
                           {action.badge}
                         </div>
                       )}
@@ -310,33 +318,43 @@ export default function UserDashboard() {
                   <BarChart2 className="w-4 h-4" />
                   <h3>Your recent threads</h3>
                 </div>
-                <div className="space-y-3 max-h-[250px] overflow-y-auto pr-1">
+                <div className="space-y-4 max-h-[280px] overflow-y-auto pr-1">
                   {activity.threads.map((thread) => (
                     <div
                       key={thread.id}
-                      className="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50/80 transition-colors cursor-pointer"
+                      className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-white/80 to-slate-50/80 border border-slate-200/60 hover:border-blue-300/60 hover:shadow-lg transition-all duration-300 cursor-pointer"
                       onClick={() => navigate(`/threads/${thread.id}`)}
                     >
-                      <div
-                        className={`w-2 h-2 rounded-full mt-2 ${
-                          thread.has_new_replies
-                            ? "bg-blue-500 ring-2 ring-blue-200"
-                            : "bg-slate-300"
-                        }`}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900 truncate">
-                          {thread.title}
-                        </p>
-                        <p className="text-xs text-slate-600 line-clamp-1 mt-1">
-                          {thread.preview}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-500">
-                          <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
-                            {thread.category}
-                          </span>
-                          <span>{thread.replies} replies</span>
-                          <span>{thread.created_at}</span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="relative p-4">
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ${
+                              thread.has_new_replies
+                                ? "bg-gradient-to-r from-blue-500 to-indigo-600 ring-2 ring-blue-200 shadow-sm"
+                                : "bg-gradient-to-r from-slate-300 to-slate-400"
+                            }`}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-2 leading-snug">
+                              {thread.title}
+                            </h4>
+                            <p className="text-sm text-slate-600 line-clamp-2 mt-2 leading-relaxed">
+                              {thread.preview}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-3 mt-3">
+                              <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 rounded-full border border-blue-200/50">
+                                {thread.category}
+                              </span>
+                              <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+                                <MessageSquare className="w-3 h-3" />
+                                {thread.replies} replies
+                              </span>
+                              <span className="text-xs text-slate-500">
+                                {thread.created_at}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -350,28 +368,35 @@ export default function UserDashboard() {
                         <CheckCircle2 className="w-4 h-4" />
                         <h3>Your recent replies</h3>
                       </div>
-                      <div className="space-y-3 max-h-[200px] overflow-y-auto pr-1">
+                      <div className="space-y-4 max-h-[220px] overflow-y-auto pr-1">
                         {activity.recent_replies.map((reply, index) => (
                           <div
                             key={index}
-                            className="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50/80 transition-colors cursor-pointer"
+                            className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-white/80 to-emerald-50/50 border border-slate-200/60 hover:border-emerald-300/60 hover:shadow-lg transition-all duration-300 cursor-pointer"
                             onClick={() =>
                               navigate(`/threads/${reply.thread_id}`)
                             }
                           >
-                            <div className="w-2 h-2 rounded-full bg-green-500 mt-2" />
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-slate-900 truncate">
-                                Reply to: {reply.thread_title}
-                              </p>
-                              <p className="text-xs text-slate-600 line-clamp-1 mt-1">
-                                {reply.preview}
-                              </p>
-                              <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-500">
-                                <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                                  {reply.category}
-                                </span>
-                                <span>{reply.replied_at}</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            <div className="relative p-4">
+                              <div className="flex items-start gap-3">
+                                <div className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 mt-1.5 flex-shrink-0 shadow-sm" />
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 leading-snug">
+                                    Reply to: {reply.thread_title}
+                                  </h4>
+                                  <p className="text-sm text-slate-600 line-clamp-2 mt-2 leading-relaxed">
+                                    {reply.preview}
+                                  </p>
+                                  <div className="flex flex-wrap items-center gap-3 mt-3">
+                                    <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 rounded-full border border-emerald-200/50">
+                                      {reply.category}
+                                    </span>
+                                    <span className="text-xs text-slate-500">
+                                      {reply.replied_at}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
