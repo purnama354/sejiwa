@@ -28,6 +28,9 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err?.response?.status === 401) {
+      // For guests (no token), don't force redirect; let UI handle 401 gracefully
+      const hasToken = Boolean(accessToken)
+
       // If already on auth pages, just surface error
       if (
         typeof location !== "undefined" &&
@@ -36,14 +39,15 @@ api.interceptors.response.use(
       ) {
         return Promise.reject(err)
       }
-      storage.setAccessToken(null)
-      storage.setRefreshToken(null)
-      storage.setUser(null)
-      setAccessToken(null)
-      // Avoid redirect loops during auth calls
-      if (!location.pathname.startsWith("/login")) {
-        window.location.href = "/login"
+
+      if (hasToken) {
+        // Authenticated user: clear session; route guards will handle redirects
+        storage.setAccessToken(null)
+        storage.setRefreshToken(null)
+        storage.setUser(null)
+        setAccessToken(null)
       }
+      // If no token, just reject so pages like PublicHome can show fallbacks
     }
     return Promise.reject(err)
   }

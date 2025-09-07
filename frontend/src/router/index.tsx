@@ -84,9 +84,11 @@ const router = createBrowserRouter([
       {
         path: "categories/:id",
         element: (
-          <Fallback>
-            <CategoryDetailsPage />
-          </Fallback>
+          <RoleRoute allow={["user", "moderator", "admin"]}>
+            <Fallback>
+              <CategoryDetailsPage />
+            </Fallback>
+          </RoleRoute>
         ),
       },
       {
@@ -104,9 +106,11 @@ const router = createBrowserRouter([
       {
         path: "threads/:id",
         element: (
-          <Fallback>
-            <ThreadDetailsPage />
-          </Fallback>
+          <RoleRoute allow={["user", "moderator", "admin"]}>
+            <Fallback>
+              <ThreadDetailsPage />
+            </Fallback>
+          </RoleRoute>
         ),
       },
       {
