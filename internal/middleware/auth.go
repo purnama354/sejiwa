@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/purnama354/sejiwa-api/internal/dto"
 	"github.com/purnama354/sejiwa-api/internal/models"
 
 	"github.com/gin-gonic/gin"
@@ -23,13 +24,13 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "AUTH_HEADER_MISSING"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Authorization header missing", "AUTH_HEADER_MISSING", nil))
 			return
 		}
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "AUTH_HEADER_INVALID_FORMAT"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid authorization header format", "AUTH_HEADER_INVALID_FORMAT", nil))
 			return
 		}
 
@@ -42,26 +43,26 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 		})
 
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "TOKEN_INVALID"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid token", "TOKEN_INVALID", nil))
 			return
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			userIDStr, ok := claims["sub"].(string)
 			if !ok {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "TOKEN_CLAIM_INVALID_SUB"})
+				c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid subject claim", "TOKEN_CLAIM_INVALID_SUB", nil))
 				return
 			}
 
 			userID, err := uuid.Parse(userIDStr)
 			if err != nil {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "TOKEN_CLAIM_INVALID_SUB_FORMAT"})
+				c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid subject claim format", "TOKEN_CLAIM_INVALID_SUB_FORMAT", nil))
 				return
 			}
 
 			userRole, ok := claims["role"].(string)
 			if !ok {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "TOKEN_CLAIM_INVALID_ROLE"})
+				c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid role claim", "TOKEN_CLAIM_INVALID_ROLE", nil))
 				return
 			}
 
@@ -69,7 +70,7 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 			c.Set(ContextUserRoleKey, models.UserRole(userRole))
 			c.Next()
 		} else {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "TOKEN_INVALID"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid token", "TOKEN_INVALID", nil))
 		}
 	}
 }
