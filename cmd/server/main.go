@@ -61,7 +61,7 @@ func main() {
 	userService := services.NewUserService(userRepo, prefRepo, threadRepo, replyRepo, reportRepo, subscriptionRepo, savedThreadRepo, categoryRepo)
 	categoryService := services.NewCategoryService(categoryRepo)
 	threadService := services.NewThreadService(threadRepo, categoryRepo, userRepo, subscriptionRepo)
-	replyService := services.NewReplyService(replyRepo, threadRepo, userRepo)
+	replyService := services.NewReplyService(replyRepo, threadRepo, userRepo, subscriptionRepo)
 	reportService := services.NewReportService(reportRepo, threadRepo, replyRepo, userRepo)
 	moderationService := services.NewModerationService(reportRepo, userRepo, threadRepo, replyRepo, moderationRepo)
 
@@ -80,9 +80,11 @@ func main() {
 	reportHandler := handlers.NewReportHandler(reportService)
 	moderationHandler := handlers.NewModerationHandler(moderationService, reportService)
 
-	router := gin.Default()
-
-	// Enable CORS for frontend dev origin
+	router := gin.New()
+	// Do not trust any proxies by default (can be configured later)
+	_ = router.SetTrustedProxies(nil)
+	// Recovery + CORS
+	router.Use(middleware.RecoveryMiddleware())
 	router.Use(middleware.CORSMiddleware())
 
 	// Rate limit: 5 requests per minute per IP for auth endpoints
@@ -91,6 +93,8 @@ func main() {
 		Limit:  5,
 	}
 	authLimiter := middleware.NewRateLimiter(authRate)
+	// Optional: general write limiter to be used on write-heavy routes
+	_ = limiter.Rate{Period: 1 * time.Minute, Limit: 60}
 	accountLockout := middleware.AccountLockoutMiddleware()
 
 	// Register routes with rate limiting and account lockout for auth endpoints

@@ -10,6 +10,8 @@ import (
 	"github.com/purnama354/sejiwa-api/internal/config"
 	"github.com/purnama354/sejiwa-api/internal/handlers"
 	"github.com/purnama354/sejiwa-api/internal/middleware"
+	"github.com/purnama354/sejiwa-api/internal/models"
+	"github.com/ulule/limiter/v3"
 )
 
 func RegisterRoutes(
@@ -21,6 +23,17 @@ func RegisterRoutes(
 ) {
 	api := router.Group("/api/v1")
 	{
+	// General write limiter (per IP): 30 requests per minute
+	writeRate := limiter.Rate{Period: 1 * time.Minute, Limit: 30}
+	writeLimiter := middleware.NewRateLimiter(writeRate)
+
+	// Stricter reply creation limiters to mitigate spam (per IP)
+	replyRate := limiter.Rate{Period: 1 * time.Minute, Limit: 10}
+	replyLimiter := middleware.NewRateLimiter(replyRate)
+	// Optional short-burst limiter to smooth spikes
+	replyBurstRate := limiter.Rate{Period: 10 * time.Second, Limit: 3}
+	replyBurstLimiter := middleware.NewRateLimiter(replyBurstRate)
+
 		// Health check endpoint
 		api.GET("/health", func(c *gin.Context) {
 			sqlDB, err := db.DB()
@@ -63,9 +76,9 @@ func RegisterRoutes(
 			categoryRoutes.GET("/:id/threads", threadHandler.GetByCategory)
 
 			// Admin-only category routes
-			categoryRoutes.POST("", middleware.AuthMiddleware(cfg.JWTSecret), middleware.AdminOnlyMiddleware(), categoryHandler.Create)
-			categoryRoutes.PUT("/:id", middleware.AuthMiddleware(cfg.JWTSecret), middleware.AdminOnlyMiddleware(), categoryHandler.Update)
-			categoryRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), middleware.AdminOnlyMiddleware(), categoryHandler.Delete)
+			categoryRoutes.POST("", middleware.AuthMiddleware(cfg.JWTSecret), middleware.AdminOnlyMiddleware(), writeLimiter, categoryHandler.Create)
+			categoryRoutes.PUT("/:id", middleware.AuthMiddleware(cfg.JWTSecret), middleware.AdminOnlyMiddleware(), writeLimiter, categoryHandler.Update)
+			categoryRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), middleware.AdminOnlyMiddleware(), writeLimiter, categoryHandler.Delete)
 		}
 
 		// Thread routes with reply endpoints
@@ -79,13 +92,13 @@ func RegisterRoutes(
 			threadRoutes.GET("/:id", middleware.OptionalAuthMiddleware(cfg.JWTSecret), threadHandler.GetByID)
 
 			// Authenticated routes
-			threadRoutes.POST("", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Create)
-			threadRoutes.PUT("/:id", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Update)
-			threadRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Delete)
+			threadRoutes.POST("", middleware.AuthMiddleware(cfg.JWTSecret), middleware.RolesAllowedMiddleware(models.RoleUser, models.RoleModerator), writeLimiter, threadHandler.Create)
+			threadRoutes.PUT("/:id", middleware.AuthMiddleware(cfg.JWTSecret), writeLimiter, threadHandler.Update)
+			threadRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), writeLimiter, threadHandler.Delete)
 
 			// Thread reply routes
-			threadRoutes.GET("/:id/replies", replyHandler.GetByThread)
-			threadRoutes.POST("/:id/replies", middleware.AuthMiddleware(cfg.JWTSecret), replyHandler.Create)
+			threadRoutes.GET("/:id/replies", middleware.OptionalAuthMiddleware(cfg.JWTSecret), replyHandler.GetByThread)
+			threadRoutes.POST("/:id/replies", middleware.AuthMiddleware(cfg.JWTSecret), middleware.RolesAllowedMiddleware(models.RoleUser, models.RoleModerator), replyBurstLimiter, replyLimiter, replyHandler.Create)
 		}
 
 		// Reply routes
@@ -95,15 +108,15 @@ func RegisterRoutes(
 			replyRoutes.GET("/:id", replyHandler.GetByID)
 
 			// Authenticated routes
-			replyRoutes.PATCH("/:id", middleware.AuthMiddleware(cfg.JWTSecret), replyHandler.Update)
-			replyRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), replyHandler.Delete)
+			replyRoutes.PATCH("/:id", middleware.AuthMiddleware(cfg.JWTSecret), writeLimiter, replyHandler.Update)
+			replyRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), writeLimiter, replyHandler.Delete)
 		}
 
 		// Report routes
 		reportRoutes := api.Group("/reports")
 		reportRoutes.Use(middleware.AuthMiddleware(cfg.JWTSecret))
 		{
-			reportRoutes.POST("", reportHandler.Create)
+			reportRoutes.POST("", writeLimiter, reportHandler.Create)
 			reportRoutes.GET("/me", reportHandler.GetMyReports)
 		}
 

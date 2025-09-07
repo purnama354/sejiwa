@@ -102,10 +102,30 @@ func (h *ReplyHandler) GetByThread(c *gin.Context) {
 	page, pageSize := h.getPaginationParams(c)
 	nested := c.Query("nested") == "true"
 
-	replies, err := h.replyService.GetByThread(threadID, page, pageSize, nested)
+	// Optional user context for access checks on private content
+	var userID *uuid.UUID
+	var userRole *models.UserRole
+	if uid, exists := c.Get(middleware.ContextUserIDKey); exists {
+		u := uid.(uuid.UUID)
+		userID = &u
+	}
+	if role, exists := c.Get(middleware.ContextUserRoleKey); exists {
+		r := role.(models.UserRole)
+		userRole = &r
+	}
+
+	replies, err := h.replyService.GetByThread(threadID, page, pageSize, nested, userID, userRole)
 	if err != nil {
 		if errors.Is(err, services.ErrThreadNotFound) {
 			c.JSON(http.StatusNotFound, dto.NewErrorResponse("Thread not found", "THREAD_NOT_FOUND", nil))
+			return
+		}
+		if errors.Is(err, services.ErrCategoryPrivate) {
+			c.JSON(http.StatusForbidden, dto.NewErrorResponse("Category is private. Join to view replies.", "CATEGORY_PRIVATE", nil))
+			return
+		}
+		if errors.Is(err, services.ErrThreadPrivate) {
+			c.JSON(http.StatusForbidden, dto.NewErrorResponse("Thread is private.", "THREAD_PRIVATE", nil))
 			return
 		}
 		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to retrieve replies", "INTERNAL_SERVER_ERROR", nil))
