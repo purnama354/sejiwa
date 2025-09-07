@@ -27,6 +27,13 @@ func RegisterRoutes(
 	writeRate := limiter.Rate{Period: 1 * time.Minute, Limit: 30}
 	writeLimiter := middleware.NewRateLimiter(writeRate)
 
+	// Stricter reply creation limiters to mitigate spam (per IP)
+	replyRate := limiter.Rate{Period: 1 * time.Minute, Limit: 10}
+	replyLimiter := middleware.NewRateLimiter(replyRate)
+	// Optional short-burst limiter to smooth spikes
+	replyBurstRate := limiter.Rate{Period: 10 * time.Second, Limit: 3}
+	replyBurstLimiter := middleware.NewRateLimiter(replyBurstRate)
+
 		// Health check endpoint
 		api.GET("/health", func(c *gin.Context) {
 			sqlDB, err := db.DB()
@@ -90,8 +97,8 @@ func RegisterRoutes(
 			threadRoutes.DELETE("/:id", middleware.AuthMiddleware(cfg.JWTSecret), writeLimiter, threadHandler.Delete)
 
 			// Thread reply routes
-			threadRoutes.GET("/:id/replies", replyHandler.GetByThread)
-			threadRoutes.POST("/:id/replies", middleware.AuthMiddleware(cfg.JWTSecret), middleware.RolesAllowedMiddleware(models.RoleUser, models.RoleModerator), writeLimiter, replyHandler.Create)
+			threadRoutes.GET("/:id/replies", middleware.OptionalAuthMiddleware(cfg.JWTSecret), replyHandler.GetByThread)
+			threadRoutes.POST("/:id/replies", middleware.AuthMiddleware(cfg.JWTSecret), middleware.RolesAllowedMiddleware(models.RoleUser, models.RoleModerator), replyBurstLimiter, replyLimiter, replyHandler.Create)
 		}
 
 		// Reply routes

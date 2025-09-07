@@ -61,7 +61,7 @@ func main() {
 	userService := services.NewUserService(userRepo, prefRepo, threadRepo, replyRepo, reportRepo, subscriptionRepo, savedThreadRepo, categoryRepo)
 	categoryService := services.NewCategoryService(categoryRepo)
 	threadService := services.NewThreadService(threadRepo, categoryRepo, userRepo, subscriptionRepo)
-	replyService := services.NewReplyService(replyRepo, threadRepo, userRepo)
+	replyService := services.NewReplyService(replyRepo, threadRepo, userRepo, subscriptionRepo)
 	reportService := services.NewReportService(reportRepo, threadRepo, replyRepo, userRepo)
 	moderationService := services.NewModerationService(reportRepo, userRepo, threadRepo, replyRepo, moderationRepo)
 
@@ -81,6 +81,8 @@ func main() {
 	moderationHandler := handlers.NewModerationHandler(moderationService, reportService)
 
 	router := gin.New()
+	// Do not trust any proxies by default (can be configured later)
+	_ = router.SetTrustedProxies(nil)
 	// Recovery + CORS
 	router.Use(middleware.RecoveryMiddleware())
 	router.Use(middleware.CORSMiddleware())

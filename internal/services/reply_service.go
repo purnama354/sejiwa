@@ -25,7 +25,7 @@ const MaxNestingLevel = 3 // Limit nesting to prevent deep threads
 type ReplyService interface {
 	Create(threadID uuid.UUID, req dto.CreateReplyRequest, authorID uuid.UUID) (*models.Reply, error)
 	GetByID(id uuid.UUID, userID *uuid.UUID, userRole *models.UserRole) (*models.Reply, error)
-	GetByThread(threadID uuid.UUID, page, pageSize int, nested bool) (*dto.ReplyListResponse, error)
+	GetByThread(threadID uuid.UUID, page, pageSize int, nested bool, userID *uuid.UUID, userRole *models.UserRole) (*dto.ReplyListResponse, error)
 	GetByAuthor(authorID uuid.UUID, page, pageSize int) (*dto.ReplyListResponse, error)
 	Update(id uuid.UUID, req dto.UpdateReplyRequest, userID uuid.UUID, userRole models.UserRole) (*models.Reply, error)
 	Delete(id uuid.UUID, userID uuid.UUID, userRole models.UserRole) error
@@ -36,6 +36,7 @@ type replyService struct {
 	replyRepo  repository.ReplyRepository
 	threadRepo repository.ThreadRepository
 	userRepo   repository.UserRepository
+	subRepo    repository.SubscriptionRepository
 }
 
 // NewReplyService creates a new instance of ReplyService
@@ -43,11 +44,13 @@ func NewReplyService(
 	replyRepo repository.ReplyRepository,
 	threadRepo repository.ThreadRepository,
 	userRepo repository.UserRepository,
+	subRepo repository.SubscriptionRepository,
 ) ReplyService {
 	return &replyService{
 		replyRepo:  replyRepo,
 		threadRepo: threadRepo,
 		userRepo:   userRepo,
+		subRepo:    subRepo,
 	}
 }
 
@@ -149,7 +152,7 @@ func (s *replyService) GetByID(id uuid.UUID, userID *uuid.UUID, userRole *models
 }
 
 // GetByThread retrieves replies for a specific thread with pagination
-func (s *replyService) GetByThread(threadID uuid.UUID, page, pageSize int, nested bool) (*dto.ReplyListResponse, error) {
+func (s *replyService) GetByThread(threadID uuid.UUID, page, pageSize int, nested bool, userID *uuid.UUID, userRole *models.UserRole) (*dto.ReplyListResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -157,13 +160,38 @@ func (s *replyService) GetByThread(threadID uuid.UUID, page, pageSize int, neste
 		pageSize = 20
 	}
 
-	// Verify thread exists
-	_, err := s.threadRepo.FindByID(threadID)
+	// Verify thread exists and load details for access checks
+	thread, err := s.threadRepo.FindByIDWithDetails(threadID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrThreadNotFound
 		}
 		return nil, err
+	}
+
+	// Enforce private category access
+	if thread.Category.IsPrivate {
+		if userID == nil {
+			return nil, ErrCategoryPrivate
+		}
+		subscribed, err := s.subRepo.IsSubscribed(*userID, thread.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+		if !subscribed && !(userRole != nil && (*userRole == models.RoleAdmin || *userRole == models.RoleModerator)) {
+			return nil, ErrCategoryPrivate
+		}
+	}
+
+	// Enforce thread-level privacy
+	if thread.IsPrivate {
+		elevated := userRole != nil && (*userRole == models.RoleAdmin || *userRole == models.RoleModerator)
+		isAuthor := userID != nil && *userID == thread.AuthorID
+		isAssignedMod := userID != nil && thread.AssignedModeratorID != nil && *userID == *thread.AssignedModeratorID
+		if !elevated && !isAuthor && !isAssignedMod {
+			// For listing replies, we don't accept password; deny if not permitted
+			return nil, ErrThreadPrivate
+		}
 	}
 
 	offset := (page - 1) * pageSize
