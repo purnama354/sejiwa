@@ -41,3 +41,19 @@ export async function getModerationStats(moderatorId?: string) {
   })
   return res.data
 }
+
+export async function getModerationActions(params?: {
+  action?: string
+  page?: number
+  pageSize?: number
+}) {
+  const { page = 1, pageSize = 20, action } = params || {}
+  const res = await api.get(`/moderation/actions`, {
+    params: {
+      page,
+      pageSize,
+      ...(action ? { action } : {}),
+    },
+  })
+  return res.data
+}

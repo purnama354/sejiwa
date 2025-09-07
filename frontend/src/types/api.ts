@@ -18,13 +18,16 @@ export type ErrorResponse = {
 export type UserProfile = {
   id: string
   username: string
+  email?: string
   role: "user" | "moderator" | "admin"
-  status: "active" | "inactive" | "suspended"
+  status: "active" | "inactive" | "suspended" | "banned"
   created_at: string
   updated_at: string
   last_active_at: string
   thread_count: number
   reply_count: number
+  violations_count?: number
+  banned?: boolean
 }
 
 export type AuthResponse = {
@@ -85,19 +88,6 @@ export type ModerationActionRequest = {
   reason: string
   ban_duration_days?: number
   internal_notes?: string
-}
-
-export type ModerationActionResponse = {
-  id: string
-  report_id: string
-  content_type: "thread" | "reply"
-  content_id: string
-  reported_user_id: string
-  action: string
-  reason: string
-  moderator: AnonymousAuthor
-  created_at: string | Date
-  ban_expires_at?: string | Date
 }
 
 export type ModerationStatsResponse = {
@@ -254,4 +244,54 @@ export type ReplyListResponse = {
 export type CreateReplyRequest = {
   content: string
   parent_reply_id?: string
+}
+
+// Moderation Action Response
+export type ModerationActionResponse = {
+  id: string
+  report_id: string
+  content_type: "thread" | "reply"
+  content_id: string
+  reported_user: AnonymousAuthor
+  action: string
+  reason: string
+  moderator: AnonymousAuthor
+  created_at: string | Date
+  ban_expires_at?: string | Date
+}
+
+// User Activity Response
+export type UserActivity = {
+  thread_count: number
+  reply_count: number
+  threads: Array<{
+    id: string
+    title: string
+    category_name: string
+    category: string
+    reply_count: number
+    replies: number
+    created_at: string
+    preview: string
+    has_new_replies: boolean
+  }>
+  replies: Array<{
+    id: string
+    thread_id: string
+    thread_title: string
+    category_name: string
+    created_at: string
+    content: string
+  }>
+  recent_replies: Array<{
+    id: string
+    thread_id: string
+    thread_title: string
+    category_name: string
+    category: string
+    created_at: string
+    replied_at: string
+    content: string
+    preview: string
+  }>
 }

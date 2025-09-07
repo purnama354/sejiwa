@@ -15,16 +15,21 @@ import {
   List,
   Clock,
   Folder,
+  LogIn,
+  UserPlus,
 } from "lucide-react"
 import { listCategories } from "@/services/categories"
 import SubscriptionButton from "@/components/subscription-button"
+import { useAuthStore } from "@/store/auth"
 import type { Category } from "@/types/api"
+import { Link } from "react-router-dom"
 
 type SortOption = "name" | "threads" | "recent" | "popular"
 type ViewMode = "grid" | "list"
 
 export default function CategoriesPage() {
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuthStore()
   const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState<SortOption>("popular")
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
@@ -114,6 +119,42 @@ export default function CategoriesPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Auth banner for guests */}
+        {!isAuthenticated && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-8">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center">
+                  <Lock className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-medium text-slate-900">
+                    Join our community to participate
+                  </p>
+                  <p className="text-sm text-slate-600">
+                    Create an account to view threads, post replies, and connect
+                    with others.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 flex-shrink-0">
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/login">
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Sign in
+                  </Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link to="/register">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Join now
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Controls */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
           {/* Search */}
@@ -276,13 +317,35 @@ export default function CategoriesPage() {
 
                       <div className="flex gap-2">
                         {category.is_private ? (
-                          <SubscriptionButton
-                            categoryId={category.id}
-                            categoryName={category.name}
-                            isPrivate
-                            variant="default"
-                          />
-                        ) : (
+                          isAuthenticated ? (
+                            <SubscriptionButton
+                              categoryId={category.id}
+                              categoryName={category.name}
+                              isPrivate
+                              variant="default"
+                            />
+                          ) : (
+                            <div className="flex gap-2 w-full">
+                              <Button
+                                asChild
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                              >
+                                <Link to="/login">
+                                  <LogIn className="w-4 h-4 mr-2" />
+                                  Sign in
+                                </Link>
+                              </Button>
+                              <Button asChild size="sm" className="flex-1">
+                                <Link to="/register">
+                                  <UserPlus className="w-4 h-4 mr-2" />
+                                  Join
+                                </Link>
+                              </Button>
+                            </div>
+                          )
+                        ) : isAuthenticated ? (
                           <Button
                             onClick={() =>
                               navigate(`/categories/${category.id}`)
@@ -292,6 +355,26 @@ export default function CategoriesPage() {
                             <Users className="w-4 h-4 mr-2" />
                             Browse Threads
                           </Button>
+                        ) : (
+                          <div className="flex gap-2 w-full">
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                            >
+                              <Link to="/login">
+                                <LogIn className="w-4 h-4 mr-2" />
+                                Sign in to browse
+                              </Link>
+                            </Button>
+                            <Button asChild size="sm" className="flex-1">
+                              <Link to="/register">
+                                <UserPlus className="w-4 h-4 mr-2" />
+                                Join now
+                              </Link>
+                            </Button>
+                          </div>
                         )}
                       </div>
                     </CardContent>
@@ -363,13 +446,30 @@ export default function CategoriesPage() {
 
                         <div className="flex items-center gap-2 ml-6">
                           {category.is_private ? (
-                            <SubscriptionButton
-                              categoryId={category.id}
-                              categoryName={category.name}
-                              isPrivate
-                              variant="default"
-                            />
-                          ) : (
+                            isAuthenticated ? (
+                              <SubscriptionButton
+                                categoryId={category.id}
+                                categoryName={category.name}
+                                isPrivate
+                                variant="default"
+                              />
+                            ) : (
+                              <div className="flex gap-2">
+                                <Button asChild variant="outline" size="sm">
+                                  <Link to="/login">
+                                    <LogIn className="w-4 h-4 mr-2" />
+                                    Sign in
+                                  </Link>
+                                </Button>
+                                <Button asChild size="sm">
+                                  <Link to="/register">
+                                    <UserPlus className="w-4 h-4 mr-2" />
+                                    Join
+                                  </Link>
+                                </Button>
+                              </div>
+                            )
+                          ) : isAuthenticated ? (
                             <Button
                               onClick={() =>
                                 navigate(`/categories/${category.id}`)
@@ -379,6 +479,21 @@ export default function CategoriesPage() {
                               <Users className="w-4 h-4 mr-2" />
                               Browse Threads
                             </Button>
+                          ) : (
+                            <div className="flex gap-2">
+                              <Button asChild variant="outline" size="sm">
+                                <Link to="/login">
+                                  <LogIn className="w-4 h-4 mr-2" />
+                                  Sign in to browse
+                                </Link>
+                              </Button>
+                              <Button asChild size="sm">
+                                <Link to="/register">
+                                  <UserPlus className="w-4 h-4 mr-2" />
+                                  Join now
+                                </Link>
+                              </Button>
+                            </div>
                           )}
                         </div>
                       </div>
