@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/purnama354/sejiwa-api/internal/dto"
+	"github.com/purnama354/sejiwa-api/internal/middleware"
 	"github.com/purnama354/sejiwa-api/internal/services"
 	"github.com/purnama354/sejiwa-api/internal/utils"
 )
@@ -23,64 +24,49 @@ func (h *ModeratorNoteHandler) CreateNote(c *gin.Context) {
 	userIDStr := c.Param("id")
 	userID, err := uuid.Parse(userIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "INVALID_USER_ID",
-			"message": "Invalid user ID format",
-		})
+		c.JSON(http.StatusBadRequest, dto.NewErrorResponse("Invalid user ID format", "INVALID_USER_ID", nil))
 		return
 	}
 
 	// Get moderator ID from JWT token
-	moderatorID, exists := c.Get("userID")
+	moderatorID, exists := c.Get(middleware.ContextUserIDKey)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error":   "UNAUTHORIZED",
-			"message": "Unauthorized access",
-		})
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("Unauthorized access", "UNAUTHORIZED", nil))
 		return
 	}
 
 	moderatorUUID, ok := moderatorID.(uuid.UUID)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "INTERNAL_SERVER_ERROR",
-			"message": "Invalid moderator ID",
-		})
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Invalid moderator ID", "INTERNAL_SERVER_ERROR", nil))
 		return
 	}
 
 	// Parse and validate request
 	var req dto.CreateModeratorNoteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "INVALID_REQUEST",
-			"message": "Invalid request format",
-		})
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
 		return
 	}
 
 	if err := utils.ValidateStruct(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "VALIDATION_ERROR",
-			"message": err.Error(),
-		})
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
 		return
 	}
 
 	// Create the note
 	noteResponse, errResp := h.noteService.CreateNote(userID, moderatorUUID, &req)
 	if errResp != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   errResp.Code,
-			"message": errResp.Message,
-		})
+		statusCode := http.StatusBadRequest
+		if errResp.Code == utils.ErrCodeUserNotFound {
+			statusCode = http.StatusNotFound
+		} else if errResp.Code == utils.ErrCodeForbidden {
+			statusCode = http.StatusForbidden
+		}
+		c.JSON(statusCode, dto.NewErrorResponse(errResp.Message, errResp.Code, nil))
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "Moderator note created successfully",
-		"data":    noteResponse,
-	})
+	c.JSON(http.StatusCreated, gin.H{"message": "Moderator note created successfully", "data": noteResponse})
 }
 
 func (h *ModeratorNoteHandler) GetNotesByUserID(c *gin.Context) {
@@ -88,10 +74,7 @@ func (h *ModeratorNoteHandler) GetNotesByUserID(c *gin.Context) {
 	userIDStr := c.Param("id")
 	userID, err := uuid.Parse(userIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "INVALID_USER_ID",
-			"message": "Invalid user ID format",
-		})
+		c.JSON(http.StatusBadRequest, dto.NewErrorResponse("Invalid user ID format", "INVALID_USER_ID", nil))
 		return
 	}
 
@@ -105,17 +88,11 @@ func (h *ModeratorNoteHandler) GetNotesByUserID(c *gin.Context) {
 		if errResp.Code == utils.ErrCodeUserNotFound {
 			statusCode = http.StatusNotFound
 		}
-		c.JSON(statusCode, gin.H{
-			"error":   errResp.Code,
-			"message": errResp.Message,
-		})
+		c.JSON(statusCode, dto.NewErrorResponse(errResp.Message, errResp.Code, nil))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Moderator notes retrieved successfully",
-		"data":    notesResponse,
-	})
+	c.JSON(http.StatusOK, gin.H{"message": "Moderator notes retrieved successfully", "data": notesResponse})
 }
 
 func (h *ModeratorNoteHandler) DeleteNote(c *gin.Context) {
@@ -123,29 +100,20 @@ func (h *ModeratorNoteHandler) DeleteNote(c *gin.Context) {
 	noteIDStr := c.Param("noteId")
 	noteID, err := uuid.Parse(noteIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "INVALID_NOTE_ID",
-			"message": "Invalid note ID format",
-		})
+		c.JSON(http.StatusBadRequest, dto.NewErrorResponse("Invalid note ID format", "INVALID_NOTE_ID", nil))
 		return
 	}
 
 	// Get moderator ID from JWT token
-	moderatorID, exists := c.Get("userID")
+	moderatorID, exists := c.Get(middleware.ContextUserIDKey)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error":   "UNAUTHORIZED",
-			"message": "Unauthorized access",
-		})
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("Unauthorized access", "UNAUTHORIZED", nil))
 		return
 	}
 
 	moderatorUUID, ok := moderatorID.(uuid.UUID)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "INTERNAL_SERVER_ERROR",
-			"message": "Invalid moderator ID",
-		})
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Invalid moderator ID", "INTERNAL_SERVER_ERROR", nil))
 		return
 	}
 
@@ -158,14 +126,9 @@ func (h *ModeratorNoteHandler) DeleteNote(c *gin.Context) {
 		} else if errResp.Code == utils.ErrCodeForbidden {
 			statusCode = http.StatusForbidden
 		}
-		c.JSON(statusCode, gin.H{
-			"error":   errResp.Code,
-			"message": errResp.Message,
-		})
+		c.JSON(statusCode, dto.NewErrorResponse(errResp.Message, errResp.Code, nil))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Moderator note deleted successfully",
-	})
+	c.JSON(http.StatusOK, gin.H{"message": "Moderator note deleted successfully"})
 }

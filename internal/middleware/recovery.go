@@ -17,11 +17,16 @@ func RecoveryMiddleware() gin.HandlerFunc {
 				// Log the panic and stack trace
 				log.Printf("panic recovered: %v\n%s", r, debug.Stack())
 				// Return a standardized error response
-				c.AbortWithStatusJSON(http.StatusInternalServerError, dto.NewErrorResponse(
+				err := dto.NewErrorResponse(
 					"An unexpected error occurred",
 					"INTERNAL_SERVER_ERROR",
 					nil,
-				))
+				)
+				// Attach request id if present
+				if rid := GetRequestID(c); rid != "" {
+					err.RequestID = rid
+				}
+				c.AbortWithStatusJSON(http.StatusInternalServerError, err)
 			}
 		}()
 		c.Next()

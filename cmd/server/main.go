@@ -83,8 +83,10 @@ func main() {
 	router := gin.New()
 	// Do not trust any proxies by default (can be configured later)
 	_ = router.SetTrustedProxies(nil)
-	// Recovery + CORS
+	// RequestID + Recovery + Logging + CORS
+	router.Use(middleware.RequestIDMiddleware())
 	router.Use(middleware.RecoveryMiddleware())
+	router.Use(middleware.LoggingMiddleware())
 	router.Use(middleware.CORSMiddleware())
 
 	// Rate limit: 5 requests per minute per IP for auth endpoints

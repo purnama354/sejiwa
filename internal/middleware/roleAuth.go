@@ -14,13 +14,21 @@ func AdminOnlyMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userRoleInterface, exists := c.Get(ContextUserRoleKey)
 		if !exists {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("No role found in token", "TOKEN_INVALID", nil))
+			err := dto.NewErrorResponse("No role found in token", "TOKEN_INVALID", nil)
+			if rid := GetRequestID(c); rid != "" {
+				err.RequestID = rid
+			}
+			c.AbortWithStatusJSON(http.StatusUnauthorized, err)
 			return
 		}
 
 		userRole, ok := userRoleInterface.(models.UserRole)
 		if !ok || userRole != models.RoleAdmin {
-			c.AbortWithStatusJSON(http.StatusForbidden, dto.NewErrorResponse("Admin access required", "ADMIN_ONLY", nil))
+			err := dto.NewErrorResponse("Admin access required", "ADMIN_ONLY", nil)
+			if rid := GetRequestID(c); rid != "" {
+				err.RequestID = rid
+			}
+			c.AbortWithStatusJSON(http.StatusForbidden, err)
 			return
 		}
 
@@ -33,13 +41,21 @@ func ModeratorOrAdminMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userRoleInterface, exists := c.Get(ContextUserRoleKey)
 		if !exists {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("No role found in token", "TOKEN_INVALID", nil))
+			err := dto.NewErrorResponse("No role found in token", "TOKEN_INVALID", nil)
+			if rid := GetRequestID(c); rid != "" {
+				err.RequestID = rid
+			}
+			c.AbortWithStatusJSON(http.StatusUnauthorized, err)
 			return
 		}
 
 		userRole, ok := userRoleInterface.(models.UserRole)
 		if !ok || (userRole != models.RoleAdmin && userRole != models.RoleModerator) {
-			c.AbortWithStatusJSON(http.StatusForbidden, dto.NewErrorResponse("Moderator or admin access required", "INSUFFICIENT_PERMISSIONS", nil))
+			err := dto.NewErrorResponse("Moderator or admin access required", "INSUFFICIENT_PERMISSIONS", nil)
+			if rid := GetRequestID(c); rid != "" {
+				err.RequestID = rid
+			}
+			c.AbortWithStatusJSON(http.StatusForbidden, err)
 			return
 		}
 
@@ -56,16 +72,28 @@ func RolesAllowedMiddleware(allowed ...models.UserRole) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userRoleInterface, exists := c.Get(ContextUserRoleKey)
 		if !exists {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("No role found in token", "TOKEN_INVALID", nil))
+			err := dto.NewErrorResponse("No role found in token", "TOKEN_INVALID", nil)
+			if rid := GetRequestID(c); rid != "" {
+				err.RequestID = rid
+			}
+			c.AbortWithStatusJSON(http.StatusUnauthorized, err)
 			return
 		}
 		userRole, ok := userRoleInterface.(models.UserRole)
 		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid role in token", "TOKEN_INVALID", nil))
+			err := dto.NewErrorResponse("Invalid role in token", "TOKEN_INVALID", nil)
+			if rid := GetRequestID(c); rid != "" {
+				err.RequestID = rid
+			}
+			c.AbortWithStatusJSON(http.StatusUnauthorized, err)
 			return
 		}
 		if _, ok := allowedSet[userRole]; !ok {
-			c.AbortWithStatusJSON(http.StatusForbidden, dto.NewErrorResponse("Insufficient permissions", "INSUFFICIENT_PERMISSIONS", nil))
+			err := dto.NewErrorResponse("Insufficient permissions", "INSUFFICIENT_PERMISSIONS", nil)
+			if rid := GetRequestID(c); rid != "" {
+				err.RequestID = rid
+			}
+			c.AbortWithStatusJSON(http.StatusForbidden, err)
 			return
 		}
 		c.Next()

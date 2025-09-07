@@ -24,13 +24,21 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Authorization header missing", "AUTH_HEADER_MISSING", nil))
+			err := dto.NewErrorResponse("Authorization header missing", "AUTH_HEADER_MISSING", nil)
+			if rid := GetRequestID(c); rid != "" {
+				err.RequestID = rid
+			}
+			c.AbortWithStatusJSON(http.StatusUnauthorized, err)
 			return
 		}
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid authorization header format", "AUTH_HEADER_INVALID_FORMAT", nil))
+			err := dto.NewErrorResponse("Invalid authorization header format", "AUTH_HEADER_INVALID_FORMAT", nil)
+			if rid := GetRequestID(c); rid != "" {
+				err.RequestID = rid
+			}
+			c.AbortWithStatusJSON(http.StatusUnauthorized, err)
 			return
 		}
 
@@ -43,26 +51,42 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 		})
 
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid token", "TOKEN_INVALID", nil))
+			errRes := dto.NewErrorResponse("Invalid token", "TOKEN_INVALID", nil)
+			if rid := GetRequestID(c); rid != "" {
+				errRes.RequestID = rid
+			}
+			c.AbortWithStatusJSON(http.StatusUnauthorized, errRes)
 			return
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			userIDStr, ok := claims["sub"].(string)
 			if !ok {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid subject claim", "TOKEN_CLAIM_INVALID_SUB", nil))
+				errRes := dto.NewErrorResponse("Invalid subject claim", "TOKEN_CLAIM_INVALID_SUB", nil)
+				if rid := GetRequestID(c); rid != "" {
+					errRes.RequestID = rid
+				}
+				c.AbortWithStatusJSON(http.StatusUnauthorized, errRes)
 				return
 			}
 
 			userID, err := uuid.Parse(userIDStr)
 			if err != nil {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid subject claim format", "TOKEN_CLAIM_INVALID_SUB_FORMAT", nil))
+				errRes := dto.NewErrorResponse("Invalid subject claim format", "TOKEN_CLAIM_INVALID_SUB_FORMAT", nil)
+				if rid := GetRequestID(c); rid != "" {
+					errRes.RequestID = rid
+				}
+				c.AbortWithStatusJSON(http.StatusUnauthorized, errRes)
 				return
 			}
 
 			userRole, ok := claims["role"].(string)
 			if !ok {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid role claim", "TOKEN_CLAIM_INVALID_ROLE", nil))
+				errRes := dto.NewErrorResponse("Invalid role claim", "TOKEN_CLAIM_INVALID_ROLE", nil)
+				if rid := GetRequestID(c); rid != "" {
+					errRes.RequestID = rid
+				}
+				c.AbortWithStatusJSON(http.StatusUnauthorized, errRes)
 				return
 			}
 
@@ -70,7 +94,11 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 			c.Set(ContextUserRoleKey, models.UserRole(userRole))
 			c.Next()
 		} else {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid token", "TOKEN_INVALID", nil))
+			errRes := dto.NewErrorResponse("Invalid token", "TOKEN_INVALID", nil)
+			if rid := GetRequestID(c); rid != "" {
+				errRes.RequestID = rid
+			}
+			c.AbortWithStatusJSON(http.StatusUnauthorized, errRes)
 		}
 	}
 }

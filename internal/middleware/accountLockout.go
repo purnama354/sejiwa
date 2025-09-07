@@ -47,6 +47,7 @@ func AccountLockoutMiddleware() gin.HandlerFunc {
 				"code":        "ACCOUNT_LOCKED",
 				"success":     false,
 				"retry_after": int(time.Until(info.LockedUntil).Seconds()),
+				"request_id":  GetRequestID(c),
 			})
 			c.Abort()
 			return

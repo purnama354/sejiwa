@@ -28,6 +28,7 @@ type ErrorResponse struct {
 	Code      string            `json:"code"`
 	Details   []ValidationError `json:"details,omitempty"`
 	Timestamp string            `json:"timestamp"`
+	RequestID string            `json:"request_id,omitempty"`
 }
 
 // SuccessResponse defines the standard success response structure
@@ -35,6 +36,7 @@ type SuccessResponse struct {
 	Message   string `json:"message"`
 	Success   bool   `json:"success"`
 	Timestamp string `json:"timestamp"`
+	RequestID string `json:"request_id,omitempty"`
 }
 
 type CategoryResponse struct {
