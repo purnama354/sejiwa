@@ -1,0 +1,23 @@
+# Build artifacts
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# VCS
+.git
+.gitignore
+
+# IDE/editor
+.vscode/
+.idea/
+
+# Node frontend (not required in API image)
+frontend/
+node_modules/
+
+# Misc
+.DS_Store
+.env
+.env.*

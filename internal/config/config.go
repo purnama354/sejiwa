@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 )
@@ -15,12 +17,19 @@ type Config struct {
 
 // LoadConfig loads configuration from environment variables.
 func LoadConfig() (*Config, error) {
-	_ = godotenv.Load("../../.env") // Load .env file if it exists
+	// Try typical locations for .env during local dev; ignore errors
+	_ = godotenv.Load(".env")
+	_ = godotenv.Load("../../.env")
 
 	var cfg Config
 	err := envconfig.Process("", &cfg)
 	if err != nil {
 		return nil, err
+	}
+
+	// Railway and many PaaS set PORT; prefer it if present
+	if p := os.Getenv("PORT"); p != "" {
+		cfg.AppPort = p
 	}
 
 	return &cfg, nil
