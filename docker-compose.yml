@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: sejiwa-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sejiwa
+      POSTGRES_USER: sejiwa
+      POSTGRES_PASSWORD: sejiwa
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sejiwa -d sejiwa"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    container_name: sejiwa-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # API configuration
+      APP_PORT: 8080
+      JWT_SECRET: dev-secret-change-me
+      INITIAL_ADMIN_PASSWORD: dev-admin-pass
+      # Point to db service
+      DATABASE_URL: postgres://sejiwa:sejiwa@db:5432/sejiwa?sslmode=disable
+    ports:
+      - "8080:8080"
+
+volumes:
+  dbdata:

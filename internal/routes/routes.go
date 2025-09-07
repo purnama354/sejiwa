@@ -75,7 +75,8 @@ func RegisterRoutes(
 			threadRoutes.GET("", threadHandler.GetAll)
 			threadRoutes.GET("/search", threadHandler.Search)
 			threadRoutes.GET("/pinned", threadHandler.GetPinned)
-			threadRoutes.GET("/:id", threadHandler.GetByID)
+			// Use optional auth so authors/mods/admins are recognized for private threads
+			threadRoutes.GET("/:id", middleware.OptionalAuthMiddleware(cfg.JWTSecret), threadHandler.GetByID)
 
 			// Authenticated routes
 			threadRoutes.POST("", middleware.AuthMiddleware(cfg.JWTSecret), threadHandler.Create)
@@ -119,6 +120,9 @@ func RegisterRoutes(
 
 			// Users listing for admin panel
 			adminRoutes.GET("/users", adminHandler.ListUsers)
+
+			// Categories management list for admin (includes locked/private categories)
+			adminRoutes.GET("/categories", categoryHandler.GetAll)
 
 			// Test endpoint for admin access
 			adminRoutes.GET("/test", func(c *gin.Context) {
@@ -183,6 +187,24 @@ func RegisterRoutes(
 			userRoutes.GET("/me", userHandler.GetProfile)
 			userRoutes.PATCH("/me", userHandler.UpdateProfile)
 			userRoutes.GET("/me/role", userHandler.GetRoleInfo)
+			userRoutes.GET("/me/stats", userHandler.GetMyStats)
+			userRoutes.GET("/me/activity", userHandler.GetMyActivity)
+			userRoutes.GET("/me/categories", userHandler.GetMyCategories)
+
+			// Preferences
+			userRoutes.GET("/me/preferences", userHandler.GetPreferences)
+			userRoutes.PUT("/me/preferences/notifications", userHandler.UpdateNotificationPreferences)
+			userRoutes.PUT("/me/preferences/privacy", userHandler.UpdatePrivacySettings)
+
+			// Subscriptions (join/leave category; join supports optional password for private categories)
+			userRoutes.GET("/me/subscriptions", userHandler.GetMyCategories)
+			userRoutes.POST("/me/subscriptions", userHandler.SubscribeCategory)
+			userRoutes.DELETE("/me/subscriptions", userHandler.UnsubscribeCategory)
+
+			// Saved threads
+			userRoutes.GET("/me/saved-threads", userHandler.ListSavedThreads)
+			userRoutes.POST("/me/saved-threads", userHandler.SaveThread)
+			userRoutes.DELETE("/me/saved-threads", userHandler.UnsaveThread)
 
 			// Test endpoint for any authenticated user
 			userRoutes.GET("/test", func(c *gin.Context) {

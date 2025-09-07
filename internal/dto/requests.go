@@ -29,6 +29,9 @@ type CreateAdminRequest struct {
 type CreateCategoryRequest struct {
 	Name        string `json:"name" binding:"required,min=3,max=50"`
 	Description string `json:"description,omitempty" binding:"max=255"`
+	IsPrivate   bool   `json:"is_private"`
+	// Password is optional; if provided for private categories, will be hashed and stored
+	Password *string `json:"password,omitempty" binding:"omitempty,min=4,max=128"`
 }
 
 // CreateThreadRequest defines the structure for creating a new thread
@@ -36,6 +39,11 @@ type CreateThreadRequest struct {
 	Title      string `json:"title" binding:"required,min=5,max=255"`
 	Content    string `json:"content" binding:"required,min=10,max=10000"`
 	CategoryID string `json:"category_id" binding:"required,uuid"`
+	// Optional per-thread privacy
+	IsPrivate bool    `json:"is_private"`
+	Password  *string `json:"password,omitempty" binding:"omitempty,min=4,max=128"`
+	// Optional assigned moderator (admin/moderator can set)
+	AssignedModeratorID *string `json:"assigned_moderator_id,omitempty" binding:"omitempty,uuid"`
 }
 
 // CreateReplyRequest defines the structure for creating a new reply
@@ -62,4 +70,36 @@ type CreateModeratorRequest struct {
 // UpdateUserRequest defines the structure for updating user profile
 type UpdateUserRequest struct {
 	Username *string `json:"username,omitempty" binding:"omitempty,min=3,max=30,alphanum_underscore_hyphen"`
+}
+
+// Preferences update requests
+type UpdateNotificationPreferencesRequest struct {
+	ThreadReplies          *bool `json:"thread_replies"`
+	Mentions               *bool `json:"mentions"`
+	CategoryUpdates        *bool `json:"category_updates"`
+	CommunityAnnouncements *bool `json:"community_announcements"`
+}
+
+type UpdatePrivacySettingsRequest struct {
+	ShowActiveStatus    *bool   `json:"show_active_status"`
+	AllowDirectMessages *bool   `json:"allow_direct_messages"`
+	ContentVisibility   *string `json:"content_visibility"`
+}
+
+// Subscription and saved thread requests
+type SubscribeRequest struct {
+	CategoryID string  `json:"category_id" binding:"required,uuid"`
+	Password   *string `json:"password,omitempty" binding:"omitempty,min=0,max=128"`
+}
+
+type UnsubscribeRequest struct {
+	CategoryID string `json:"category_id" binding:"required,uuid"`
+}
+
+type SaveThreadRequest struct {
+	ThreadID string `json:"thread_id" binding:"required,uuid"`
+}
+
+type UnsaveThreadRequest struct {
+	ThreadID string `json:"thread_id" binding:"required,uuid"`
 }

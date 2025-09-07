@@ -30,10 +30,16 @@ type Thread struct {
 	ModerationStatus ModerationStatus `gorm:"type:varchar(20);default:'approved';not null"`
 	IsEdited         bool             `gorm:"default:false"`
 	LastReplyAt      *time.Time       `gorm:"index"`
+	// Per-thread privacy controls
+	IsPrivate bool    `gorm:"default:false"`
+	Password  *string `gorm:"size:255"` // optional bcrypt hash
+	// Optional assigned moderator responsible for this thread
+	AssignedModeratorID *uuid.UUID `gorm:"type:uuid;index"`
 
 	// Relationships
-	Author   User     `gorm:"foreignKey:AuthorID"`
-	Category Category `gorm:"foreignKey:CategoryID"`
+	Author            User     `gorm:"foreignKey:AuthorID"`
+	Category          Category `gorm:"foreignKey:CategoryID"`
+	AssignedModerator *User    `gorm:"foreignKey:AssignedModeratorID"`
 }
 
 // TableName returns the table name for Thread model

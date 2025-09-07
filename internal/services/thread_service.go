@@ -7,6 +7,7 @@ import (
 	"github.com/purnama354/sejiwa-api/internal/dto"
 	"github.com/purnama354/sejiwa-api/internal/models"
 	"github.com/purnama354/sejiwa-api/internal/repository"
+	"github.com/purnama354/sejiwa-api/internal/utils"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -18,14 +19,16 @@ var (
 	ErrUnauthorizedAccess = errors.New("UNAUTHORIZED_ACCESS")
 	ErrCategoryLocked     = errors.New("CATEGORY_LOCKED")
 	ErrInvalidPage        = errors.New("INVALID_PAGE_PARAMETER")
+	ErrCategoryPrivate    = errors.New("CATEGORY_PRIVATE")
+	ErrThreadPrivate      = errors.New("THREAD_PRIVATE")
 )
 
 // ThreadService defines the interface for thread-related business logic
 type ThreadService interface {
-	Create(req dto.CreateThreadRequest, authorID uuid.UUID) (*models.Thread, error)
-	GetByID(id uuid.UUID, userID *uuid.UUID, userRole *models.UserRole) (*models.Thread, error)
+	Create(req dto.CreateThreadRequest, authorID uuid.UUID, userRole models.UserRole) (*models.Thread, error)
+	GetByID(id uuid.UUID, userID *uuid.UUID, userRole *models.UserRole, password *string) (*models.Thread, error)
 	GetAll(page, pageSize int) (*dto.ThreadListResponse, error)
-	GetByCategory(categoryID uuid.UUID, page, pageSize int) (*dto.ThreadListResponse, error)
+	GetByCategory(categoryID uuid.UUID, page, pageSize int, userID *uuid.UUID) (*dto.ThreadListResponse, error)
 	GetByAuthor(authorID uuid.UUID, page, pageSize int) (*dto.ThreadListResponse, error)
 	Search(query string, page, pageSize int) (*dto.ThreadListResponse, error)
 	Update(id uuid.UUID, req dto.UpdateThreadRequest, userID uuid.UUID, userRole models.UserRole) (*models.Thread, error)
@@ -38,6 +41,7 @@ type threadService struct {
 	threadRepo   repository.ThreadRepository
 	categoryRepo repository.CategoryRepository
 	userRepo     repository.UserRepository
+	subRepo      repository.SubscriptionRepository
 }
 
 // NewThreadService creates a new instance of ThreadService
@@ -45,16 +49,18 @@ func NewThreadService(
 	threadRepo repository.ThreadRepository,
 	categoryRepo repository.CategoryRepository,
 	userRepo repository.UserRepository,
+	subRepo repository.SubscriptionRepository,
 ) ThreadService {
 	return &threadService{
 		threadRepo:   threadRepo,
 		categoryRepo: categoryRepo,
 		userRepo:     userRepo,
+		subRepo:      subRepo,
 	}
 }
 
 // Create handles the business logic for creating a new thread
-func (s *threadService) Create(req dto.CreateThreadRequest, authorID uuid.UUID) (*models.Thread, error) {
+func (s *threadService) Create(req dto.CreateThreadRequest, authorID uuid.UUID, userRole models.UserRole) (*models.Thread, error) {
 	// Parse and validate category ID
 	categoryID, err := uuid.Parse(req.CategoryID)
 	if err != nil {
@@ -74,6 +80,16 @@ func (s *threadService) Create(req dto.CreateThreadRequest, authorID uuid.UUID) 
 		return nil, ErrCategoryLocked
 	}
 
+	if category.IsPrivate {
+		subscribed, err := s.subRepo.IsSubscribed(authorID, categoryID)
+		if err != nil {
+			return nil, err
+		}
+		if !subscribed {
+			return nil, ErrCategoryPrivate
+		}
+	}
+
 	// Create new thread
 	thread := &models.Thread{
 		Title:            req.Title,
@@ -81,6 +97,27 @@ func (s *threadService) Create(req dto.CreateThreadRequest, authorID uuid.UUID) 
 		AuthorID:         authorID,
 		CategoryID:       categoryID,
 		ModerationStatus: models.ModerationStatusApproved,
+	}
+
+	// Apply per-thread privacy
+	if req.IsPrivate {
+		thread.IsPrivate = true
+		if req.Password != nil && *req.Password != "" {
+			hash, err := utils.HashPassword(*req.Password)
+			if err != nil {
+				return nil, err
+			}
+			thread.Password = &hash
+		}
+	}
+
+	// Assign moderator if provided (only moderators/admins should be allowed higher in handler via middleware)
+	if req.AssignedModeratorID != nil && *req.AssignedModeratorID != "" {
+		if userRole == models.RoleAdmin || userRole == models.RoleModerator {
+			if modID, err := uuid.Parse(*req.AssignedModeratorID); err == nil {
+				thread.AssignedModeratorID = &modID
+			}
+		}
 	}
 
 	// Save thread to database
@@ -103,8 +140,21 @@ func (s *threadService) Create(req dto.CreateThreadRequest, authorID uuid.UUID) 
 }
 
 // GetByID retrieves a thread by ID and increments view count
-func (s *threadService) GetByID(id uuid.UUID, userID *uuid.UUID, userRole *models.UserRole) (*models.Thread, error) {
+func (s *threadService) GetByID(id uuid.UUID, userID *uuid.UUID, userRole *models.UserRole, password *string) (*models.Thread, error) {
 	thread, err := s.threadRepo.FindByIDWithDetails(id)
+	// Enforce private category access
+	if thread.Category.IsPrivate {
+		if userID == nil {
+			return nil, ErrCategoryPrivate
+		}
+		subscribed, err := s.subRepo.IsSubscribed(*userID, thread.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+		if !subscribed && !(userRole != nil && (*userRole == models.RoleAdmin || *userRole == models.RoleModerator)) {
+			return nil, ErrCategoryPrivate
+		}
+	}
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrThreadNotFound
@@ -128,10 +178,36 @@ func (s *threadService) GetByID(id uuid.UUID, userID *uuid.UUID, userRole *model
 		}
 	}
 
+	// Enforce thread-level private access if applicable
+	if thread.IsPrivate {
+		// Admin/Moderator or author can always access
+		elevated := userRole != nil && (*userRole == models.RoleAdmin || *userRole == models.RoleModerator)
+		isAuthor := userID != nil && *userID == thread.AuthorID
+		isAssignedMod := userID != nil && thread.AssignedModeratorID != nil && *userID == *thread.AssignedModeratorID
+		if !elevated && !isAuthor && !isAssignedMod {
+			// If password set, require correct password; if no password but IsPrivate true, deny unless assigned moderator
+			if thread.Password != nil {
+				if password == nil || !utils.CheckPasswordHash(deref(password), *thread.Password) {
+					return nil, ErrThreadPrivate
+				}
+			} else {
+				return nil, ErrThreadPrivate
+			}
+		}
+	}
+
 	// Increment view count (fire and forget)
 	go s.threadRepo.IncrementViewCount(id)
 
 	return thread, nil
+}
+
+// helper to safely deref string pointer
+func deref(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }
 
 // GetAll retrieves all threads with pagination
@@ -153,7 +229,7 @@ func (s *threadService) GetAll(page, pageSize int) (*dto.ThreadListResponse, err
 }
 
 // GetByCategory retrieves threads by category with pagination
-func (s *threadService) GetByCategory(categoryID uuid.UUID, page, pageSize int) (*dto.ThreadListResponse, error) {
+func (s *threadService) GetByCategory(categoryID uuid.UUID, page, pageSize int, userID *uuid.UUID) (*dto.ThreadListResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -162,12 +238,25 @@ func (s *threadService) GetByCategory(categoryID uuid.UUID, page, pageSize int) 
 	}
 
 	// Verify category exists
-	_, err := s.categoryRepo.FindByID(categoryID)
+	category, err := s.categoryRepo.FindByID(categoryID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrCategoryNotFound
 		}
 		return nil, err
+	}
+	// If category is private, require subscription
+	if category.IsPrivate {
+		if userID == nil {
+			return nil, ErrCategoryPrivate
+		}
+		subscribed, err := s.subRepo.IsSubscribed(*userID, categoryID)
+		if err != nil {
+			return nil, err
+		}
+		if !subscribed {
+			return nil, ErrCategoryPrivate
+		}
 	}
 
 	offset := (page - 1) * pageSize
@@ -243,6 +332,34 @@ func (s *threadService) Update(id uuid.UUID, req dto.UpdateThreadRequest, userID
 	if req.Content != nil {
 		thread.Content = *req.Content
 		thread.IsEdited = true
+	}
+	if req.IsPrivate != nil {
+		thread.IsPrivate = *req.IsPrivate
+		// If turning off privacy, clear password
+		if !*req.IsPrivate {
+			thread.Password = nil
+		}
+	}
+	if req.SetPassword != nil {
+		// If empty string, clear password
+		if *req.SetPassword == "" {
+			thread.Password = nil
+		} else {
+			hash, err := utils.HashPassword(*req.SetPassword)
+			if err != nil {
+				return nil, err
+			}
+			thread.Password = &hash
+			thread.IsPrivate = true
+		}
+		thread.IsEdited = true
+	}
+	if req.AssignedModeratorID != nil {
+		if *req.AssignedModeratorID == "" {
+			thread.AssignedModeratorID = nil
+		} else if modID, err := uuid.Parse(*req.AssignedModeratorID); err == nil {
+			thread.AssignedModeratorID = &modID
+		}
 	}
 
 	if err := s.threadRepo.Update(thread); err != nil {
@@ -357,11 +474,20 @@ func (s *threadService) buildThreadListResponse(threads []models.Thread, total i
 			ViewCount:        thread.ViewCount,
 			IsPinned:         thread.IsPinned,
 			IsLocked:         thread.IsLocked,
+			IsPrivate:        thread.IsPrivate,
 			ModerationStatus: string(thread.ModerationStatus),
 			IsEdited:         thread.IsEdited,
 			CreatedAt:        thread.CreatedAt,
 			UpdatedAt:        thread.UpdatedAt,
 			LastReplyAt:      thread.LastReplyAt,
+		}
+		if thread.AssignedModeratorID != nil {
+			modID := thread.AssignedModeratorID.String()
+			threadResponses[i].AssignedModeratorID = &modID
+			if thread.AssignedModerator != nil {
+				username := thread.AssignedModerator.Username
+				threadResponses[i].AssignedModeratorUsername = &username
+			}
 		}
 	}
 

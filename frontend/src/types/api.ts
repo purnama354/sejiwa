@@ -154,6 +154,8 @@ export type Category = {
   description: string
   thread_count: number
   is_locked: boolean
+  is_private: boolean
+  has_password: boolean
   created_at: string | Date
   updated_at: string | Date
 }
@@ -161,10 +163,95 @@ export type Category = {
 export type CreateCategoryRequest = {
   name: string
   description?: string
+  is_private?: boolean
+  password?: string
 }
 
 export type UpdateCategoryRequest = {
   name?: string
   description?: string
   is_locked?: boolean
+  is_private?: boolean
+  set_password?: string
+}
+
+export type SubscribeRequest = {
+  category_id: string
+  password?: string
+}
+
+// Thread DTOs
+export type Thread = {
+  id: string
+  title: string
+  content: string
+  author_username: string
+  category_id: string
+  category_name: string
+  category_slug: string
+  reply_count: number
+  view_count: number
+  is_pinned: boolean
+  is_locked: boolean
+  is_private: boolean
+  assigned_moderator_id?: string
+  assigned_moderator_username?: string
+  moderation_status: string
+  is_edited: boolean
+  created_at: string | Date
+  updated_at: string | Date
+  last_reply_at?: string | Date
+}
+
+export type ThreadListResponse = {
+  threads: Thread[]
+  total: number
+  page: number
+  page_size: number
+  total_pages: number
+}
+
+export type CreateThreadRequest = {
+  title: string
+  content: string
+  category_id: string
+  is_private?: boolean
+  password?: string
+  assigned_moderator_id?: string
+}
+
+export type UpdateThreadRequest = {
+  title?: string
+  content?: string
+  is_private?: boolean
+  set_password?: string
+  assigned_moderator_id?: string
+}
+
+// Reply DTOs
+export type Reply = {
+  id: string
+  content: string
+  author_username: string
+  thread_id: string
+  parent_reply_id?: string
+  depth: number
+  reply_count: number
+  moderation_status: string
+  is_edited: boolean
+  created_at: string | Date
+  updated_at: string | Date
+}
+
+export type ReplyListResponse = {
+  replies: Reply[]
+  total: number
+  page: number
+  page_size: number
+  total_pages: number
+}
+
+export type CreateReplyRequest = {
+  content: string
+  parent_reply_id?: string
 }

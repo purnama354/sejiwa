@@ -10,6 +10,11 @@ export async function listCategories() {
   return res.data
 }
 
+export async function listAdminCategories() {
+  const res = await api.get<Category[]>(`/admin/categories`)
+  return res.data
+}
+
 export async function createCategory(body: CreateCategoryRequest) {
   const res = await api.post<Category>(`/categories`, body)
   return res.data

@@ -163,3 +163,239 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 
 	c.JSON(http.StatusOK, profile)
 }
+
+// GetPreferences returns user's notification and privacy preferences
+func (h *UserHandler) GetPreferences(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	pref, err := h.userService.GetPreferences(userID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to get preferences", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	// map to DTOs for frontend expectations
+	resp := gin.H{
+		"notifications": gin.H{
+			"thread_replies":          pref.NotifyThreadReplies,
+			"mentions":                pref.NotifyMentions,
+			"category_updates":        pref.NotifyCategoryUpdates,
+			"community_announcements": pref.NotifyAnnouncements,
+		},
+		"privacy": gin.H{
+			"show_active_status":    pref.ShowActiveStatus,
+			"allow_direct_messages": pref.AllowDirectMessages,
+			"content_visibility":    string(pref.ContentVisibility),
+		},
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+// UpdateNotificationPreferences updates notification preferences
+func (h *UserHandler) UpdateNotificationPreferences(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	var req dto.UpdateNotificationPreferencesRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
+		return
+	}
+	pref, err := h.userService.UpdateNotificationPreferences(userID.(uuid.UUID), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to update notification preferences", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"thread_replies":          pref.NotifyThreadReplies,
+		"mentions":                pref.NotifyMentions,
+		"category_updates":        pref.NotifyCategoryUpdates,
+		"community_announcements": pref.NotifyAnnouncements,
+	})
+}
+
+// UpdatePrivacySettings updates privacy settings
+func (h *UserHandler) UpdatePrivacySettings(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	var req dto.UpdatePrivacySettingsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
+		return
+	}
+	pref, err := h.userService.UpdatePrivacySettings(userID.(uuid.UUID), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to update privacy settings", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"show_active_status":    pref.ShowActiveStatus,
+		"allow_direct_messages": pref.AllowDirectMessages,
+		"content_visibility":    string(pref.ContentVisibility),
+	})
+}
+
+// GetMyStats returns aggregated stats for the authenticated user
+func (h *UserHandler) GetMyStats(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	stats, err := h.userService.GetMyStats(userID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to get stats", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, stats)
+}
+
+// GetMyActivity returns recent threads and replies by the user
+func (h *UserHandler) GetMyActivity(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	activity, err := h.userService.GetMyActivity(userID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to get activity", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, activity)
+}
+
+// GetMyCategories returns categories related to the user's activity
+func (h *UserHandler) GetMyCategories(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	cats, err := h.userService.GetMyCategories(userID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to get categories", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, cats)
+}
+
+// Subscribe to a category
+func (h *UserHandler) SubscribeCategory(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	var body struct {
+		CategoryID string  `json:"category_id" binding:"required,uuid"`
+		Password   *string `json:"password,omitempty"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
+		return
+	}
+	cid, _ := uuid.Parse(body.CategoryID)
+	if err := h.userService.JoinCategory(userID.(uuid.UUID), cid, body.Password); err != nil {
+		switch err.Error() {
+		case "PASSWORD_REQUIRED":
+			c.JSON(http.StatusBadRequest, dto.NewErrorResponse("Password required to join this category", "PASSWORD_REQUIRED", nil))
+			return
+		case "INVALID_PASSWORD":
+			c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("Invalid password", "INVALID_PASSWORD", nil))
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to subscribe", "INTERNAL_SERVER_ERROR", nil))
+			return
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{"subscribed": true})
+}
+
+// Unsubscribe from a category
+func (h *UserHandler) UnsubscribeCategory(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	var body struct {
+		CategoryID string `json:"category_id" binding:"required,uuid"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
+		return
+	}
+	cid, _ := uuid.Parse(body.CategoryID)
+	if err := h.userService.UnsubscribeCategory(userID.(uuid.UUID), cid); err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to unsubscribe", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"subscribed": false})
+}
+
+// List saved threads
+func (h *UserHandler) ListSavedThreads(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	previews, total, err := h.userService.ListSavedThreads(userID.(uuid.UUID), 0, 20)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to get saved threads", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"items": previews, "total": total})
+}
+
+// Save a thread
+func (h *UserHandler) SaveThread(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	var body struct {
+		ThreadID string `json:"thread_id" binding:"required,uuid"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
+		return
+	}
+	tid, _ := uuid.Parse(body.ThreadID)
+	if err := h.userService.SaveThread(userID.(uuid.UUID), tid); err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to save thread", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"saved": true})
+}
+
+// Unsave a thread
+func (h *UserHandler) UnsaveThread(c *gin.Context) {
+	userID, exists := c.Get(middleware.ContextUserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("User ID not found in context", "CONTEXT_ERROR", nil))
+		return
+	}
+	var body struct {
+		ThreadID string `json:"thread_id" binding:"required,uuid"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, dto.NewErrorResponse("Validation failed", "VALIDATION_ERROR", utils.ParseValidationErrors(err)))
+		return
+	}
+	tid, _ := uuid.Parse(body.ThreadID)
+	if err := h.userService.UnsaveThread(userID.(uuid.UUID), tid); err != nil {
+		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to unsave thread", "INTERNAL_SERVER_ERROR", nil))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"saved": false})
+}

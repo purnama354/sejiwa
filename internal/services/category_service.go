@@ -53,6 +53,15 @@ func (s *categoryService) Create(req dto.CreateCategoryRequest) (*models.Categor
 		Name:        req.Name,
 		Slug:        slug,
 		Description: req.Description,
+		IsPrivate:   req.IsPrivate,
+	}
+
+	if req.Password != nil && *req.Password != "" {
+		hashed, err := utils.HashPassword(*req.Password)
+		if err != nil {
+			return nil, err
+		}
+		category.Password = &hashed
 	}
 
 	if err := s.repo.Create(category); err != nil {
@@ -80,6 +89,7 @@ func (s *categoryService) GetAll(adminView bool) ([]models.Category, error) {
 	if adminView {
 		return s.repo.FindAll()
 	}
+	// Public view: categories that are not locked for new threads; private categories are still visible
 	return s.repo.FindUnlocked()
 }
 
@@ -112,6 +122,23 @@ func (s *categoryService) Update(id uuid.UUID, req dto.UpdateCategoryRequest) (*
 
 	if req.IsLocked != nil {
 		category.IsLocked = *req.IsLocked
+	}
+
+	if req.IsPrivate != nil {
+		category.IsPrivate = *req.IsPrivate
+	}
+
+	if req.SetPassword != nil {
+		if *req.SetPassword == "" {
+			// clear password
+			category.Password = nil
+		} else {
+			hashed, err := utils.HashPassword(*req.SetPassword)
+			if err != nil {
+				return nil, err
+			}
+			category.Password = &hashed
+		}
 	}
 
 	if err := s.repo.Update(category); err != nil {

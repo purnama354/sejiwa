@@ -1,13 +1,28 @@
 import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
-  listCategories,
+  listAdminCategories,
   createCategory,
   updateCategory,
   deleteCategory,
 } from "@/services/categories"
-import type { Category, CreateCategoryRequest } from "@/types/api"
-import { Plus, Edit3, Trash2, Lock, Save, X, Folder, Hash } from "lucide-react"
+import type {
+  Category,
+  CreateCategoryRequest,
+  UpdateCategoryRequest,
+} from "@/types/api"
+import {
+  Plus,
+  Edit3,
+  Trash2,
+  Lock,
+  Save,
+  X,
+  Folder,
+  Hash,
+  Shield,
+} from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 export default function AdminCategories() {
   const qc = useQueryClient()
@@ -16,8 +31,8 @@ export default function AdminCategories() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["categories"],
-    queryFn: listCategories,
+    queryKey: ["categories", { admin: true }],
+    queryFn: () => listAdminCategories(),
   })
 
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -38,12 +53,14 @@ export default function AdminCategories() {
   const updateMut = useMutation({
     mutationFn: ({ id, ...data }: { id: string } & Partial<Category>) =>
       updateCategory(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ["categories", { admin: true }] }),
   })
 
   const deleteMut = useMutation({
     mutationFn: deleteCategory,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ["categories", { admin: true }] }),
   })
 
   const handleCreate = () => {
@@ -208,7 +225,7 @@ function CategoryCard({
   isDeleting,
 }: {
   category: Category
-  onUpdate: (data: Partial<Category>) => void
+  onUpdate: (data: UpdateCategoryRequest) => void
   onDelete: () => void
   isUpdating: boolean
   isDeleting: boolean
@@ -218,10 +235,28 @@ function CategoryCard({
     name: category.name,
     description: category.description,
     is_locked: category.is_locked,
+    is_private: category.is_private,
+    password: "",
+    clearPassword: false,
   })
 
   const handleSave = () => {
-    onUpdate(editData)
+    // Prepare data for update
+    const updateData: UpdateCategoryRequest = {
+      name: editData.name,
+      description: editData.description,
+      is_locked: editData.is_locked,
+      is_private: editData.is_private,
+    }
+
+    // Handle password operations -> backend expects set_password (empty string clears)
+    if (editData.clearPassword) {
+      updateData.set_password = ""
+    } else if (editData.password) {
+      updateData.set_password = editData.password
+    }
+
+    onUpdate(updateData)
     setIsEditing(false)
   }
 
@@ -230,6 +265,9 @@ function CategoryCard({
       name: category.name,
       description: category.description,
       is_locked: category.is_locked,
+      is_private: category.is_private,
+      password: "",
+      clearPassword: false,
     })
     setIsEditing(false)
   }
@@ -301,6 +339,66 @@ function CategoryCard({
             />
             <span className="text-slate-600">Lock category</span>
           </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={editData.is_private}
+              onChange={(e) =>
+                setEditData({ ...editData, is_private: e.target.checked })
+              }
+              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-slate-600">Private category</span>
+          </label>
+
+          {editData.is_private && (
+            <div className="space-y-3 border rounded-lg p-3 bg-slate-50">
+              <h4 className="text-sm font-medium text-slate-700">
+                Password Settings
+              </h4>
+              <div>
+                <label className="text-sm text-slate-600 block mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={editData.password}
+                  onChange={(e) =>
+                    setEditData({
+                      ...editData,
+                      password: e.target.value,
+                      clearPassword: false,
+                    })
+                  }
+                  placeholder={
+                    category.has_password ? "Change password" : "Set password"
+                  }
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                />
+              </div>
+
+              {category.has_password && (
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={editData.clearPassword}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        clearPassword: e.target.checked,
+                        password: e.target.checked ? "" : editData.password,
+                      })
+                    }
+                    className="rounded border-slate-300 text-red-600 focus:ring-red-500"
+                  />
+                  <span className="text-slate-600">
+                    Remove password protection
+                  </span>
+                </label>
+              )}
+            </div>
+          )}
+
           <div className="flex items-center gap-2">
             <button
               onClick={handleSave}
@@ -321,7 +419,22 @@ function CategoryCard({
         </div>
       ) : (
         <div>
-          <h3 className="font-semibold text-slate-900 mb-1">{category.name}</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-slate-900">{category.name}</h3>
+            {category.is_private && (
+              <Badge variant="warning" className="gap-1">
+                <Shield className="w-3 h-3" /> Private
+              </Badge>
+            )}
+            {category.is_private && category.has_password && (
+              <Badge
+                variant="outline"
+                className="gap-1 bg-blue-50 text-blue-700 border-blue-200"
+              >
+                <Lock className="w-3 h-3" /> Password
+              </Badge>
+            )}
+          </div>
           <p className="text-slate-600 text-sm mb-3 line-clamp-2">
             {category.description || "No description"}
           </p>

@@ -4,6 +4,7 @@ import App from "@/App"
 import RoleRoute from "@/router/role-route"
 import PublicOnly from "@/router/public-only"
 import Fallback from "@/router/fallback"
+const HomePage = lazy(() => import("@/pages/home"))
 const LoginPage = lazy(() => import("@/pages/auth/login"))
 const RegisterPage = lazy(() => import("@/pages/auth/register"))
 const DashboardPage = lazy(() => import("@/pages/dashboard"))
@@ -15,13 +16,28 @@ const AdminCategories = lazy(() => import("@/pages/admin/categories"))
 const ModeratorLayout = lazy(() => import("@/pages/moderation/layout"))
 const ModeratorDashboard = lazy(() => import("@/pages/moderation/dashboard"))
 const AdminSettings = lazy(() => import("@/pages/admin/settings"))
+const PrivacySettings = lazy(() => import("@/pages/profile/privacy"))
+const NotificationSettings = lazy(() => import("@/pages/profile/notifications"))
+const SavedThreadsPage = lazy(() => import("@/pages/profile/saved"))
+const ProfileSettingsPage = lazy(() => import("@/pages/profile/settings"))
+const CategoriesPage = lazy(() => import("@/pages/categories"))
+const CategoryDetailsPage = lazy(() => import("@/pages/categories/[id]"))
+const ThreadDetailsPage = lazy(() => import("@/pages/threads/[id]"))
+const CreateThreadPage = lazy(() => import("@/pages/threads/new"))
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-      { index: true, element: <Navigate to="/login" replace /> },
+      {
+        index: true,
+        element: (
+          <Fallback>
+            <HomePage />
+          </Fallback>
+        ),
+      },
       {
         path: "login",
         element: (
@@ -51,6 +67,85 @@ const router = createBrowserRouter([
             </Fallback>
           </RoleRoute>
         ),
+      },
+      {
+        path: "categories",
+        element: (
+          <Fallback>
+            <CategoriesPage />
+          </Fallback>
+        ),
+      },
+      {
+        path: "categories/:id",
+        element: (
+          <Fallback>
+            <CategoryDetailsPage />
+          </Fallback>
+        ),
+      },
+      {
+        path: "threads/new",
+        element: (
+          <RoleRoute allow={["user"]}>
+            <Fallback>
+              <CreateThreadPage />
+            </Fallback>
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "threads/:id",
+        element: (
+          <Fallback>
+            <ThreadDetailsPage />
+          </Fallback>
+        ),
+      },
+      {
+        path: "profile",
+        children: [
+          {
+            path: "saved",
+            element: (
+              <RoleRoute allow={["user", "moderator", "admin"]}>
+                <Fallback>
+                  <SavedThreadsPage />
+                </Fallback>
+              </RoleRoute>
+            ),
+          },
+          {
+            path: "settings",
+            element: (
+              <RoleRoute allow={["user", "moderator", "admin"]}>
+                <Fallback>
+                  <ProfileSettingsPage />
+                </Fallback>
+              </RoleRoute>
+            ),
+          },
+          {
+            path: "privacy",
+            element: (
+              <RoleRoute allow={["user", "moderator", "admin"]}>
+                <Fallback>
+                  <PrivacySettings />
+                </Fallback>
+              </RoleRoute>
+            ),
+          },
+          {
+            path: "notifications",
+            element: (
+              <RoleRoute allow={["user", "moderator", "admin"]}>
+                <Fallback>
+                  <NotificationSettings />
+                </Fallback>
+              </RoleRoute>
+            ),
+          },
+        ],
       },
       {
         path: "moderation",

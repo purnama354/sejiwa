@@ -5,8 +5,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   EyeOff,
-  Trash2,
-  Timer,
   Activity,
   Shield,
   FileText,
@@ -20,7 +18,7 @@ import {
 
 export default function ModeratorDashboard() {
   const navigate = useNavigate()
-  
+
   const { data: stats } = useQuery({
     queryKey: ["moderation-stats"],
     queryFn: () => getModerationStats(),
@@ -28,7 +26,7 @@ export default function ModeratorDashboard() {
 
   const { data: recentReports } = useQuery({
     queryKey: ["recent-reports-dashboard"],
-    queryFn: () => getReports({ page: 1, limit: 5, status: "pending" }),
+    queryFn: () => getReports({ page: 1, pageSize: 5, status: "pending" }),
   })
 
   const cards = [
@@ -73,17 +71,22 @@ export default function ModeratorDashboard() {
   const priorities = [
     {
       label: "High Priority",
-      count: recentReports?.reports?.filter(r => r.priority === "high").length ?? 0,
+      count:
+        recentReports?.reports?.filter((r) => r.priority === "high").length ??
+        0,
       color: "bg-red-100 text-red-700 border-red-200",
     },
     {
       label: "Medium Priority",
-      count: recentReports?.reports?.filter(r => r.priority === "medium").length ?? 0,
+      count:
+        recentReports?.reports?.filter((r) => r.priority === "medium").length ??
+        0,
       color: "bg-yellow-100 text-yellow-700 border-yellow-200",
     },
     {
       label: "Low Priority",
-      count: recentReports?.reports?.filter(r => r.priority === "low").length ?? 0,
+      count:
+        recentReports?.reports?.filter((r) => r.priority === "low").length ?? 0,
       color: "bg-green-100 text-green-700 border-green-200",
     },
   ]
@@ -120,7 +123,9 @@ export default function ModeratorDashboard() {
       {/* Header */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 p-6 sm:p-8 text-white">
         <div className="relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Moderation Center</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+            Moderation Center
+          </h1>
           <p className="text-emerald-100 text-base sm:text-lg">
             Keep the community safe, supportive, and thriving.
           </p>
@@ -129,8 +134,12 @@ export default function ModeratorDashboard() {
               <div className="w-2 h-2 bg-emerald-300 rounded-full animate-pulse" />
               <span>Active Session</span>
             </div>
-            <div>Response Time: {stats?.average_response_time_hours ?? 0}h avg</div>
-            <div>Total Actions: {stats?.actions_this_month ?? 0} this month</div>
+            <div>
+              Response Time: {stats?.average_response_time_hours ?? 0}h avg
+            </div>
+            <div>
+              Total Actions: {stats?.actions_this_month ?? 0} this month
+            </div>
           </div>
         </div>
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-32 translate-x-32" />
@@ -183,7 +192,9 @@ export default function ModeratorDashboard() {
             key={priority.label}
             className={`rounded-xl border p-4 ${priority.color}`}
           >
-            <div className="text-xl sm:text-2xl font-bold mb-1">{priority.count}</div>
+            <div className="text-xl sm:text-2xl font-bold mb-1">
+              {priority.count}
+            </div>
             <div className="text-sm font-medium">{priority.label}</div>
           </div>
         ))}
@@ -202,7 +213,7 @@ export default function ModeratorDashboard() {
                   Recent Reports
                 </h2>
               </div>
-              <button 
+              <button
                 className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 self-start sm:self-center"
                 onClick={() => navigate("/moderation/reports")}
               >
@@ -217,10 +228,15 @@ export default function ModeratorDashboard() {
                     className="flex items-start gap-4 p-4 rounded-lg border border-slate-200 hover:bg-slate-50/80 transition-colors cursor-pointer"
                     onClick={() => navigate(`/moderation/reports/${report.id}`)}
                   >
-                    <div className={`w-3 h-3 rounded-full mt-2 ${
-                      report.priority === "high" ? "bg-red-500" :
-                      report.priority === "medium" ? "bg-yellow-500" : "bg-green-500"
-                    }`} />
+                    <div
+                      className={`w-3 h-3 rounded-full mt-2 ${
+                        report.priority === "high"
+                          ? "bg-red-500"
+                          : report.priority === "medium"
+                          ? "bg-yellow-500"
+                          : "bg-green-500"
+                      }`}
+                    />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-slate-900 truncate">
                         {report.reason.replace(/_/g, " ").toUpperCase()}
@@ -231,7 +247,9 @@ export default function ModeratorDashboard() {
                       <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
                         <span>By: {report.reported_user.username}</span>
                         <span>Reporter: {report.reporter.username}</span>
-                        <span>{new Date(report.created_at).toLocaleDateString()}</span>
+                        <span>
+                          {new Date(report.created_at).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -241,7 +259,9 @@ export default function ModeratorDashboard() {
               <div className="text-center py-8 text-slate-500">
                 <AlertTriangle className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>No pending reports</p>
-                <p className="text-sm">Great job keeping the community clean!</p>
+                <p className="text-sm">
+                  Great job keeping the community clean!
+                </p>
               </div>
             )}
           </div>
@@ -270,9 +290,13 @@ export default function ModeratorDashboard() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Icon className={`w-5 h-5 transition-colors ${
-                          action.urgent ? "text-red-500" : "text-slate-400 group-hover:text-blue-500"
-                        }`} />
+                        <Icon
+                          className={`w-5 h-5 transition-colors ${
+                            action.urgent
+                              ? "text-red-500"
+                              : "text-slate-400 group-hover:text-blue-500"
+                          }`}
+                        />
                         <div>
                           <span className="font-medium text-slate-700 block">
                             {action.label}
@@ -283,9 +307,13 @@ export default function ModeratorDashboard() {
                         </div>
                       </div>
                       {action.count > 0 && (
-                        <div className={`px-2 py-1 text-xs rounded-full ${
-                          action.urgent ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-600"
-                        }`}>
+                        <div
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            action.urgent
+                              ? "bg-red-100 text-red-700"
+                              : "bg-slate-100 text-slate-600"
+                          }`}
+                        >
                           {action.count}
                         </div>
                       )}
@@ -307,15 +335,27 @@ export default function ModeratorDashboard() {
               </h2>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Stat label="Actions" value={stats?.actions_this_week ?? 0} icon={Activity} />
-              <Stat 
-                label="Response Time" 
-                value={`${stats?.average_response_time_hours ?? 0}h`} 
+              <Stat
+                label="Actions"
+                value={stats?.actions_this_week ?? 0}
+                icon={Activity}
+              />
+              <Stat
+                label="Response Time"
+                value={`${stats?.average_response_time_hours ?? 0}h`}
                 icon={Clock}
                 isTime
               />
-              <Stat label="Warnings" value={stats?.users_warned ?? 0} icon={MessageSquare} />
-              <Stat label="Temp Bans" value={stats?.users_banned_temp ?? 0} icon={Users} />
+              <Stat
+                label="Warnings"
+                value={stats?.users_warned ?? 0}
+                icon={MessageSquare}
+              />
+              <Stat
+                label="Temp Bans"
+                value={stats?.users_banned_temp ?? 0}
+                icon={Users}
+              />
             </div>
           </div>
         </div>
@@ -324,16 +364,16 @@ export default function ModeratorDashboard() {
   )
 }
 
-function Stat({ 
-  label, 
-  value, 
-  icon: Icon, 
-  isTime = false 
-}: { 
+function Stat({
+  label,
+  value,
+  icon: Icon,
+  isTime = false,
+}: {
   label: string
   value: number | string
-  icon: any
-  isTime?: boolean 
+  icon: React.ComponentType<{ className?: string }>
+  isTime?: boolean
 }) {
   return (
     <div className="rounded-lg border border-slate-200 p-3 bg-white/50 hover:bg-white/70 transition-colors">
@@ -341,7 +381,11 @@ function Stat({
         <Icon className="w-4 h-4 text-slate-500" />
         <div className="text-xs text-slate-500 font-medium">{label}</div>
       </div>
-      <div className={`text-xl font-bold ${isTime ? "text-blue-600" : "text-slate-900"}`}>
+      <div
+        className={`text-xl font-bold ${
+          isTime ? "text-blue-600" : "text-slate-900"
+        }`}
+      >
         {value}
       </div>
     </div>
