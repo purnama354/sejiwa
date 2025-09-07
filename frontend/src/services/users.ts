@@ -63,3 +63,12 @@ export async function promoteToAdmin(userId: string): Promise<ActionResponse> {
   )
   return response.data
 }
+
+export async function getUsersForModeration(params?: {
+  status?: string
+  page?: number
+  pageSize?: number
+}): Promise<UserProfile[]> {
+  const response = await api.get("/moderation/users", { params })
+  return response.data
+}

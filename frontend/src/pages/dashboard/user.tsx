@@ -17,6 +17,7 @@ import {
   Shield,
   CheckCircle2,
   Leaf,
+  Folder,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -369,38 +370,53 @@ export default function UserDashboard() {
                         <h3>Your recent replies</h3>
                       </div>
                       <div className="space-y-4 max-h-[220px] overflow-y-auto pr-1">
-                        {activity.recent_replies.map((reply, index) => (
-                          <div
-                            key={index}
-                            className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-white/80 to-emerald-50/50 border border-slate-200/60 hover:border-emerald-300/60 hover:shadow-lg transition-all duration-300 cursor-pointer"
-                            onClick={() =>
-                              navigate(`/threads/${reply.thread_id}`)
-                            }
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            <div className="relative p-4">
-                              <div className="flex items-start gap-3">
-                                <div className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 mt-1.5 flex-shrink-0 shadow-sm" />
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 leading-snug">
-                                    Reply to: {reply.thread_title}
-                                  </h4>
-                                  <p className="text-sm text-slate-600 line-clamp-2 mt-2 leading-relaxed">
-                                    {reply.preview}
-                                  </p>
-                                  <div className="flex flex-wrap items-center gap-3 mt-3">
-                                    <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 rounded-full border border-emerald-200/50">
-                                      {reply.category}
-                                    </span>
-                                    <span className="text-xs text-slate-500">
-                                      {reply.replied_at}
-                                    </span>
+                        {activity.recent_replies.map(
+                          (
+                            reply: {
+                              id: string
+                              thread_id: string
+                              thread_title: string
+                              category_name: string
+                              category: string
+                              created_at: string
+                              replied_at: string
+                              content: string
+                              preview: string
+                            },
+                            index: number
+                          ) => (
+                            <div
+                              key={index}
+                              className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-white/80 to-emerald-50/50 border border-slate-200/60 hover:border-emerald-300/60 hover:shadow-lg transition-all duration-300 cursor-pointer"
+                              onClick={() =>
+                                navigate(`/threads/${reply.thread_id}`)
+                              }
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                              <div className="relative p-4">
+                                <div className="flex items-start gap-3">
+                                  <div className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 mt-1.5 flex-shrink-0 shadow-sm" />
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 leading-snug">
+                                      Reply to: {reply.thread_title}
+                                    </h4>
+                                    <p className="text-sm text-slate-600 line-clamp-2 mt-2 leading-relaxed">
+                                      {reply.preview}
+                                    </p>
+                                    <div className="flex flex-wrap items-center gap-3 mt-3">
+                                      <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 rounded-full border border-emerald-200/50">
+                                        {reply.category}
+                                      </span>
+                                      <span className="text-xs text-slate-500">
+                                        {reply.replied_at}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
                     </>
                   )}

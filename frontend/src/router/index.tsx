@@ -15,13 +15,17 @@ const AdminPage = lazy(() => import("@/pages/admin"))
 const AdminCategories = lazy(() => import("@/pages/admin/categories"))
 const ModeratorLayout = lazy(() => import("@/pages/moderation/layout"))
 const ModeratorDashboard = lazy(() => import("@/pages/moderation/dashboard"))
+const ModerationActionsPage = lazy(() => import("@/pages/moderation/actions"))
+const ModerationUsersPage = lazy(() => import("@/pages/moderation/users"))
 const AdminSettings = lazy(() => import("@/pages/admin/settings"))
 const PrivacySettings = lazy(() => import("@/pages/profile/privacy"))
 const NotificationSettings = lazy(() => import("@/pages/profile/notifications"))
 const SavedThreadsPage = lazy(() => import("@/pages/profile/saved"))
 const ProfileSettingsPage = lazy(() => import("@/pages/profile/settings"))
+const ProfileActivityPage = lazy(() => import("@/pages/profile/activity"))
 const CategoriesPage = lazy(() => import("@/pages/categories"))
 const CategoryDetailsPage = lazy(() => import("@/pages/categories/[id]"))
+const CategoryPreviewPage = lazy(() => import("@/pages/preview/[slug]"))
 const ThreadDetailsPage = lazy(() => import("@/pages/threads/[id]"))
 const CreateThreadPage = lazy(() => import("@/pages/threads/new"))
 
@@ -103,6 +107,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "preview/:slug",
+        element: (
+          <Fallback>
+            <CategoryPreviewPage />
+          </Fallback>
+        ),
+      },
+      {
         path: "profile",
         children: [
           {
@@ -145,6 +157,16 @@ const router = createBrowserRouter([
               </RoleRoute>
             ),
           },
+          {
+            path: "activity",
+            element: (
+              <RoleRoute allow={["user", "moderator", "admin"]}>
+                <Fallback>
+                  <ProfileActivityPage />
+                </Fallback>
+              </RoleRoute>
+            ),
+          },
         ],
       },
       {
@@ -171,6 +193,22 @@ const router = createBrowserRouter([
             element: (
               <Fallback>
                 <ModerationPage />
+              </Fallback>
+            ),
+          },
+          {
+            path: "actions",
+            element: (
+              <Fallback>
+                <ModerationActionsPage />
+              </Fallback>
+            ),
+          },
+          {
+            path: "users",
+            element: (
+              <Fallback>
+                <ModerationUsersPage />
               </Fallback>
             ),
           },

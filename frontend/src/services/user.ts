@@ -1,16 +1,5 @@
 import api from "@/lib/api"
-
-// Types for user profile
-export type UserProfile = {
-  id: string
-  username: string
-  role: "user" | "moderator" | "admin"
-  status: "active" | "inactive" | "banned"
-  created_at: string
-  last_active_at: string
-  thread_count?: number
-  reply_count?: number
-}
+import type { UserProfile, UserActivity } from "@/types/api"
 
 // Types for user dashboard
 export type UserStats = {
@@ -44,12 +33,6 @@ export type ReplyPreview = {
   category_slug: string
   replied_at: string
   preview: string
-}
-
-export type UserActivity = {
-  threads: ThreadPreview[]
-  recent_replies: ReplyPreview[]
-  saved_threads: ThreadPreview[]
 }
 
 export type CategorySubscription = {
