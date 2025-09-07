@@ -4,6 +4,7 @@ import App from "@/App"
 import RoleRoute from "@/router/role-route"
 import PublicOnly from "@/router/public-only"
 import Fallback from "@/router/fallback"
+import ThreadCreationGuard from "@/router/thread-creation-guard"
 const HomePage = lazy(() => import("@/pages/home"))
 const LoginPage = lazy(() => import("@/pages/auth/login"))
 const RegisterPage = lazy(() => import("@/pages/auth/register"))
@@ -91,10 +92,12 @@ const router = createBrowserRouter([
       {
         path: "threads/new",
         element: (
-          <RoleRoute allow={["user"]}>
-            <Fallback>
-              <CreateThreadPage />
-            </Fallback>
+          <RoleRoute allow={["user", "moderator"]}>
+            <ThreadCreationGuard>
+              <Fallback>
+                <CreateThreadPage />
+              </Fallback>
+            </ThreadCreationGuard>
           </RoleRoute>
         ),
       },
