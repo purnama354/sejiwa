@@ -23,16 +23,16 @@ func RegisterRoutes(
 ) {
 	api := router.Group("/api/v1")
 	{
-	// General write limiter (per IP): 30 requests per minute
-	writeRate := limiter.Rate{Period: 1 * time.Minute, Limit: 30}
-	writeLimiter := middleware.NewRateLimiter(writeRate)
+		// General write limiter (per IP): 30 requests per minute
+		writeRate := limiter.Rate{Period: 1 * time.Minute, Limit: 30}
+		writeLimiter := middleware.NewRateLimiter(writeRate)
 
-	// Stricter reply creation limiters to mitigate spam (per IP)
-	replyRate := limiter.Rate{Period: 1 * time.Minute, Limit: 10}
-	replyLimiter := middleware.NewRateLimiter(replyRate)
-	// Optional short-burst limiter to smooth spikes
-	replyBurstRate := limiter.Rate{Period: 10 * time.Second, Limit: 3}
-	replyBurstLimiter := middleware.NewRateLimiter(replyBurstRate)
+		// Stricter reply creation limiters to mitigate spam (per IP)
+		replyRate := limiter.Rate{Period: 1 * time.Minute, Limit: 10}
+		replyLimiter := middleware.NewRateLimiter(replyRate)
+		// Optional short-burst limiter to smooth spikes
+		replyBurstRate := limiter.Rate{Period: 10 * time.Second, Limit: 3}
+		replyBurstLimiter := middleware.NewRateLimiter(replyBurstRate)
 
 		// Health check endpoint
 		api.GET("/health", func(c *gin.Context) {

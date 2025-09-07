@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/purnama354/sejiwa-api/internal/models"
 	"github.com/purnama354/sejiwa-api/internal/dto"
+	"github.com/purnama354/sejiwa-api/internal/models"
 
 	"github.com/gin-gonic/gin"
 )
