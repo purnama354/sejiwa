@@ -38,9 +38,11 @@ const router = createBrowserRouter([
       {
         index: true,
         element: (
-          <Fallback>
-            <HomePage />
-          </Fallback>
+          <RoleRoute allow={["user", "moderator", "admin"]}>
+            <Fallback>
+              <HomePage />
+            </Fallback>
+          </RoleRoute>
         ),
       },
       {
